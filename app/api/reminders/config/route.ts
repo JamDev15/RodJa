@@ -13,12 +13,12 @@ export async function PUT(req: Request) {
 
   const parsed = reminderConfigSchema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: formatZodError(parsed.error) }, { status: 400 });
-  const { smsEnabled, emailEnabled, inAppEnabled } = parsed.data;
+  const { smsEnabled, emailEnabled, inAppEnabled, daysBefore, daysAfter } = parsed.data;
 
   const config = await prisma.reminderConfig.upsert({
     where: { accountId },
-    update: { smsEnabled, emailEnabled, inAppEnabled },
-    create: { accountId, smsEnabled, emailEnabled, inAppEnabled },
+    update: { smsEnabled, emailEnabled, inAppEnabled, daysBefore, daysAfter },
+    create: { accountId, smsEnabled, emailEnabled, inAppEnabled, daysBefore, daysAfter },
   });
   return NextResponse.json(config);
 }

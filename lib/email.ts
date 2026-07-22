@@ -74,6 +74,33 @@ export async function sendPaymentApproved(
   }
 }
 
+export async function sendPasswordReset(
+  to: string,
+  name: string,
+  newPassword: string
+): Promise<boolean> {
+  try {
+    await resend.emails.send({
+      from: FROM,
+      to,
+      subject: "Your RODJA password has been reset",
+      html: `
+        <div style="font-family:sans-serif;max-width:480px;margin:0 auto">
+          <h2 style="color:#1a1a2e">Password Reset</h2>
+          <p>Hi <strong>${name}</strong>,</p>
+          <p>We received a request to reset your password. Your new temporary password is:</p>
+          <p style="font-size:18px;font-weight:bold;letter-spacing:1px">${newPassword}</p>
+          <p>Please log in and change it as soon as possible.</p>
+          <p style="color:#666;font-size:12px">If you didn't request this, please contact support immediately.</p>
+        </div>
+      `,
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export async function sendWelcomeTenant(
   to: string,
   tenantName: string,

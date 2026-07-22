@@ -2,7 +2,10 @@ import { auth } from "@/lib/auth";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const PUBLIC_API_PREFIXES = ["/api/auth", "/api/signup"];
+// "Public" here means no session cookie is required at this layer — routes
+// under /api/cron enforce their own CRON_SECRET bearer-token check instead,
+// since Vercel Cron triggers carry no user session.
+const PUBLIC_API_PREFIXES = ["/api/auth", "/api/signup", "/api/cron"];
 const TENANT_API_PREFIXES = ["/api/tenant/", "/api/payments/submit", "/api/maintenance"];
 const ADMIN_API_PREFIXES = ["/api/admin"];
 

@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
 import { Bell, Mail, MessageSquare, Smartphone } from "lucide-react";
@@ -10,6 +11,18 @@ interface Props {
   accountId: string;
 }
 
+function toCsv(value: unknown, fallback: number[]): string {
+  const arr = Array.isArray(value) ? value : fallback;
+  return arr.join(", ");
+}
+
+function parseCsv(value: string): number[] {
+  return value
+    .split(",")
+    .map((s) => parseInt(s.trim(), 10))
+    .filter((n) => Number.isFinite(n) && n > 0);
+}
+
 export function ReminderConfig({ config, accountId }: Props) {
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
@@ -17,6 +30,8 @@ export function ReminderConfig({ config, accountId }: Props) {
     emailEnabled: config?.emailEnabled ?? true,
     inAppEnabled: config?.inAppEnabled ?? true,
   });
+  const [daysBeforeCsv, setDaysBeforeCsv] = useState(toCsv(config?.daysBefore, [7, 3, 1]));
+  const [daysAfterCsv, setDaysAfterCsv] = useState(toCsv(config?.daysAfter, [1, 3, 7]));
 
   async function handleSave() {
     setLoading(true);
@@ -24,7 +39,12 @@ export function ReminderConfig({ config, accountId }: Props) {
       const res = await fetch("/api/reminders/config", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, accountId }),
+        body: JSON.stringify({
+          ...form,
+          accountId,
+          daysBefore: parseCsv(daysBeforeCsv),
+          daysAfter: parseCsv(daysAfterCsv),
+        }),
       });
       if (!res.ok) throw new Error("Failed");
       toast({ title: "Reminder settings saved!", variant: "success" });
@@ -68,24 +88,25 @@ export function ReminderConfig({ config, accountId }: Props) {
         ))}
       </div>
 
-      <div className="rounded-xl border border-white/10 bg-white/5 p-6 space-y-3">
-        <h2 className="font-semibold text-white">Reminder Schedule</h2>
-        <p className="text-sm text-gray-400">Reminders are automatically sent at these intervals:</p>
-        <div className="grid grid-cols-2 gap-2 text-sm">
-          {[
-            "7 days before due date",
-            "3 days before due date",
-            "1 day before due date",
-            "On due date",
-            "1 day after overdue",
-            "3 days after overdue",
-            "7 days after overdue",
-          ].map((s) => (
-            <div key={s} className="flex items-center gap-2 text-gray-400">
-              <div className="h-1.5 w-1.5 rounded-full bg-blue-400 shrink-0" />
-              {s}
-            </div>
-          ))}
+      <div className="rounded-xl border border-white/10 bg-white/5 p-6 space-y-4">
+        <div>
+          <h2 className="font-semibold text-white">Reminder Schedule</h2>
+          <p className="text-sm text-gray-400 mt-1">
+            A reminder always goes out on the due date itself. Add extra days below (comma-separated) for
+            reminders before it&apos;s due and follow-ups after it&apos;s overdue.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="daysBefore">Days before due date</Label>
+            <Input id="daysBefore" placeholder="7, 3, 1" value={daysBeforeCsv}
+              onChange={(e) => setDaysBeforeCsv(e.target.value)} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="daysAfter">Days after due date (overdue)</Label>
+            <Input id="daysAfter" placeholder="1, 3, 7" value={daysAfterCsv}
+              onChange={(e) => setDaysAfterCsv(e.target.value)} />
+          </div>
         </div>
       </div>
 
