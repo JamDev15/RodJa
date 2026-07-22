@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 const PUBLIC_API_PREFIXES = ["/api/auth", "/api/signup"];
-const TENANT_API_PREFIXES = ["/api/tenant", "/api/payments/submit", "/api/maintenance"];
+const TENANT_API_PREFIXES = ["/api/tenant/", "/api/payments/submit", "/api/maintenance"];
 const ADMIN_API_PREFIXES = ["/api/admin"];
 
 function startsWithAny(pathname: string, prefixes: string[]): boolean {
