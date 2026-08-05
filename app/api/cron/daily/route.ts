@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { runReminderSweep } from "@/lib/reminders";
+import { runBillingSweep } from "@/lib/billing";
 
 export async function GET(req: Request) {
   const cronSecret = process.env.CRON_SECRET;
@@ -8,6 +9,9 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const result = await runReminderSweep();
-  return NextResponse.json(result);
+  // Sequential, not parallel — the Supabase pooler here has a low
+  // concurrent-connection cap, and both sweeps touch the DB heavily.
+  const reminders = await runReminderSweep();
+  const billing = await runBillingSweep();
+  return NextResponse.json({ reminders, billing });
 }

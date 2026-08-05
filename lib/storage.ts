@@ -17,16 +17,9 @@ export function validateProofFile(file: File): string | null {
   return null;
 }
 
-export async function uploadPaymentProof(
-  file: File,
-  tenantId: string,
-  month: string
-): Promise<string | null> {
+async function uploadToBucket(file: File, path: string): Promise<string | null> {
   if (!SUPABASE_URL || !SUPABASE_KEY) return null;
 
-  const ext = ALLOWED_MIME_TYPES[file.type];
-  if (!ext) return null;
-  const path = `${tenantId}/${month}-${Date.now()}.${ext}`;
   const formData = new FormData();
   formData.append("", file);
 
@@ -47,4 +40,35 @@ export async function uploadPaymentProof(
   } catch {
     return null;
   }
+}
+
+export async function uploadPaymentProof(
+  file: File,
+  tenantId: string,
+  month: string
+): Promise<string | null> {
+  const ext = ALLOWED_MIME_TYPES[file.type];
+  if (!ext) return null;
+  return uploadToBucket(file, `${tenantId}/${month}-${Date.now()}.${ext}`);
+}
+
+/** Proof a landlord submits when paying their own platform subscription. */
+export async function uploadBillingProof(
+  file: File,
+  accountId: string,
+  period: string
+): Promise<string | null> {
+  const ext = ALLOWED_MIME_TYPES[file.type];
+  if (!ext) return null;
+  return uploadToBucket(file, `billing/${accountId}/${period}-${Date.now()}.${ext}`);
+}
+
+/** GCash/Maya QR code image the Super Admin uploads for landlords to pay against. */
+export async function uploadPlatformQr(
+  file: File,
+  provider: "gcash" | "maya"
+): Promise<string | null> {
+  const ext = ALLOWED_MIME_TYPES[file.type];
+  if (!ext) return null;
+  return uploadToBucket(file, `platform/${provider}-qr-${Date.now()}.${ext}`);
 }

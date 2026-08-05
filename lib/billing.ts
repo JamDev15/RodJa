@@ -1,0 +1,99 @@
+import { prisma } from "@/lib/prisma";
+import { sendBillingReminder, sendAccountPaused } from "@/lib/email";
+import { daysBetween } from "@/lib/due-dates";
+
+function addMonths(date: Date, months: number): Date {
+  const d = new Date(date);
+  d.setUTCMonth(d.getUTCMonth() + months);
+  return d;
+}
+
+function periodLabelFor(date: Date): string {
+  return new Intl.DateTimeFormat("en-PH", { month: "long", year: "numeric" }).format(date);
+}
+
+export interface BillingSweepResult {
+  cyclesCreated: number;
+  remindersSent: number;
+  accountsPaused: number;
+}
+
+/**
+ * Recurring subscription billing for paid-plan accounts:
+ * - Creates the next billing cycle's record once the previous one is paid
+ *   and its due date has arrived (or immediately, for an account's first
+ *   cycle, anchored to the end of its free trial).
+ * - Sends a reminder email 3 days before a pending/submitted record's due date.
+ * - Auto-pauses (isActive = false) any account whose bill is still unpaid
+ *   once the due date arrives, the same way the admin "Suspend" toggle does.
+ */
+export async function runBillingSweep(now: Date = new Date()): Promise<BillingSweepResult> {
+  let cyclesCreated = 0;
+  let remindersSent = 0;
+  let accountsPaused = 0;
+
+  const accounts = await prisma.account.findMany({
+    where: { isActive: true, plan: { price: { gt: 0 } } },
+    include: { plan: true },
+  });
+
+  for (const account of accounts) {
+    const latest = await prisma.billingRecord.findFirst({
+      where: { accountId: account.id },
+      orderBy: { dueDate: "desc" },
+    });
+
+    if (!latest) {
+      const dueDate = account.trialEndsAt ?? account.createdAt;
+      await prisma.billingRecord.create({
+        data: {
+          accountId: account.id,
+          amount: account.plan.price,
+          period: periodLabelFor(dueDate),
+          dueDate,
+          status: "pending",
+        },
+      });
+      cyclesCreated++;
+      continue;
+    }
+
+    if (latest.status === "paid") {
+      if (now >= latest.dueDate) {
+        const nextDueDate = addMonths(latest.dueDate, 1);
+        await prisma.billingRecord.create({
+          data: {
+            accountId: account.id,
+            amount: account.plan.price,
+            period: periodLabelFor(nextDueDate),
+            dueDate: nextDueDate,
+            status: "pending",
+          },
+        });
+        cyclesCreated++;
+      }
+      continue;
+    }
+
+    if (latest.status === "pending" || latest.status === "submitted") {
+      const diff = daysBetween(now, latest.dueDate);
+
+      if (diff === 3 && !latest.reminderSentAt) {
+        const sent = await sendBillingReminder(account.email, account.ownerName, latest.amount, latest.dueDate, latest.period);
+        if (sent) {
+          await prisma.billingRecord.update({ where: { id: latest.id }, data: { reminderSentAt: now } });
+          remindersSent++;
+        }
+      }
+
+      if (now >= latest.dueDate) {
+        await prisma.billingRecord.update({ where: { id: latest.id }, data: { status: "overdue" } });
+        await prisma.account.update({ where: { id: account.id }, data: { isActive: false } });
+        await sendAccountPaused(account.email, account.ownerName, latest.period);
+        accountsPaused++;
+      }
+    }
+  }
+
+  return { cyclesCreated, remindersSent, accountsPaused };
+}

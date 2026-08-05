@@ -143,8 +143,17 @@ export const adminListingReviewSchema = z.object({
   action: z.enum(["approve", "reject"]),
 });
 
-export const adminBillingUpdateSchema = z.object({
-  status: z.enum(["pending", "paid", "overdue"]),
+export const adminBillingReviewSchema = z.object({
+  action: z.enum(["approve", "reject"]),
+});
+
+export const platformSettingsUpdateSchema = z.object({
+  gcashNumber: z.string().trim().max(30).optional().nullable(),
+  mayaNumber: z.string().trim().max(30).optional().nullable(),
+});
+
+export const billingPaySchema = z.object({
+  referenceNumber: z.string().trim().min(1).max(100),
 });
 
 export const adminPasswordChangeSchema = z.object({

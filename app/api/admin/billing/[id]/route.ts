@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { adminBillingUpdateSchema, formatZodError } from "@/lib/validations";
+import { sendBillingApproved, sendBillingRejected } from "@/lib/email";
+import { adminBillingReviewSchema, formatZodError } from "@/lib/validations";
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -17,20 +18,30 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     return NextResponse.json({ error: "Invalid body" }, { status: 400 });
   }
 
-  const parsed = adminBillingUpdateSchema.safeParse(body);
+  const parsed = adminBillingReviewSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json({ error: formatZodError(parsed.error) }, { status: 400 });
   }
 
-  const record = await prisma.billingRecord.findUnique({ where: { id } });
+  const record = await prisma.billingRecord.findUnique({ where: { id }, include: { account: true } });
   if (!record) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+  if (parsed.data.action === "approve") {
+    const updated = await prisma.billingRecord.update({
+      where: { id },
+      data: { status: "paid", paidAt: new Date() },
+    });
+    // Approving always restores access — covers both a normal on-time
+    // approval and an overdue/paused account that has since paid.
+    await prisma.account.update({ where: { id: record.accountId }, data: { isActive: true } });
+    await sendBillingApproved(record.account.email, record.account.ownerName, record.period);
+    return NextResponse.json(updated);
+  }
 
   const updated = await prisma.billingRecord.update({
     where: { id },
-    data: {
-      status: parsed.data.status,
-      paidAt: parsed.data.status === "paid" ? new Date() : null,
-    },
+    data: { status: "pending", referenceNumber: null, proofUrl: null },
   });
+  await sendBillingRejected(record.account.email, record.account.ownerName, record.period);
   return NextResponse.json(updated);
 }

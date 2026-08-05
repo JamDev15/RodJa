@@ -101,6 +101,117 @@ export async function sendPasswordReset(
   }
 }
 
+export async function sendBillingReminder(
+  to: string,
+  ownerName: string,
+  amount: number,
+  dueDate: Date,
+  period: string
+): Promise<boolean> {
+  const formatted = new Intl.NumberFormat("en-PH", {
+    style: "currency",
+    currency: "PHP",
+    minimumFractionDigits: 0,
+  }).format(amount);
+
+  try {
+    await resend.emails.send({
+      from: FROM,
+      to,
+      subject: `Subscription payment due soon – ${formatted}`,
+      html: `
+        <div style="font-family:sans-serif;max-width:480px;margin:0 auto">
+          <h2 style="color:#1a1a2e">Subscription Payment Reminder</h2>
+          <p>Hi ${ownerName},</p>
+          <p>Your TenantHub subscription for <strong>${period}</strong> (${formatted}) is due on
+             <strong>${new Intl.DateTimeFormat("en-PH", { dateStyle: "long" }).format(dueDate)}</strong>.</p>
+          <p>Please pay and submit your reference number in the Billing section of your dashboard to avoid
+             your account being paused.</p>
+        </div>
+      `,
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export async function sendBillingApproved(
+  to: string,
+  ownerName: string,
+  period: string
+): Promise<boolean> {
+  try {
+    await resend.emails.send({
+      from: FROM,
+      to,
+      subject: `Payment confirmed – ${period}`,
+      html: `
+        <div style="font-family:sans-serif;max-width:480px;margin:0 auto">
+          <h2 style="color:#16a34a">Payment Confirmed ✓</h2>
+          <p>Hi ${ownerName},</p>
+          <p>Your subscription payment for <strong>${period}</strong> has been confirmed. Thank you!</p>
+        </div>
+      `,
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export async function sendBillingRejected(
+  to: string,
+  ownerName: string,
+  period: string
+): Promise<boolean> {
+  try {
+    await resend.emails.send({
+      from: FROM,
+      to,
+      subject: `Payment could not be verified – ${period}`,
+      html: `
+        <div style="font-family:sans-serif;max-width:480px;margin:0 auto">
+          <h2 style="color:#dc2626">Payment Could Not Be Verified</h2>
+          <p>Hi ${ownerName},</p>
+          <p>We couldn't verify your subscription payment for <strong>${period}</strong>.
+             Please double-check your reference number and proof, then resubmit in the Billing
+             section of your dashboard.</p>
+        </div>
+      `,
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export async function sendAccountPaused(
+  to: string,
+  ownerName: string,
+  period: string
+): Promise<boolean> {
+  try {
+    await resend.emails.send({
+      from: FROM,
+      to,
+      subject: "Your TenantHub account has been paused",
+      html: `
+        <div style="font-family:sans-serif;max-width:480px;margin:0 auto">
+          <h2 style="color:#dc2626">Account Paused</h2>
+          <p>Hi ${ownerName},</p>
+          <p>Your subscription payment for <strong>${period}</strong> was not received by the due date,
+             so your TenantHub account has been paused and you won't be able to log in until it's settled.</p>
+          <p>Please contact support to arrange payment and restore access.</p>
+        </div>
+      `,
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export async function sendWelcomeTenant(
   to: string,
   tenantName: string,

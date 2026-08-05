@@ -4,6 +4,7 @@ import { formatCurrency, formatDate } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { CheckCircle, Zap } from "lucide-react";
+import { BillingPayForm } from "./billing-pay-form";
 
 const PLANS = [
   { name: "Free", price: 0, maxProperties: 1, maxUnits: 3, maxTenants: 20, features: ["Manual tracking", "Tenant portal"] },
@@ -27,6 +28,9 @@ export default async function BillingPage() {
   ]);
 
   const [propCount, unitCount, tenantCount] = stats;
+
+  const currentBill = account?.billingRecords.find((b) => b.status === "pending" || b.status === "submitted" || b.status === "overdue");
+  const platformSettings = currentBill ? await prisma.platformSettings.findFirst() : null;
 
   return (
     <div className="space-y-6 max-w-3xl">
@@ -64,6 +68,55 @@ export default async function BillingPage() {
           ))}
         </div>
       </div>
+
+      {/* Pay Now */}
+      {currentBill && (
+        <div className={`rounded-xl border p-6 ${currentBill.status === "overdue" ? "border-red-500/30 bg-red-500/10" : "border-yellow-500/30 bg-yellow-500/10"}`}>
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-lg font-semibold text-white">
+                {currentBill.status === "overdue" ? "Account Paused — Payment Overdue" : "Subscription Payment Due"}
+              </h2>
+              <p className="text-sm text-gray-400 mt-1">
+                {currentBill.period} · {formatCurrency(currentBill.amount)} · Due {formatDate(currentBill.dueDate)}
+              </p>
+              {currentBill.status === "submitted" && (
+                <p className="text-sm text-blue-400 mt-1">Submitted — awaiting approval.</p>
+              )}
+            </div>
+            <Badge variant={currentBill.status === "overdue" ? "destructive" : "warning"}>{currentBill.status}</Badge>
+          </div>
+
+          {currentBill.status !== "submitted" && (
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="space-y-3">
+                {platformSettings?.gcashNumber && (
+                  <div>
+                    <p className="text-xs text-gray-500">GCash</p>
+                    <p className="text-white font-medium">{platformSettings.gcashNumber}</p>
+                    {platformSettings.gcashQrUrl && (
+                      <img src={platformSettings.gcashQrUrl} alt="GCash QR" className="mt-2 h-40 w-40 rounded-lg border border-white/10 object-contain bg-white" />
+                    )}
+                  </div>
+                )}
+                {platformSettings?.mayaNumber && (
+                  <div>
+                    <p className="text-xs text-gray-500">Maya</p>
+                    <p className="text-white font-medium">{platformSettings.mayaNumber}</p>
+                    {platformSettings.mayaQrUrl && (
+                      <img src={platformSettings.mayaQrUrl} alt="Maya QR" className="mt-2 h-40 w-40 rounded-lg border border-white/10 object-contain bg-white" />
+                    )}
+                  </div>
+                )}
+                {!platformSettings?.gcashNumber && !platformSettings?.mayaNumber && (
+                  <p className="text-sm text-gray-500">Payment details haven&apos;t been set up yet — contact support.</p>
+                )}
+              </div>
+              <BillingPayForm />
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Upgrade */}
       {account?.plan.name !== "Pro" && (

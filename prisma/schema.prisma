@@ -231,13 +231,27 @@ model LoginAttempt {
 }
 
 model BillingRecord {
-  id        String   @id @default(cuid())
-  accountId String
-  account   Account  @relation(fields: [accountId], references: [id])
-  amount    Float
-  period    String
-  status    String   @default("pending")
-  paidAt    DateTime?
-  proofUrl  String?
-  createdAt DateTime @default(now())
+  id              String    @id @default(cuid())
+  accountId       String
+  account         Account   @relation(fields: [accountId], references: [id])
+  amount          Float
+  period          String
+  dueDate         DateTime
+  status          String    @default("pending") // pending | submitted | paid | overdue
+  referenceNumber String?
+  proofUrl        String?
+  paidAt          DateTime?
+  reminderSentAt  DateTime?
+  createdAt       DateTime  @default(now())
+}
+
+// Singleton row holding the platform's own GCash/Maya payment info, shown
+// to landlords when they pay their subscription.
+model PlatformSettings {
+  id          String   @id @default(cuid())
+  gcashNumber String?
+  gcashQrUrl  String?
+  mayaNumber  String?
+  mayaQrUrl   String?
+  updatedAt   DateTime @updatedAt
 }

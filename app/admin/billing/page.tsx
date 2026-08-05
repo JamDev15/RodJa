@@ -6,7 +6,7 @@ import { BillingActions } from "./billing-actions";
 export default async function AdminBillingPage() {
   const records = await prisma.billingRecord.findMany({
     include: { account: { select: { name: true, ownerName: true, email: true } } },
-    orderBy: { createdAt: "desc" },
+    orderBy: { dueDate: "desc" },
   });
 
   return (
@@ -18,8 +18,7 @@ export default async function AdminBillingPage() {
 
       {records.length === 0 ? (
         <div className="rounded-xl border border-white/10 bg-white/5 p-8 text-center text-gray-500 text-sm">
-          No billing records yet. These are created when an account submits a subscription payment —
-          that flow isn't wired up on the landlord side yet, so this list will be empty until it is.
+          No billing records yet — they're created automatically for paid-plan accounts once their free trial ends.
         </div>
       ) : (
         <div className="rounded-xl border border-white/10 overflow-hidden">
@@ -29,8 +28,9 @@ export default async function AdminBillingPage() {
                 <th className="text-left px-4 py-3 text-gray-400 font-medium">Account</th>
                 <th className="text-left px-4 py-3 text-gray-400 font-medium">Period</th>
                 <th className="text-left px-4 py-3 text-gray-400 font-medium">Amount</th>
+                <th className="text-left px-4 py-3 text-gray-400 font-medium hidden lg:table-cell">Due Date</th>
                 <th className="text-left px-4 py-3 text-gray-400 font-medium">Status</th>
-                <th className="text-left px-4 py-3 text-gray-400 font-medium hidden md:table-cell">Paid At</th>
+                <th className="text-left px-4 py-3 text-gray-400 font-medium hidden md:table-cell">Reference #</th>
                 <th className="text-left px-4 py-3 text-gray-400 font-medium hidden md:table-cell">Proof</th>
                 <th className="text-left px-4 py-3 text-gray-400 font-medium">Actions</th>
               </tr>
@@ -44,12 +44,13 @@ export default async function AdminBillingPage() {
                   </td>
                   <td className="px-4 py-3 text-gray-400">{r.period}</td>
                   <td className="px-4 py-3 text-white">{formatCurrency(r.amount)}</td>
+                  <td className="px-4 py-3 text-gray-400 hidden lg:table-cell">{formatDate(r.dueDate)}</td>
                   <td className="px-4 py-3">
                     <Badge variant={r.status === "paid" ? "success" : r.status === "overdue" ? "destructive" : "warning"}>
                       {r.status}
                     </Badge>
                   </td>
-                  <td className="px-4 py-3 text-gray-400 hidden md:table-cell">{r.paidAt ? formatDate(r.paidAt) : "—"}</td>
+                  <td className="px-4 py-3 text-gray-400 hidden md:table-cell">{r.referenceNumber ?? "—"}</td>
                   <td className="px-4 py-3 hidden md:table-cell">
                     {r.proofUrl ? (
                       <a href={r.proofUrl} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 text-xs">View</a>
