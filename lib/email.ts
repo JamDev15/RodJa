@@ -19,7 +19,7 @@ export async function sendPaymentReminder(
   }).format(amount);
 
   try {
-    await resend.emails.send({
+    const { error } = await resend.emails.send({
       from: FROM,
       to,
       subject: `Rent Reminder – ${formatted} due`,
@@ -36,6 +36,10 @@ export async function sendPaymentReminder(
         </div>
       `,
     });
+    if (error) {
+      console.error("Resend rejected email:", error);
+      return false;
+    }
     return true;
   } catch (err) {
     console.error("Failed to send email:", err);
@@ -56,7 +60,7 @@ export async function sendPaymentApproved(
   }).format(amount);
 
   try {
-    await resend.emails.send({
+    const { error } = await resend.emails.send({
       from: FROM,
       to,
       subject: `Payment Approved – ${month}`,
@@ -69,6 +73,10 @@ export async function sendPaymentApproved(
         </div>
       `,
     });
+    if (error) {
+      console.error("Resend rejected email:", error);
+      return false;
+    }
     return true;
   } catch (err) {
     console.error("Failed to send email:", err);
@@ -82,7 +90,7 @@ export async function sendPasswordReset(
   newPassword: string
 ): Promise<boolean> {
   try {
-    await resend.emails.send({
+    const { error } = await resend.emails.send({
       from: FROM,
       to,
       subject: "Your TenantHub password has been reset",
@@ -97,6 +105,10 @@ export async function sendPasswordReset(
         </div>
       `,
     });
+    if (error) {
+      console.error("Resend rejected email:", error);
+      return false;
+    }
     return true;
   } catch (err) {
     console.error("Failed to send email:", err);
@@ -118,7 +130,7 @@ export async function sendBillingReminder(
   }).format(amount);
 
   try {
-    await resend.emails.send({
+    const { error } = await resend.emails.send({
       from: FROM,
       to,
       subject: `Subscription payment due soon – ${formatted}`,
@@ -133,6 +145,10 @@ export async function sendBillingReminder(
         </div>
       `,
     });
+    if (error) {
+      console.error("Resend rejected email:", error);
+      return false;
+    }
     return true;
   } catch (err) {
     console.error("Failed to send email:", err);
@@ -147,7 +163,7 @@ export async function sendBillingApproved(
   loginUrl: string
 ): Promise<boolean> {
   try {
-    await resend.emails.send({
+    const { error } = await resend.emails.send({
       from: FROM,
       to,
       subject: `Payment confirmed – ${period}`,
@@ -162,6 +178,10 @@ export async function sendBillingApproved(
         </div>
       `,
     });
+    if (error) {
+      console.error("Resend rejected email:", error);
+      return false;
+    }
     return true;
   } catch (err) {
     console.error("Failed to send email:", err);
@@ -184,7 +204,7 @@ export async function sendBillingSubmittedNotification(
   }).format(amount);
 
   try {
-    await resend.emails.send({
+    const { error } = await resend.emails.send({
       from: FROM,
       to,
       subject: `New payment submitted – ${accountName}`,
@@ -198,6 +218,10 @@ export async function sendBillingSubmittedNotification(
         </div>
       `,
     });
+    if (error) {
+      console.error("Resend rejected email:", error);
+      return false;
+    }
     return true;
   } catch (err) {
     console.error("Failed to send email:", err);
@@ -211,7 +235,7 @@ export async function sendTrialEndingSoon(
   trialEndsAt: Date
 ): Promise<boolean> {
   try {
-    await resend.emails.send({
+    const { error } = await resend.emails.send({
       from: FROM,
       to,
       subject: "Your free trial ends in 3 days",
@@ -225,6 +249,10 @@ export async function sendTrialEndingSoon(
         </div>
       `,
     });
+    if (error) {
+      console.error("Resend rejected email:", error);
+      return false;
+    }
     return true;
   } catch (err) {
     console.error("Failed to send email:", err);
@@ -237,7 +265,7 @@ export async function sendTrialEnded(
   ownerName: string
 ): Promise<boolean> {
   try {
-    await resend.emails.send({
+    const { error } = await resend.emails.send({
       from: FROM,
       to,
       subject: "Your TenantHub free trial has ended",
@@ -251,6 +279,10 @@ export async function sendTrialEnded(
         </div>
       `,
     });
+    if (error) {
+      console.error("Resend rejected email:", error);
+      return false;
+    }
     return true;
   } catch (err) {
     console.error("Failed to send email:", err);
@@ -264,7 +296,7 @@ export async function sendBillingRejected(
   period: string
 ): Promise<boolean> {
   try {
-    await resend.emails.send({
+    const { error } = await resend.emails.send({
       from: FROM,
       to,
       subject: `Payment could not be verified – ${period}`,
@@ -278,6 +310,10 @@ export async function sendBillingRejected(
         </div>
       `,
     });
+    if (error) {
+      console.error("Resend rejected email:", error);
+      return false;
+    }
     return true;
   } catch (err) {
     console.error("Failed to send email:", err);
@@ -291,7 +327,7 @@ export async function sendAccountPaused(
   period: string
 ): Promise<boolean> {
   try {
-    await resend.emails.send({
+    const { error } = await resend.emails.send({
       from: FROM,
       to,
       subject: "Your TenantHub account has been paused",
@@ -305,6 +341,10 @@ export async function sendAccountPaused(
         </div>
       `,
     });
+    if (error) {
+      console.error("Resend rejected email:", error);
+      return false;
+    }
     return true;
   } catch (err) {
     console.error("Failed to send email:", err);
@@ -320,7 +360,7 @@ export async function sendWelcomeTenant(
   portalUrl: string
 ): Promise<boolean> {
   try {
-    await resend.emails.send({
+    const { error } = await resend.emails.send({
       from: FROM,
       to,
       subject: "Welcome to your Tenant Portal",
@@ -336,6 +376,10 @@ export async function sendWelcomeTenant(
         </div>
       `,
     });
+    if (error) {
+      console.error("Resend rejected email:", error);
+      return false;
+    }
     return true;
   } catch (err) {
     console.error("Failed to send email:", err);
