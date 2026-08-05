@@ -253,12 +253,16 @@ model BillingRecord {
 // Singleton row holding the platform's own GCash/Maya payment info, shown
 // to landlords when they pay their subscription.
 model PlatformSettings {
-  id          String   @id @default(cuid())
-  gcashNumber String?
-  gcashQrUrl  String?
-  mayaNumber  String?
-  mayaQrUrl   String?
-  updatedAt   DateTime @updatedAt
+  id               String   @id @default(cuid())
+  gcashNumber      String?
+  gcashQrUrl       String?
+  mayaNumber       String?
+  mayaQrUrl        String?
+  // Where "new signup" / "payment submitted" notifications go — separate
+  // from SuperAdmin login email so it can be a real, actively-checked
+  // inbox without affecting who can log in as Super Admin.
+  notificationEmail String?
+  updatedAt        DateTime @updatedAt
 }
 
 // One-time, expiring login link sent in the billing-approved email so a

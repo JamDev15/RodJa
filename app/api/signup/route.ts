@@ -5,7 +5,7 @@ import { isRateLimited, recordFailedAttempt, getClientIp } from "@/lib/rate-limi
 import { signupSchema, formatZodError } from "@/lib/validations";
 import { uploadBillingProof, validateProofFile } from "@/lib/storage";
 import { sendBillingSubmittedNotification } from "@/lib/email";
-import { periodLabelFor } from "@/lib/billing";
+import { periodLabelFor, getNotificationRecipients } from "@/lib/billing";
 
 const PLAN_NAMES: Record<string, string> = {
   free: "Free",
@@ -106,10 +106,10 @@ export async function POST(req: Request) {
           proofUrl,
         },
       });
-      const admins = await prisma.superAdmin.findMany({ select: { email: true } });
+      const recipients = await getNotificationRecipients();
       await Promise.all(
-        admins.map((admin) =>
-          sendBillingSubmittedNotification(admin.email, account.name, account.ownerName, record.amount, record.period, referenceNumber ?? "")
+        recipients.map((email) =>
+          sendBillingSubmittedNotification(email, account.name, account.ownerName, record.amount, record.period, referenceNumber ?? "")
         )
       );
     }

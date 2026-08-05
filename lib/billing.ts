@@ -12,6 +12,19 @@ export function periodLabelFor(date: Date): string {
   return new Intl.DateTimeFormat("en-PH", { month: "long", year: "numeric" }).format(date);
 }
 
+/**
+ * Who gets "new payment submitted" notifications: the configured
+ * PlatformSettings.notificationEmail if set (a real inbox, independent of
+ * login credentials), otherwise every SuperAdmin's login email as a fallback.
+ */
+export async function getNotificationRecipients(): Promise<string[]> {
+  const settings = await prisma.platformSettings.findFirst();
+  if (settings?.notificationEmail) return [settings.notificationEmail];
+
+  const admins = await prisma.superAdmin.findMany({ select: { email: true } });
+  return admins.map((a) => a.email);
+}
+
 export interface BillingSweepResult {
   cyclesCreated: number;
   remindersSent: number;

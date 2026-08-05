@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { uploadBillingProof, validateProofFile } from "@/lib/storage";
 import { billingPaySchema, formatZodError } from "@/lib/validations";
 import { sendBillingSubmittedNotification } from "@/lib/email";
+import { getNotificationRecipients } from "@/lib/billing";
 
 export async function POST(req: Request) {
   const session = await auth();
@@ -42,12 +43,12 @@ export async function POST(req: Request) {
   });
 
   const account = await prisma.account.findUnique({ where: { id: accountId } });
-  const admins = await prisma.superAdmin.findMany({ select: { email: true } });
   if (account) {
+    const recipients = await getNotificationRecipients();
     await Promise.all(
-      admins.map((admin) =>
+      recipients.map((email) =>
         sendBillingSubmittedNotification(
-          admin.email,
+          email,
           account.name,
           account.ownerName,
           updated.amount,

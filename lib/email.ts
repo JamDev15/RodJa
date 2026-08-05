@@ -37,7 +37,8 @@ export async function sendPaymentReminder(
       `,
     });
     return true;
-  } catch {
+  } catch (err) {
+    console.error("Failed to send email:", err);
     return false;
   }
 }
@@ -69,7 +70,8 @@ export async function sendPaymentApproved(
       `,
     });
     return true;
-  } catch {
+  } catch (err) {
+    console.error("Failed to send email:", err);
     return false;
   }
 }
@@ -96,7 +98,8 @@ export async function sendPasswordReset(
       `,
     });
     return true;
-  } catch {
+  } catch (err) {
+    console.error("Failed to send email:", err);
     return false;
   }
 }
@@ -131,7 +134,8 @@ export async function sendBillingReminder(
       `,
     });
     return true;
-  } catch {
+  } catch (err) {
+    console.error("Failed to send email:", err);
     return false;
   }
 }
@@ -159,7 +163,8 @@ export async function sendBillingApproved(
       `,
     });
     return true;
-  } catch {
+  } catch (err) {
+    console.error("Failed to send email:", err);
     return false;
   }
 }
@@ -194,7 +199,8 @@ export async function sendBillingSubmittedNotification(
       `,
     });
     return true;
-  } catch {
+  } catch (err) {
+    console.error("Failed to send email:", err);
     return false;
   }
 }
@@ -220,7 +226,8 @@ export async function sendTrialEndingSoon(
       `,
     });
     return true;
-  } catch {
+  } catch (err) {
+    console.error("Failed to send email:", err);
     return false;
   }
 }
@@ -245,7 +252,8 @@ export async function sendTrialEnded(
       `,
     });
     return true;
-  } catch {
+  } catch (err) {
+    console.error("Failed to send email:", err);
     return false;
   }
 }
@@ -271,7 +279,8 @@ export async function sendBillingRejected(
       `,
     });
     return true;
-  } catch {
+  } catch (err) {
+    console.error("Failed to send email:", err);
     return false;
   }
 }
@@ -297,7 +306,8 @@ export async function sendAccountPaused(
       `,
     });
     return true;
-  } catch {
+  } catch (err) {
+    console.error("Failed to send email:", err);
     return false;
   }
 }
@@ -327,7 +337,8 @@ export async function sendWelcomeTenant(
       `,
     });
     return true;
-  } catch {
+  } catch (err) {
+    console.error("Failed to send email:", err);
     return false;
   }
 }

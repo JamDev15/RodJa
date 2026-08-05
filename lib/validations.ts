@@ -156,6 +156,7 @@ export const adminBillingReviewSchema = z.object({
 export const platformSettingsUpdateSchema = z.object({
   gcashNumber: z.string().trim().max(30).optional().nullable(),
   mayaNumber: z.string().trim().max(30).optional().nullable(),
+  notificationEmail: z.string().trim().toLowerCase().email().max(255).optional().nullable().or(z.literal("")),
 });
 
 export const billingPaySchema = z.object({

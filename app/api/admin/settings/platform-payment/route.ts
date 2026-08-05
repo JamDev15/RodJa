@@ -13,19 +13,21 @@ export async function PATCH(req: Request) {
   const formData = await req.formData();
   const gcashNumber = (formData.get("gcashNumber") as string) || "";
   const mayaNumber = (formData.get("mayaNumber") as string) || "";
+  const notificationEmail = (formData.get("notificationEmail") as string) || "";
   const gcashQr = formData.get("gcashQr") as File | null;
   const mayaQr = formData.get("mayaQr") as File | null;
 
-  const parsed = platformSettingsUpdateSchema.safeParse({ gcashNumber, mayaNumber });
+  const parsed = platformSettingsUpdateSchema.safeParse({ gcashNumber, mayaNumber, notificationEmail });
   if (!parsed.success) {
     return NextResponse.json({ error: formatZodError(parsed.error) }, { status: 400 });
   }
 
   const existing = await prisma.platformSettings.findFirst();
 
-  const data: { gcashNumber?: string | null; mayaNumber?: string | null; gcashQrUrl?: string; mayaQrUrl?: string } = {
+  const data: { gcashNumber?: string | null; mayaNumber?: string | null; notificationEmail?: string | null; gcashQrUrl?: string; mayaQrUrl?: string } = {
     gcashNumber: parsed.data.gcashNumber || null,
     mayaNumber: parsed.data.mayaNumber || null,
+    notificationEmail: parsed.data.notificationEmail || null,
   };
 
   if (gcashQr && gcashQr.size > 0) {
