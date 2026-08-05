@@ -11,9 +11,9 @@ const features = [
 ];
 
 const plans = [
-  { name: "Free", price: "₱0", period: "forever", features: ["1 property", "3 units", "20 tenants", "Manual tracking"], cta: "Get Started", highlight: false },
-  { name: "Basic", price: "₱199", period: "/ month", features: ["3 properties", "15 units", "50 tenants", "SMS reminders", "Payment proofs"], cta: "Start Free Trial", highlight: false },
-  { name: "Pro", price: "₱499", period: "/ month", features: ["Unlimited everything", "Public listings", "Maintenance module", "PDF/CSV export", "Priority support"], cta: "Go Pro", highlight: true },
+  { name: "Free", price: "₱0", period: "7-day trial", features: ["1 property", "3 units", "20 tenants", "Manual tracking"], cta: "Get Started", highlight: false, planKey: "free" },
+  { name: "Basic", price: "₱199", period: "/ month", features: ["3 properties", "15 units", "50 tenants", "SMS reminders", "Payment proofs"], cta: "Subscribe", highlight: false, planKey: "basic" },
+  { name: "Pro", price: "₱499", period: "/ month", features: ["Unlimited everything", "Public listings", "Maintenance module", "PDF/CSV export", "Priority support"], cta: "Go Pro", highlight: true, planKey: "pro" },
 ];
 
 export default function LandingPage() {
@@ -101,7 +101,7 @@ export default function LandingPage() {
                 ))}
               </ul>
               <Link
-                href="/signup"
+                href={`/signup?plan=${plan.planKey}`}
                 className={`w-full rounded-lg py-2.5 text-sm font-semibold text-center transition-colors ${plan.highlight ? "bg-blue-600 text-white hover:bg-blue-700" : "bg-white/10 text-white hover:bg-white/20"}`}
               >
                 {plan.cta}

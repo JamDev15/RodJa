@@ -1,25 +1,33 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import { daysBetween } from "@/lib/due-dates";
 import { Badge } from "@/components/ui/badge";
-import Link from "next/link";
-import { CheckCircle, Zap } from "lucide-react";
+import { CheckCircle } from "lucide-react";
 import { BillingPayForm } from "./billing-pay-form";
+import { UpgradeButton } from "./upgrade-button";
 
-const PLANS = [
-  { name: "Free", price: 0, maxProperties: 1, maxUnits: 3, maxTenants: 20, features: ["Manual tracking", "Tenant portal"] },
-  { name: "Basic", price: 199, maxProperties: 3, maxUnits: 15, maxTenants: 50, features: ["SMS reminders", "Payment proof", "Email support"] },
-  { name: "Pro", price: 499, maxProperties: -1, maxUnits: -1, maxTenants: -1, features: ["Unlimited everything", "Public listings", "Maintenance module", "PDF/CSV export"] },
-];
+const PLAN_FEATURES: Record<string, string[]> = {
+  Free: ["Manual tracking", "Tenant portal", "7-day trial only"],
+  Basic: ["SMS reminders", "Payment proof", "Email support"],
+  Pro: ["Unlimited everything", "Public listings", "Maintenance module", "PDF/CSV export"],
+};
 
 export default async function BillingPage() {
   const session = await auth();
   const accountId = (session?.user as any)?.accountId;
 
-  const account = await prisma.account.findUnique({
-    where: { id: accountId },
-    include: { plan: true, billingRecords: { orderBy: { createdAt: "desc" }, take: 6 } },
-  });
+  const [account, plans] = await Promise.all([
+    prisma.account.findUnique({
+      where: { id: accountId },
+      include: { plan: true, billingRecords: { orderBy: { createdAt: "desc" }, take: 6 } },
+    }),
+    prisma.plan.findMany({ where: { isActive: true, price: { gt: 0 } }, orderBy: { price: "asc" } }),
+  ]);
+
+  const trialDaysLeft = account?.plan.price === 0 && account.trialEndsAt
+    ? daysBetween(account.trialEndsAt, new Date())
+    : null;
 
   const stats = await prisma.$transaction([
     prisma.property.count({ where: { accountId } }),
@@ -38,6 +46,14 @@ export default async function BillingPage() {
         <h1 className="text-2xl font-bold text-white">Billing & Plan</h1>
         <p className="text-gray-400 text-sm mt-1">Manage your subscription</p>
       </div>
+
+      {trialDaysLeft !== null && (
+        <div className={`rounded-xl border p-4 text-sm ${trialDaysLeft <= 0 ? "border-red-500/30 bg-red-500/10 text-red-400" : "border-yellow-500/30 bg-yellow-500/10 text-yellow-400"}`}>
+          {trialDaysLeft <= 0
+            ? "Your 7-day free trial has ended. Upgrade to Basic or Pro below to keep using TenantHub."
+            : `Your free trial ends in ${trialDaysLeft} day${trialDaysLeft === 1 ? "" : "s"}. Upgrade anytime to avoid interruption.`}
+        </div>
+      )}
 
       {/* Current Plan */}
       <div className="rounded-xl border border-blue-500/30 bg-blue-500/10 p-6">
@@ -119,39 +135,33 @@ export default async function BillingPage() {
       )}
 
       {/* Upgrade */}
-      {account?.plan.name !== "Pro" && (
+      {!currentBill && account?.plan.name !== "Pro" && (
         <div>
           <h2 className="text-lg font-semibold text-white mb-3">Upgrade Plan</h2>
-          <div className="grid md:grid-cols-3 gap-3">
-            {PLANS.map((plan) => {
+          <p className="text-sm text-gray-400 mb-3">
+            Basic and Pro have no free trial — pay to activate, then it&apos;s active as soon as we approve your payment.
+          </p>
+          <div className="grid md:grid-cols-2 gap-3">
+            {plans.map((plan) => {
               const isCurrent = plan.name === account?.plan.name;
               return (
-                <div key={plan.name} className={`rounded-xl border p-5 ${isCurrent ? "border-blue-500/50 bg-blue-500/10" : "border-white/10 bg-white/5 hover:bg-white/[0.07]"} transition-colors`}>
+                <div key={plan.id} className={`rounded-xl border p-5 ${isCurrent ? "border-blue-500/50 bg-blue-500/10" : "border-white/10 bg-white/5 hover:bg-white/[0.07]"} transition-colors`}>
                   <div className="flex items-center justify-between mb-1">
                     <h3 className="font-semibold text-white">{plan.name}</h3>
                     {isCurrent && <Badge variant="default">Current</Badge>}
                   </div>
                   <p className="text-2xl font-bold text-white mb-3">
-                    {plan.price === 0 ? "Free" : `₱${plan.price}`}
-                    {plan.price > 0 && <span className="text-sm font-normal text-gray-400">/mo</span>}
+                    ₱{plan.price}<span className="text-sm font-normal text-gray-400">/mo</span>
                   </p>
                   <ul className="space-y-1 mb-4">
-                    {plan.features.map((f) => (
+                    {(PLAN_FEATURES[plan.name] ?? []).map((f) => (
                       <li key={f} className="flex items-center gap-1.5 text-xs text-gray-400">
                         <CheckCircle className="h-3 w-3 text-green-400 shrink-0" />
                         {f}
                       </li>
                     ))}
                   </ul>
-                  {!isCurrent && plan.price > 0 && (
-                    <Link
-                      href="/dashboard/billing/upgrade"
-                      className="flex items-center justify-center gap-1.5 w-full rounded-lg bg-blue-600 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
-                    >
-                      <Zap className="h-3.5 w-3.5" />
-                      Upgrade
-                    </Link>
-                  )}
+                  {!isCurrent && <UpgradeButton planId={plan.id} label={`Upgrade to ${plan.name}`} />}
                 </div>
               );
             })}

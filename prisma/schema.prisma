@@ -42,6 +42,7 @@ model Account {
   plan           Plan            @relation(fields: [planId], references: [id])
   isActive       Boolean         @default(true)
   trialEndsAt    DateTime?
+  trialReminderSentAt DateTime?
   gcashNumber    String?
   mayaNumber     String?
   bankDetails    String?
@@ -242,6 +243,10 @@ model BillingRecord {
   proofUrl        String?
   paidAt          DateTime?
   reminderSentAt  DateTime?
+  // Set only for an upgrade/plan-change record: the plan the account should
+  // switch to once this bill is approved (regular recurring renewals leave
+  // this null since the plan isn't changing).
+  targetPlanId    String?
   createdAt       DateTime  @default(now())
 }
 

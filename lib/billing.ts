@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { sendBillingReminder, sendAccountPaused } from "@/lib/email";
+import { sendBillingReminder, sendAccountPaused, sendTrialEndingSoon, sendTrialEnded } from "@/lib/email";
 import { daysBetween } from "@/lib/due-dates";
 
 function addMonths(date: Date, months: number): Date {
@@ -8,7 +8,7 @@ function addMonths(date: Date, months: number): Date {
   return d;
 }
 
-function periodLabelFor(date: Date): string {
+export function periodLabelFor(date: Date): string {
   return new Intl.DateTimeFormat("en-PH", { month: "long", year: "numeric" }).format(date);
 }
 
@@ -96,4 +96,44 @@ export async function runBillingSweep(now: Date = new Date()): Promise<BillingSw
   }
 
   return { cyclesCreated, remindersSent, accountsPaused };
+}
+
+export interface FreeTrialSweepResult {
+  remindersSent: number;
+  accountsPaused: number;
+}
+
+/**
+ * Free plan has no billing cycle — it's a 7-day trial only (Account.trialEndsAt,
+ * set at signup). Sends a reminder 3 days before it ends, and auto-pauses the
+ * account once it does, the same way an unpaid subscription pauses.
+ */
+export async function runFreeTrialSweep(now: Date = new Date()): Promise<FreeTrialSweepResult> {
+  let remindersSent = 0;
+  let accountsPaused = 0;
+
+  const accounts = await prisma.account.findMany({
+    where: { isActive: true, plan: { price: 0 }, trialEndsAt: { not: null } },
+  });
+
+  for (const account of accounts) {
+    if (!account.trialEndsAt) continue;
+    const diff = daysBetween(now, account.trialEndsAt);
+
+    if (diff === 3 && !account.trialReminderSentAt) {
+      const sent = await sendTrialEndingSoon(account.email, account.ownerName, account.trialEndsAt);
+      if (sent) {
+        await prisma.account.update({ where: { id: account.id }, data: { trialReminderSentAt: now } });
+        remindersSent++;
+      }
+    }
+
+    if (now >= account.trialEndsAt) {
+      await prisma.account.update({ where: { id: account.id }, data: { isActive: false } });
+      await sendTrialEnded(account.email, account.ownerName);
+      accountsPaused++;
+    }
+  }
+
+  return { remindersSent, accountsPaused };
 }

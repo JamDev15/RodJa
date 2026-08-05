@@ -3,6 +3,9 @@ import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { isRateLimited, recordFailedAttempt, getClientIp } from "@/lib/rate-limit";
 import { signupSchema, formatZodError } from "@/lib/validations";
+import { uploadBillingProof, validateProofFile } from "@/lib/storage";
+import { sendBillingSubmittedNotification } from "@/lib/email";
+import { periodLabelFor } from "@/lib/billing";
 
 const PLAN_NAMES: Record<string, string> = {
   free: "Free",
@@ -18,13 +21,25 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: "Too many attempts. Please try again later." }, { status: 429 });
     }
 
-    const json = await req.json();
-    const parsed = signupSchema.safeParse(json);
+    const formData = await req.formData();
+    const fields = {
+      name: (formData.get("name") as string) || "",
+      ownerName: (formData.get("ownerName") as string) || "",
+      email: (formData.get("email") as string) || "",
+      password: (formData.get("password") as string) || "",
+      phone: (formData.get("phone") as string) || "",
+      plan: (formData.get("plan") as string) || "free",
+      referenceNumber: (formData.get("referenceNumber") as string) || "",
+    };
+    const file = formData.get("proof") as File | null;
+
+    const parsed = signupSchema.safeParse(fields);
     if (!parsed.success) {
       await recordFailedAttempt(identifier);
       return NextResponse.json({ message: formatZodError(parsed.error) }, { status: 400 });
     }
-    const { name, ownerName, email, password, phone, plan: planKey } = parsed.data;
+    const { name, ownerName, email, password, phone, plan: planKey, referenceNumber } = parsed.data;
+    const isPaidPlan = planKey === "basic" || planKey === "pro";
 
     const existing = await prisma.account.findUnique({ where: { email } });
     if (existing) {
@@ -53,6 +68,12 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: "Plan not found" }, { status: 500 });
     }
 
+    let proofUrl: string | null = null;
+    if (isPaidPlan && file && file.size > 0) {
+      const validationError = validateProofFile(file);
+      if (validationError) return NextResponse.json({ message: validationError }, { status: 400 });
+    }
+
     const hashed = await bcrypt.hash(password, 12);
     const account = await prisma.account.create({
       data: {
@@ -62,11 +83,38 @@ export async function POST(req: Request) {
         password: hashed,
         phone: phone || null,
         planId: dbPlan.id,
-        trialEndsAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+        // Paid plans have no trial and stay inactive until the admin
+        // approves the payment submitted below; Free is instant with a
+        // 7-day trial.
+        trialEndsAt: isPaidPlan ? null : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        isActive: !isPaidPlan,
       },
     });
 
-    return NextResponse.json({ id: account.id }, { status: 201 });
+    if (isPaidPlan) {
+      if (file && file.size > 0) {
+        proofUrl = await uploadBillingProof(file, account.id, periodLabelFor(new Date()));
+      }
+      const record = await prisma.billingRecord.create({
+        data: {
+          accountId: account.id,
+          amount: dbPlan.price,
+          period: periodLabelFor(new Date()),
+          dueDate: new Date(),
+          status: "submitted",
+          referenceNumber,
+          proofUrl,
+        },
+      });
+      const admins = await prisma.superAdmin.findMany({ select: { email: true } });
+      await Promise.all(
+        admins.map((admin) =>
+          sendBillingSubmittedNotification(admin.email, account.name, account.ownerName, record.amount, record.period, referenceNumber ?? "")
+        )
+      );
+    }
+
+    return NextResponse.json({ id: account.id, pendingApproval: isPaidPlan }, { status: 201 });
   } catch (err) {
     console.error(err);
     return NextResponse.json({ message: "Server error" }, { status: 500 });

@@ -34,7 +34,12 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     });
     // Approving always restores access — covers both a normal on-time
     // approval and an overdue/paused account that has since paid.
-    await prisma.account.update({ where: { id: record.accountId }, data: { isActive: true } });
+    // If this record was an upgrade request, switch the account onto the
+    // new plan too.
+    await prisma.account.update({
+      where: { id: record.accountId },
+      data: { isActive: true, planId: record.targetPlanId ?? undefined },
+    });
 
     const token = crypto.randomBytes(32).toString("base64url");
     await prisma.loginToken.create({

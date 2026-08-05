@@ -4,14 +4,20 @@ export const forgotPasswordSchema = z.object({
   email: z.string().trim().toLowerCase().email().max(255),
 });
 
-export const signupSchema = z.object({
-  name: z.string().trim().min(1).max(200),
-  ownerName: z.string().trim().min(1).max(200),
-  email: z.string().trim().toLowerCase().email().max(255),
-  password: z.string().min(8).max(200),
-  phone: z.string().trim().max(30).optional().nullable(),
-  plan: z.enum(["free", "basic", "pro"]).optional(),
-});
+export const signupSchema = z
+  .object({
+    name: z.string().trim().min(1).max(200),
+    ownerName: z.string().trim().min(1).max(200),
+    email: z.string().trim().toLowerCase().email().max(255),
+    password: z.string().min(8).max(200),
+    phone: z.string().trim().max(30).optional().nullable(),
+    plan: z.enum(["free", "basic", "pro"]).optional(),
+    referenceNumber: z.string().trim().max(100).optional(),
+  })
+  .refine((data) => (data.plan ?? "free") === "free" || !!data.referenceNumber, {
+    message: "Reference number is required for paid plans",
+    path: ["referenceNumber"],
+  });
 
 export const tenantCreateSchema = z.object({
   unitId: z.string().min(1),
@@ -154,6 +160,10 @@ export const platformSettingsUpdateSchema = z.object({
 
 export const billingPaySchema = z.object({
   referenceNumber: z.string().trim().min(1).max(100),
+});
+
+export const billingUpgradeSchema = z.object({
+  planId: z.string().min(1),
 });
 
 export const adminPasswordChangeSchema = z.object({

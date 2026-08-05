@@ -199,6 +199,57 @@ export async function sendBillingSubmittedNotification(
   }
 }
 
+export async function sendTrialEndingSoon(
+  to: string,
+  ownerName: string,
+  trialEndsAt: Date
+): Promise<boolean> {
+  try {
+    await resend.emails.send({
+      from: FROM,
+      to,
+      subject: "Your free trial ends in 3 days",
+      html: `
+        <div style="font-family:sans-serif;max-width:480px;margin:0 auto">
+          <h2 style="color:#1a1a2e">Your Free Trial Is Ending Soon</h2>
+          <p>Hi ${ownerName},</p>
+          <p>Your TenantHub free trial ends on
+             <strong>${new Intl.DateTimeFormat("en-PH", { dateStyle: "long" }).format(trialEndsAt)}</strong>.</p>
+          <p>Upgrade to Basic or Pro in the Billing section of your dashboard to keep using TenantHub without interruption.</p>
+        </div>
+      `,
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export async function sendTrialEnded(
+  to: string,
+  ownerName: string
+): Promise<boolean> {
+  try {
+    await resend.emails.send({
+      from: FROM,
+      to,
+      subject: "Your TenantHub free trial has ended",
+      html: `
+        <div style="font-family:sans-serif;max-width:480px;margin:0 auto">
+          <h2 style="color:#dc2626">Free Trial Ended</h2>
+          <p>Hi ${ownerName},</p>
+          <p>Your 7-day free trial has ended, so your TenantHub account has been paused.
+             Upgrade to Basic or Pro to restore access — contact support to arrange payment
+             and get a login link once you're on a paid plan.</p>
+        </div>
+      `,
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export async function sendBillingRejected(
   to: string,
   ownerName: string,
