@@ -61,7 +61,11 @@ export default async function TenantDetailPage({ params }: { params: Promise<{ i
             <div className="flex items-center gap-2 text-gray-400"><Home className="h-4 w-4" />Unit {tenant.unit.unitNumber} · {formatCurrency(tenant.unit.rentAmount)}/mo</div>
           </div>
           <div className="pt-2 text-xs text-gray-500">
-            Portal PIN: <span className="font-mono text-white bg-white/10 px-1.5 py-0.5 rounded">{tenant.portalPin}</span>
+            Portal PIN is hidden for security.{" "}
+            <Link href={`/dashboard/tenants/${id}/edit`} className="text-blue-400 hover:text-blue-300">
+              Reset it
+            </Link>{" "}
+            if the tenant forgot theirs.
           </div>
         </div>
 

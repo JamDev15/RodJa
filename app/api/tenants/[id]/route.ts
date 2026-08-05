@@ -15,7 +15,11 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
     include: { unit: { include: { property: true } } },
   });
   if (!tenant) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  return NextResponse.json(tenant);
+  // Never send the PIN hash to the client — it's a one-way hash and has no
+  // legitimate use in the browser; exposing it also invites offline
+  // brute-forcing of what's usually a short numeric PIN.
+  const { portalPin: _portalPin, ...tenantWithoutPin } = tenant;
+  return NextResponse.json(tenantWithoutPin);
 }
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {

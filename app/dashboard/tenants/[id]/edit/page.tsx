@@ -37,7 +37,7 @@ export default function EditTenantPage() {
           moveOutDate: data.moveOutDate ? data.moveOutDate.split("T")[0] : "",
           depositAmount: data.depositAmount != null ? String(data.depositAmount) : "",
           depositPaid: data.depositPaid ?? false,
-          portalPin: data.portalPin ?? "",
+          portalPin: "",
           emergencyContact: data.emergencyContact ?? "",
           notes: data.notes ?? "",
           isActive: data.isActive ?? true,
@@ -55,11 +55,17 @@ export default function EditTenantPage() {
     e.preventDefault();
     setLoading(true);
     try {
+      const { portalPin, ...rest } = form;
       const res = await fetch(`/api/tenants/${tenantId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ...form,
+          ...rest,
+          // Only send portalPin when the landlord actually typed/generated
+          // a new one — otherwise omit it entirely so the existing PIN is
+          // left untouched (sending back a stale/empty value would either
+          // re-hash garbage or fail validation).
+          ...(portalPin ? { portalPin } : {}),
           depositAmount: form.depositAmount ? parseFloat(form.depositAmount) : null,
           moveOutDate: form.moveOutDate || null,
         }),
@@ -68,7 +74,11 @@ export default function EditTenantPage() {
         const err = await res.json();
         throw new Error(err.error ?? "Failed");
       }
-      toast({ title: "Tenant updated!", variant: "success" });
+      toast({
+        title: "Tenant updated!",
+        description: portalPin ? `New Portal PIN: ${portalPin}` : undefined,
+        variant: "success",
+      });
       router.push(`/dashboard/tenants/${tenantId}`);
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
@@ -139,12 +149,15 @@ export default function EditTenantPage() {
               onChange={(e) => setForm({ ...form, email: e.target.value })} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="portalPin">Portal PIN *</Label>
+            <Label htmlFor="portalPin">Portal PIN</Label>
             <div className="flex gap-2">
-              <Input id="portalPin" placeholder="6-digit PIN" value={form.portalPin}
-                onChange={(e) => setForm({ ...form, portalPin: e.target.value })} required maxLength={6} />
+              <Input id="portalPin" placeholder="Leave blank to keep current PIN" value={form.portalPin}
+                onChange={(e) => setForm({ ...form, portalPin: e.target.value })} maxLength={6} />
               <Button type="button" variant="secondary" onClick={generatePin} className="shrink-0">New PIN</Button>
             </div>
+            <p className="text-xs text-gray-500">
+              For security, the current PIN can&apos;t be displayed. Only fill this in to set a new one.
+            </p>
           </div>
         </div>
 
