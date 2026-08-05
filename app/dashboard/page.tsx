@@ -4,6 +4,7 @@ import { formatCurrency, formatDate, getMonthLabel, getCurrentMonth } from "@/li
 import { daysBetween, dueDateForMonth } from "@/lib/due-dates";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { PaymentBadge } from "@/components/dashboard/payment-badge";
+import { GettingStarted } from "@/components/dashboard/getting-started";
 import { DollarSign, Home, Users, AlertTriangle, CheckCircle, Clock } from "lucide-react";
 import Link from "next/link";
 
@@ -13,7 +14,7 @@ export default async function DashboardPage() {
   const currentMonth = getCurrentMonth();
   const now = new Date();
 
-  const [properties, allPayments, tenants] = await Promise.all([
+  const [properties, allPayments, tenants, account, reminderConfig] = await Promise.all([
     prisma.property.findMany({
       where: { accountId },
       include: { units: { include: { tenants: { where: { isActive: true } } } } },
@@ -27,6 +28,11 @@ export default async function DashboardPage() {
       where: { isActive: true, unit: { property: { accountId } } },
       include: { unit: { include: { property: true } } },
     }),
+    prisma.account.findUnique({
+      where: { id: accountId },
+      select: { gcashNumber: true, mayaNumber: true, bankDetails: true },
+    }),
+    prisma.reminderConfig.findUnique({ where: { accountId } }),
   ]);
 
   const allUnits = properties.flatMap((p) => p.units);
@@ -67,6 +73,39 @@ export default async function DashboardPage() {
 
   const recentPayments = allPayments.slice(0, 8);
 
+  const gettingStartedSteps = [
+    {
+      label: "Add your first property",
+      description: "Register a property so you can start adding units to it.",
+      href: "/dashboard/properties/new",
+      done: properties.length > 0,
+    },
+    {
+      label: "Add a unit",
+      description: "Units are what tenants get assigned to, with their own rent amount.",
+      href: properties[0] ? `/dashboard/properties/${properties[0].id}/units/new` : "/dashboard/properties",
+      done: totalUnits > 0,
+    },
+    {
+      label: "Add your first tenant",
+      description: "Assign a tenant to a unit and set their portal PIN.",
+      href: "/dashboard/tenants/new",
+      done: tenants.length > 0,
+    },
+    {
+      label: "Set up your payment info",
+      description: "Add your GCash/Maya number or bank details so tenants know where to pay.",
+      href: "/dashboard/settings",
+      done: !!(account?.gcashNumber || account?.mayaNumber || account?.bankDetails),
+    },
+    {
+      label: "Configure reminders",
+      description: "Choose which channels (SMS, email, in-app) send payment reminders and when.",
+      href: "/dashboard/reminders",
+      done: !!reminderConfig,
+    },
+  ];
+
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -74,6 +113,8 @@ export default async function DashboardPage() {
         <h1 className="text-2xl font-bold text-white">Dashboard</h1>
         <p className="text-gray-400 text-sm mt-1">{getMonthLabel(currentMonth)} Overview</p>
       </div>
+
+      <GettingStarted steps={gettingStartedSteps} />
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
