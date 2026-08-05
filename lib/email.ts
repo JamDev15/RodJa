@@ -139,7 +139,8 @@ export async function sendBillingReminder(
 export async function sendBillingApproved(
   to: string,
   ownerName: string,
-  period: string
+  period: string,
+  loginUrl: string
 ): Promise<boolean> {
   try {
     await resend.emails.send({
@@ -151,6 +152,44 @@ export async function sendBillingApproved(
           <h2 style="color:#16a34a">Payment Confirmed ✓</h2>
           <p>Hi ${ownerName},</p>
           <p>Your subscription payment for <strong>${period}</strong> has been confirmed. Thank you!</p>
+          <p>Your account is active and ready to go.</p>
+          <p><a href="${loginUrl}" style="background:#2563eb;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;display:inline-block">Log In Now</a></p>
+          <p style="color:#666;font-size:12px">This link signs you in directly and expires in 48 hours.</p>
+        </div>
+      `,
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export async function sendBillingSubmittedNotification(
+  to: string,
+  accountName: string,
+  ownerName: string,
+  amount: number,
+  period: string,
+  referenceNumber: string
+): Promise<boolean> {
+  const formatted = new Intl.NumberFormat("en-PH", {
+    style: "currency",
+    currency: "PHP",
+    minimumFractionDigits: 0,
+  }).format(amount);
+
+  try {
+    await resend.emails.send({
+      from: FROM,
+      to,
+      subject: `New payment submitted – ${accountName}`,
+      html: `
+        <div style="font-family:sans-serif;max-width:480px;margin:0 auto">
+          <h2 style="color:#1a1a2e">New Subscription Payment Submitted</h2>
+          <p><strong>${accountName}</strong> (${ownerName}) submitted a payment for <strong>${period}</strong>
+             (${formatted}).</p>
+          <p>Reference number: <strong>${referenceNumber}</strong></p>
+          <p>Review and approve it in the admin Billing page.</p>
         </div>
       `,
     });

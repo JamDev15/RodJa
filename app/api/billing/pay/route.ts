@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { uploadBillingProof, validateProofFile } from "@/lib/storage";
 import { billingPaySchema, formatZodError } from "@/lib/validations";
+import { sendBillingSubmittedNotification } from "@/lib/email";
 
 export async function POST(req: Request) {
   const session = await auth();
@@ -39,6 +40,23 @@ export async function POST(req: Request) {
       proofUrl: proofUrl ?? record.proofUrl,
     },
   });
+
+  const account = await prisma.account.findUnique({ where: { id: accountId } });
+  const admins = await prisma.superAdmin.findMany({ select: { email: true } });
+  if (account) {
+    await Promise.all(
+      admins.map((admin) =>
+        sendBillingSubmittedNotification(
+          admin.email,
+          account.name,
+          account.ownerName,
+          updated.amount,
+          updated.period,
+          updated.referenceNumber ?? ""
+        )
+      )
+    );
+  }
 
   return NextResponse.json(updated);
 }

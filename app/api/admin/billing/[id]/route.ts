@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import crypto from "crypto";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { sendBillingApproved, sendBillingRejected } from "@/lib/email";
@@ -34,7 +35,17 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     // Approving always restores access — covers both a normal on-time
     // approval and an overdue/paused account that has since paid.
     await prisma.account.update({ where: { id: record.accountId }, data: { isActive: true } });
-    await sendBillingApproved(record.account.email, record.account.ownerName, record.period);
+
+    const token = crypto.randomBytes(32).toString("base64url");
+    await prisma.loginToken.create({
+      data: {
+        accountId: record.accountId,
+        token,
+        expiresAt: new Date(Date.now() + 48 * 60 * 60 * 1000),
+      },
+    });
+    const loginUrl = `${process.env.NEXT_PUBLIC_APP_URL}/magic-login?token=${token}`;
+    await sendBillingApproved(record.account.email, record.account.ownerName, record.period, loginUrl);
     return NextResponse.json(updated);
   }
 

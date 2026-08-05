@@ -255,3 +255,15 @@ model PlatformSettings {
   mayaQrUrl   String?
   updatedAt   DateTime @updatedAt
 }
+
+// One-time, expiring login link sent in the billing-approved email so a
+// landlord (especially one just restored from a payment pause) can get
+// straight back into their account.
+model LoginToken {
+  id        String    @id @default(cuid())
+  accountId String
+  token     String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+}

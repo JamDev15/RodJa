@@ -98,6 +98,47 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
     }),
     Credentials({
+      id: "magic-link",
+      name: "Magic Link",
+      credentials: {
+        token: { label: "Token", type: "text" },
+      },
+      async authorize(credentials, request) {
+        if (!credentials?.token) return null;
+        const ip = getClientIp(request);
+        const identifier = `magic-link:${ip}`;
+
+        if (await isRateLimited(identifier)) {
+          throw new Error("Too many attempts. Please try again later.");
+        }
+
+        const loginToken = await prisma.loginToken.findUnique({
+          where: { token: credentials.token as string },
+        });
+        if (!loginToken || loginToken.usedAt || loginToken.expiresAt < new Date()) {
+          await recordFailedAttempt(identifier);
+          return null;
+        }
+
+        const account = await prisma.account.findUnique({ where: { id: loginToken.accountId } });
+        if (!account || !account.isActive) {
+          await recordFailedAttempt(identifier);
+          return null;
+        }
+
+        await prisma.loginToken.update({ where: { id: loginToken.id }, data: { usedAt: new Date() } });
+        await clearAttempts(identifier);
+        return {
+          id: account.id,
+          email: account.email,
+          name: account.ownerName,
+          role: "LANDLORD",
+          accountId: account.id,
+          accountName: account.name,
+        };
+      },
+    }),
+    Credentials({
       id: "tenant",
       name: "Tenant",
       credentials: {
