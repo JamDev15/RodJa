@@ -135,6 +135,23 @@ export const adminAccountUpdateSchema = z.object({
   isActive: z.boolean(),
 });
 
+export const adminPlanUpdateSchema = z.object({
+  isActive: z.boolean(),
+});
+
+export const adminListingReviewSchema = z.object({
+  action: z.enum(["approve", "reject"]),
+});
+
+export const adminBillingUpdateSchema = z.object({
+  status: z.enum(["pending", "paid", "overdue"]),
+});
+
+export const adminPasswordChangeSchema = z.object({
+  currentPassword: z.string().min(1),
+  newPassword: z.string().min(8).max(200),
+});
+
 /** Formats zod issues into a flat, client-friendly message. */
 export function formatZodError(error: z.ZodError): string {
   return error.issues.map((i) => `${i.path.join(".")}: ${i.message}`).join("; ");
