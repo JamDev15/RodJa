@@ -1,7 +1,7 @@
 import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
-const FROM = process.env.EMAIL_FROM ?? "noreply@rodjarent.com";
+const FROM = process.env.EMAIL_FROM ?? "noreply@tenanthub.com";
 
 export async function sendPaymentReminder(
   to: string,
@@ -83,7 +83,7 @@ export async function sendPasswordReset(
     await resend.emails.send({
       from: FROM,
       to,
-      subject: "Your RODJA password has been reset",
+      subject: "Your TenantHub password has been reset",
       html: `
         <div style="font-family:sans-serif;max-width:480px;margin:0 auto">
           <h2 style="color:#1a1a2e">Password Reset</h2>

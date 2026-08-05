@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "RodjaRent",
-    short_name: "RodjaRent",
+    name: "TenantHub",
+    short_name: "TenantHub",
     description: "Manage your rental properties, tenants, and payments with ease.",
     start_url: "/",
     display: "standalone",

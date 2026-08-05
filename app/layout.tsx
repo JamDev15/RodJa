@@ -4,12 +4,16 @@ import { Toaster } from "@/components/ui/toaster";
 import { RegisterServiceWorker } from "@/components/register-sw";
 
 export const metadata: Metadata = {
-  title: "RodjaRent – Rental Management for Philippine Landlords",
+  title: "TenantHub – Rental Management for Philippine Landlords",
   description: "Manage your rental properties, tenants, and payments with ease.",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "RodjaRent",
+    title: "TenantHub",
+  },
+  icons: {
+    icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
+    shortcut: "/icon.svg",
   },
 };
 

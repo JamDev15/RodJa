@@ -24,7 +24,7 @@ export function AdminNav() {
           <ShieldCheck className="h-4 w-4 text-white" />
         </div>
         <div>
-          <p className="text-sm font-bold text-white">RodjaRent</p>
+          <p className="text-sm font-bold text-white">TenantHub</p>
           <p className="text-xs text-purple-400">Super Admin</p>
         </div>
       </div>

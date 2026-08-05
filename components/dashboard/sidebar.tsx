@@ -34,7 +34,7 @@ export function Sidebar({ accountName }: SidebarProps) {
           <Home className="h-4 w-4 text-white" />
         </div>
         <div>
-          <p className="text-sm font-bold text-white">RodjaRent</p>
+          <p className="text-sm font-bold text-white">TenantHub</p>
           {accountName && <p className="text-xs text-gray-500 truncate max-w-[120px]">{accountName}</p>}
         </div>
       </div>

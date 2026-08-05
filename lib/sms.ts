@@ -10,7 +10,7 @@ export async function sendSMS(to: string, message: string): Promise<boolean> {
         apikey: apiKey,
         number: to,
         message,
-        sendername: process.env.SEMAPHORE_SENDER_NAME ?? "RODJARENT",
+        sendername: process.env.SEMAPHORE_SENDER_NAME ?? "TENANTHUB",
       }),
     });
     return res.ok;
