@@ -37,7 +37,7 @@ export default async function BillingPage() {
 
   const [propCount, unitCount, tenantCount] = stats;
 
-  const currentBill = account?.billingRecords.find((b) => b.status === "pending" || b.status === "submitted" || b.status === "overdue");
+  const currentBill = account?.billingRecords.find((b) => ["pending", "submitted", "overdue", "rejected"].includes(b.status));
   const platformSettings = currentBill ? await prisma.platformSettings.findFirst() : null;
 
   return (
@@ -87,11 +87,15 @@ export default async function BillingPage() {
 
       {/* Pay Now */}
       {currentBill && (
-        <div className={`rounded-xl border p-6 ${currentBill.status === "overdue" ? "border-red-500/30 bg-red-500/10" : "border-yellow-500/30 bg-yellow-500/10"}`}>
+        <div className={`rounded-xl border p-6 ${currentBill.status === "overdue" || currentBill.status === "rejected" ? "border-red-500/30 bg-red-500/10" : "border-yellow-500/30 bg-yellow-500/10"}`}>
           <div className="flex items-center justify-between mb-4">
             <div>
               <h2 className="text-lg font-semibold text-white">
-                {currentBill.status === "overdue" ? "Account Paused — Payment Overdue" : "Subscription Payment Due"}
+                {currentBill.status === "overdue"
+                  ? "Account Paused — Payment Overdue"
+                  : currentBill.status === "rejected"
+                  ? "Payment Rejected — Please Resubmit"
+                  : "Subscription Payment Due"}
               </h2>
               <p className="text-sm text-gray-400 mt-1">
                 {currentBill.period} · {formatCurrency(currentBill.amount)} · Due {formatDate(currentBill.dueDate)}
@@ -99,8 +103,13 @@ export default async function BillingPage() {
               {currentBill.status === "submitted" && (
                 <p className="text-sm text-blue-400 mt-1">Submitted — awaiting approval.</p>
               )}
+              {currentBill.status === "rejected" && (
+                <p className="text-sm text-red-400 mt-1">
+                  We couldn&apos;t verify your last submission (ref: {currentBill.referenceNumber ?? "—"}). Please double-check and resubmit below.
+                </p>
+              )}
             </div>
-            <Badge variant={currentBill.status === "overdue" ? "destructive" : "warning"}>{currentBill.status}</Badge>
+            <Badge variant={currentBill.status === "overdue" || currentBill.status === "rejected" ? "destructive" : "warning"}>{currentBill.status}</Badge>
           </div>
 
           {currentBill.status !== "submitted" && (
@@ -189,7 +198,7 @@ export default async function BillingPage() {
                     <td className="px-4 py-3 text-white">{b.period}</td>
                     <td className="px-4 py-3 text-white">{formatCurrency(b.amount)}</td>
                     <td className="px-4 py-3">
-                      <Badge variant={b.status === "paid" ? "success" : b.status === "overdue" ? "destructive" : "warning"}>
+                      <Badge variant={b.status === "paid" ? "success" : b.status === "overdue" || b.status === "rejected" ? "destructive" : "warning"}>
                         {b.status}
                       </Badge>
                     </td>

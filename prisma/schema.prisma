@@ -238,7 +238,7 @@ model BillingRecord {
   amount          Float
   period          String
   dueDate         DateTime
-  status          String    @default("pending") // pending | submitted | paid | overdue
+  status          String    @default("pending") // pending | submitted | paid | overdue | rejected
   referenceNumber String?
   proofUrl        String?
   paidAt          DateTime?

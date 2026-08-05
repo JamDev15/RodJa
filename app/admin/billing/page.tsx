@@ -47,7 +47,7 @@ export default async function AdminBillingPage() {
                   <td className="px-4 py-3 text-white">{formatCurrency(r.amount)}</td>
                   <td className="px-4 py-3 text-gray-400 hidden lg:table-cell">{formatDate(r.dueDate)}</td>
                   <td className="px-4 py-3">
-                    <Badge variant={r.status === "paid" ? "success" : r.status === "overdue" ? "destructive" : "warning"}>
+                    <Badge variant={r.status === "paid" ? "success" : r.status === "overdue" || r.status === "rejected" ? "destructive" : "warning"}>
                       {r.status}
                     </Badge>
                   </td>

@@ -22,7 +22,7 @@ export async function POST(req: Request) {
 
   let proofUrl: string | null = null;
   const record = await prisma.billingRecord.findFirst({
-    where: { accountId, status: { in: ["pending", "submitted"] } },
+    where: { accountId, status: { in: ["pending", "submitted", "rejected", "overdue"] } },
     orderBy: { dueDate: "desc" },
   });
   if (!record) return NextResponse.json({ error: "No payment currently due" }, { status: 404 });

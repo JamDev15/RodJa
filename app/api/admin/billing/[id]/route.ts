@@ -54,9 +54,11 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     return NextResponse.json(updated);
   }
 
+  // Keep the submitted reference number and proof for the record — rejecting
+  // shouldn't erase evidence of what was submitted and reviewed.
   const updated = await prisma.billingRecord.update({
     where: { id },
-    data: { status: "pending", referenceNumber: null, proofUrl: null },
+    data: { status: "rejected" },
   });
   await sendBillingRejected(record.account.email, record.account.ownerName, record.period);
   return NextResponse.json(updated);
