@@ -1,36 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { sendPaymentReminder } from "@/lib/email";
 import { sendSMS, buildReminderMessage } from "@/lib/sms";
-
-const PH_OFFSET_MS = 8 * 60 * 60 * 1000;
-
-function toPhDateOnly(date: Date): Date {
-  const ph = new Date(date.getTime() + PH_OFFSET_MS);
-  return new Date(Date.UTC(ph.getUTCFullYear(), ph.getUTCMonth(), ph.getUTCDate()));
-}
-
-function daysBetween(a: Date, b: Date): number {
-  return Math.round((toPhDateOnly(a).getTime() - toPhDateOnly(b).getTime()) / 86400000);
-}
-
-function monthKeyOf(date: Date): string {
-  const ph = new Date(date.getTime() + PH_OFFSET_MS);
-  return `${ph.getUTCFullYear()}-${String(ph.getUTCMonth() + 1).padStart(2, "0")}`;
-}
-
-function shiftMonthKey(monthKey: string, delta: number): string {
-  const [y, m] = monthKey.split("-").map(Number);
-  const d = new Date(Date.UTC(y, m - 1 + delta, 1));
-  return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
-}
-
-// Rent is due on the 5th of the month by convention (matches the tenant
-// self-pay flow in app/api/tenant/pay and app/api/payments/submit) — used
-// only as a fallback when no Payment row exists yet for that month.
-function defaultDueDateFor(monthKey: string): Date {
-  const [y, m] = monthKey.split("-").map(Number);
-  return new Date(Date.UTC(y, m - 1, 5));
-}
+import { daysBetween, monthKeyOf, shiftMonthKey, defaultDueDateFor, toPhDateOnly } from "@/lib/due-dates";
 
 function computeTrigger(diff: number, daysBefore: number[], daysAfter: number[]): string | null {
   if (diff === 0) return "due_date";
