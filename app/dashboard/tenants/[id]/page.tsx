@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, Phone, Mail, Calendar, Home, Pencil, Clock } from "lucide-react";
 import { PaymentBadge } from "@/components/dashboard/payment-badge";
 import { Badge } from "@/components/ui/badge";
+import { ProofPreview } from "@/components/ui/proof-preview";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { AddPaymentButton } from "./add-payment-button";
 import { TenantLedger } from "@/components/dashboard/tenant-ledger";
@@ -131,9 +132,7 @@ export default async function TenantDetailPage({ params }: { params: Promise<{ i
                   <td className="px-4 py-3"><PaymentBadge status={p.status} /></td>
                   <td className="px-4 py-3 text-gray-400 hidden md:table-cell capitalize">{p.method ?? "—"}</td>
                   <td className="px-4 py-3 hidden md:table-cell">
-                    {p.proofUrl ? (
-                      <a href={p.proofUrl} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 text-xs">View</a>
-                    ) : "—"}
+                    <ProofPreview url={p.proofUrl} label={`${tenant.name} — ${p.month}`} />
                   </td>
                 </tr>
               ))}

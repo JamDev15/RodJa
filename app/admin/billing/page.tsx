@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { Badge } from "@/components/ui/badge";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import { ProofPreview } from "@/components/ui/proof-preview";
 import { BillingActions } from "./billing-actions";
 
 export default async function AdminBillingPage() {
@@ -52,9 +53,7 @@ export default async function AdminBillingPage() {
                   </td>
                   <td className="px-4 py-3 text-gray-400 hidden md:table-cell">{r.referenceNumber ?? "—"}</td>
                   <td className="px-4 py-3 hidden md:table-cell">
-                    {r.proofUrl ? (
-                      <a href={r.proofUrl} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 text-xs">View</a>
-                    ) : "—"}
+                    <ProofPreview url={r.proofUrl} label={`${r.account.name} — ${r.period}`} />
                   </td>
                   <td className="px-4 py-3">
                     {r.status !== "paid" && <BillingActions recordId={r.id} />}
