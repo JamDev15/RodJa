@@ -56,7 +56,7 @@ export default async function AdminBillingPage() {
                     <ProofPreview url={r.proofUrl} label={`${r.account.name} — ${r.period}`} />
                   </td>
                   <td className="px-4 py-3">
-                    {r.status !== "paid" && <BillingActions recordId={r.id} />}
+                    {r.status !== "paid" && <BillingActions recordId={r.id} hasSubmission={r.status === "submitted"} />}
                   </td>
                 </tr>
               ))}

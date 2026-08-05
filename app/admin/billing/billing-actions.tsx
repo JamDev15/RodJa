@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 
-export function BillingActions({ recordId }: { recordId: string }) {
+export function BillingActions({ recordId, hasSubmission }: { recordId: string; hasSubmission: boolean }) {
   const [loading, setLoading] = useState(false);
 
   async function review(action: "approve" | "reject") {
@@ -30,7 +30,9 @@ export function BillingActions({ recordId }: { recordId: string }) {
   return (
     <div className="flex gap-2">
       <Button size="sm" variant="success" onClick={() => review("approve")} disabled={loading}>Approve</Button>
-      <Button size="sm" variant="destructive" onClick={() => review("reject")} disabled={loading}>Reject</Button>
+      {hasSubmission && (
+        <Button size="sm" variant="destructive" onClick={() => review("reject")} disabled={loading}>Reject</Button>
+      )}
     </div>
   );
 }

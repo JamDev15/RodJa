@@ -54,6 +54,13 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     return NextResponse.json(updated);
   }
 
+  // Nothing to reject if the landlord never actually submitted anything —
+  // avoids a confusing "we couldn't verify your payment" email going out
+  // for a bill they haven't touched yet.
+  if (record.status !== "submitted") {
+    return NextResponse.json({ error: "Nothing has been submitted for this bill yet" }, { status: 400 });
+  }
+
   // Keep the submitted reference number and proof for the record — rejecting
   // shouldn't erase evidence of what was submitted and reviewed.
   const updated = await prisma.billingRecord.update({
