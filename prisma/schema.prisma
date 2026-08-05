@@ -105,6 +105,7 @@ model Tenant {
   phone            String               @unique
   moveInDate       DateTime
   moveOutDate      DateTime?
+  dueDay           Int                  @default(5)
   depositAmount    Float?
   depositPaid      Boolean              @default(false)
   portalPin        String

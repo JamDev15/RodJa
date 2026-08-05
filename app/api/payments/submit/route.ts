@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getCurrentMonth } from "@/lib/utils";
 import { validateProofFile } from "@/lib/storage";
+import { dueDateForMonth } from "@/lib/due-dates";
 
 const ALLOWED_METHODS = ["gcash", "maya", "bank", "cash"];
 
@@ -39,7 +40,7 @@ export async function POST(req: Request) {
   if (!tenant) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   const month = getCurrentMonth();
-  const dueDate = new Date(new Date().getFullYear(), new Date().getMonth(), 5);
+  const dueDate = dueDateForMonth(month, tenant.dueDay);
 
   // Upsert payment for this month
   const existing = await prisma.payment.findFirst({ where: { tenantId, month } });

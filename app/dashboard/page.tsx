@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { formatCurrency, formatDate, getMonthLabel, getCurrentMonth } from "@/lib/utils";
-import { daysBetween, defaultDueDateFor } from "@/lib/due-dates";
+import { daysBetween, dueDateForMonth } from "@/lib/due-dates";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { PaymentBadge } from "@/components/dashboard/payment-badge";
 import { DollarSign, Home, Users, AlertTriangle, CheckCircle, Clock } from "lucide-react";
@@ -42,7 +42,7 @@ export default async function DashboardPage() {
     .map((tenant) => {
       const payment = allPayments.find((p) => p.tenantId === tenant.id);
       if (payment && ["approved", "waived"].includes(payment.status)) return null;
-      const dueDate = payment?.dueDate ?? defaultDueDateFor(currentMonth);
+      const dueDate = payment?.dueDate ?? dueDateForMonth(currentMonth, tenant.dueDay);
       const diff = daysBetween(now, dueDate);
       return {
         tenantId: tenant.id,

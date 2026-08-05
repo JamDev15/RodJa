@@ -2,7 +2,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Phone, Mail, Calendar, Home, Pencil } from "lucide-react";
+import { ArrowLeft, Phone, Mail, Calendar, Home, Pencil, Clock } from "lucide-react";
 import { PaymentBadge } from "@/components/dashboard/payment-badge";
 import { Badge } from "@/components/ui/badge";
 import { formatCurrency, formatDate } from "@/lib/utils";
@@ -59,6 +59,7 @@ export default async function TenantDetailPage({ params }: { params: Promise<{ i
             {tenant.email && <div className="flex items-center gap-2 text-gray-400"><Mail className="h-4 w-4" />{tenant.email}</div>}
             <div className="flex items-center gap-2 text-gray-400"><Calendar className="h-4 w-4" />Moved in {formatDate(tenant.moveInDate)}</div>
             <div className="flex items-center gap-2 text-gray-400"><Home className="h-4 w-4" />Unit {tenant.unit.unitNumber} · {formatCurrency(tenant.unit.rentAmount)}/mo</div>
+            <div className="flex items-center gap-2 text-gray-400"><Clock className="h-4 w-4" />Rent due on day {tenant.dueDay} of each month</div>
           </div>
           <div className="pt-2 text-xs text-gray-500">
             Portal PIN is hidden for security.{" "}

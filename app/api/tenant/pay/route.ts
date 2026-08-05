@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { uploadPaymentProof, validateProofFile } from "@/lib/storage";
 import { getCurrentMonth } from "@/lib/utils";
+import { dueDateForMonth } from "@/lib/due-dates";
 
 const ALLOWED_METHODS = ["gcash", "maya", "bank", "cash"];
 
@@ -35,7 +36,7 @@ export async function POST(req: Request) {
     proofUrl = await uploadPaymentProof(file, tenantId, month);
   }
 
-  const dueDate = new Date(new Date().getFullYear(), new Date().getMonth(), 5);
+  const dueDate = dueDateForMonth(month, tenant.dueDay);
   const existing = await prisma.payment.findFirst({ where: { tenantId, month } });
 
   if (existing) {

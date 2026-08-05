@@ -36,7 +36,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
   const parsed = tenantUpdateSchema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: formatZodError(parsed.error) }, { status: 400 });
-  const { name, email, phone, moveInDate, moveOutDate, depositAmount, depositPaid, portalPin, emergencyContact, notes, isActive } = parsed.data;
+  const { name, email, phone, moveInDate, moveOutDate, dueDay, depositAmount, depositPaid, portalPin, emergencyContact, notes, isActive } = parsed.data;
 
   // Check phone uniqueness if changed
   if (phone && phone !== tenant.phone) {
@@ -52,6 +52,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       phone,
       moveInDate: moveInDate ? new Date(moveInDate) : undefined,
       moveOutDate: moveOutDate ? new Date(moveOutDate) : null,
+      dueDay: dueDay ?? undefined,
       depositAmount: depositAmount != null ? Number(depositAmount) : undefined,
       depositPaid: depositPaid ?? undefined,
       portalPin: portalPin ? await bcrypt.hash(portalPin, 10) : undefined,

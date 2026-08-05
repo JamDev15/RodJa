@@ -19,7 +19,7 @@ export default function EditTenantPage() {
   const [unitLabel, setUnitLabel] = useState("");
   const [form, setForm] = useState({
     name: "", email: "", phone: "",
-    moveInDate: "", moveOutDate: "",
+    moveInDate: "", moveOutDate: "", dueDay: "5",
     depositAmount: "", depositPaid: false,
     portalPin: "", emergencyContact: "", notes: "",
     isActive: true,
@@ -35,6 +35,7 @@ export default function EditTenantPage() {
           phone: data.phone ?? "",
           moveInDate: data.moveInDate ? data.moveInDate.split("T")[0] : "",
           moveOutDate: data.moveOutDate ? data.moveOutDate.split("T")[0] : "",
+          dueDay: data.dueDay != null ? String(data.dueDay) : "5",
           depositAmount: data.depositAmount != null ? String(data.depositAmount) : "",
           depositPaid: data.depositPaid ?? false,
           portalPin: "",
@@ -66,6 +67,7 @@ export default function EditTenantPage() {
           // left untouched (sending back a stale/empty value would either
           // re-hash garbage or fail validation).
           ...(portalPin ? { portalPin } : {}),
+          dueDay: form.dueDay ? parseInt(form.dueDay, 10) : undefined,
           depositAmount: form.depositAmount ? parseFloat(form.depositAmount) : null,
           moveOutDate: form.moveOutDate || null,
         }),
@@ -172,6 +174,16 @@ export default function EditTenantPage() {
             <Label htmlFor="moveOutDate">Move-out Date (optional)</Label>
             <Input id="moveOutDate" type="date" value={form.moveOutDate}
               onChange={(e) => setForm({ ...form, moveOutDate: e.target.value })} />
+          </div>
+        </div>
+
+        {/* Due Day */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="dueDay">Rent Due Day *</Label>
+            <Input id="dueDay" type="number" placeholder="5" value={form.dueDay}
+              onChange={(e) => setForm({ ...form, dueDay: e.target.value })} min="1" max="28" required />
+            <p className="text-xs text-gray-500">Day of the month rent is due (1–28)</p>
           </div>
         </div>
 

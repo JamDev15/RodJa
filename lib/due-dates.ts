@@ -20,10 +20,10 @@ export function shiftMonthKey(monthKey: string, delta: number): string {
   return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
 }
 
-// Rent is due on the 5th of the month by convention (matches the tenant
-// self-pay flow in app/api/tenant/pay and app/api/payments/submit) — used
-// only as a fallback when no Payment row exists yet for that month.
-export function defaultDueDateFor(monthKey: string): Date {
+// Due date for a given month, using the tenant's configured due day
+// (Tenant.dueDay, 1-28). Used directly for computing this month's due date,
+// and as the fallback when no Payment row exists yet for that month.
+export function dueDateForMonth(monthKey: string, dueDay: number = 5): Date {
   const [y, m] = monthKey.split("-").map(Number);
-  return new Date(Date.UTC(y, m - 1, 5));
+  return new Date(Date.UTC(y, m - 1, dueDay));
 }

@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { sendPaymentReminder } from "@/lib/email";
 import { sendSMS, buildReminderMessage } from "@/lib/sms";
-import { daysBetween, monthKeyOf, shiftMonthKey, defaultDueDateFor, toPhDateOnly } from "@/lib/due-dates";
+import { daysBetween, monthKeyOf, shiftMonthKey, dueDateForMonth, toPhDateOnly } from "@/lib/due-dates";
 
 function computeTrigger(diff: number, daysBefore: number[], daysAfter: number[]): string | null {
   if (diff === 0) return "due_date";
@@ -55,7 +55,7 @@ export async function runReminderSweep(now: Date = new Date()): Promise<Reminder
         const payment = tenant.payments.find((p) => p.month === monthKey);
         if (payment?.status === "approved") continue;
 
-        const dueDate = payment?.dueDate ?? defaultDueDateFor(monthKey);
+        const dueDate = payment?.dueDate ?? dueDateForMonth(monthKey, tenant.dueDay);
         const diff = daysBetween(now, dueDate);
         const trigger = computeTrigger(diff, daysBefore, daysAfter);
         if (!trigger) continue;

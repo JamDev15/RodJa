@@ -21,6 +21,7 @@ export default function NewTenantPage() {
   const [form, setForm] = useState({
     name: "", email: "", phone: "", unitId: defaultUnitId,
     moveInDate: new Date().toISOString().split("T")[0],
+    dueDay: "5",
     depositAmount: "", portalPin: "", emergencyContact: "", notes: ""
   });
 
@@ -42,6 +43,7 @@ export default function NewTenantPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...form,
+          dueDay: form.dueDay ? parseInt(form.dueDay, 10) : undefined,
           depositAmount: form.depositAmount ? parseFloat(form.depositAmount) : null,
         }),
       });
@@ -109,6 +111,15 @@ export default function NewTenantPage() {
             <Label htmlFor="moveInDate">Move-in Date *</Label>
             <Input id="moveInDate" type="date" value={form.moveInDate}
               onChange={(e) => setForm({ ...form, moveInDate: e.target.value })} required />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="dueDay">Rent Due Day *</Label>
+            <Input id="dueDay" type="number" placeholder="5" value={form.dueDay}
+              onChange={(e) => setForm({ ...form, dueDay: e.target.value })} min="1" max="28" required />
+            <p className="text-xs text-gray-500">Day of the month rent is due (1–28)</p>
           </div>
         </div>
 

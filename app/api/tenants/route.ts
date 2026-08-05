@@ -19,7 +19,7 @@ export async function POST(req: Request) {
   if (!parsed.success) {
     return NextResponse.json({ message: formatZodError(parsed.error) }, { status: 400 });
   }
-  const { unitId, name, email, phone, moveInDate, depositAmount, portalPin, emergencyContact, notes } = parsed.data;
+  const { unitId, name, email, phone, moveInDate, dueDay, depositAmount, portalPin, emergencyContact, notes } = parsed.data;
 
   // Verify unit belongs to this account
   const unit = await prisma.unit.findFirst({ where: { id: unitId, property: { accountId } } });
@@ -37,6 +37,7 @@ export async function POST(req: Request) {
       email: email || null,
       phone,
       moveInDate,
+      dueDay: dueDay ?? undefined,
       depositAmount: depositAmount ?? null,
       portalPin: hashedPin,
       emergencyContact: emergencyContact || null,

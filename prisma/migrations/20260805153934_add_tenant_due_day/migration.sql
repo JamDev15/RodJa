@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Tenant" ADD COLUMN     "dueDay" INTEGER NOT NULL DEFAULT 5;
