@@ -55,7 +55,7 @@ export default async function AdminAccountsPage() {
                   </div>
                 </td>
                 <td className="px-4 py-3">
-                  <AccountActions accountId={account.id} isActive={account.isActive} lifetimeAccess={account.lifetimeAccess} />
+                  <AccountActions accountId={account.id} accountName={account.name} isActive={account.isActive} lifetimeAccess={account.lifetimeAccess} />
                 </td>
               </tr>
             ))}

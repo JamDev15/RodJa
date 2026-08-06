@@ -142,6 +142,10 @@ export const adminAccountUpdateSchema = z.object({
   lifetimeAccess: z.boolean().optional(),
 });
 
+export const adminAccountDeleteSchema = z.object({
+  confirmName: z.string().min(1),
+});
+
 export const adminPlanUpdateSchema = z.object({
   isActive: z.boolean(),
 });
