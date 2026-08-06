@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Account" ADD COLUMN     "lifetimeAccess" BOOLEAN NOT NULL DEFAULT false;

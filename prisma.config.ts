@@ -9,6 +9,9 @@ export default defineConfig({
     path: "prisma/migrations",
   },
   datasource: {
-    url: process.env["DATABASE_URL"],
+    // Migrations/CLI need a direct (non-pooled) connection — DATABASE_URL
+    // is the transaction pooler the running app uses, which doesn't
+    // reliably support the DDL/long-lived transactions migrations need.
+    url: process.env["DIRECT_URL"] ?? process.env["DATABASE_URL"],
   },
 });
