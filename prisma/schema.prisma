@@ -41,6 +41,10 @@ model Account {
   planId         String
   plan           Plan            @relation(fields: [planId], references: [id])
   isActive       Boolean         @default(true)
+  // Exempt from the free-trial auto-pause and the recurring paid-plan
+  // billing sweep entirely — for comped/owner accounts that shouldn't ever
+  // be gated on payment.
+  lifetimeAccess Boolean         @default(false)
   trialEndsAt    DateTime?
   trialReminderSentAt DateTime?
   gcashNumber    String?

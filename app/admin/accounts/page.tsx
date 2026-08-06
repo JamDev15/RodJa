@@ -47,12 +47,15 @@ export default async function AdminAccountsPage() {
                 <td className="px-4 py-3 text-gray-400 hidden md:table-cell">{account._count.properties}</td>
                 <td className="px-4 py-3 text-gray-400 hidden lg:table-cell">{formatDate(account.createdAt)}</td>
                 <td className="px-4 py-3">
-                  <Badge variant={account.isActive ? "success" : "destructive"}>
-                    {account.isActive ? "Active" : "Suspended"}
-                  </Badge>
+                  <div className="flex items-center gap-1.5">
+                    <Badge variant={account.isActive ? "success" : "destructive"}>
+                      {account.isActive ? "Active" : "Suspended"}
+                    </Badge>
+                    {account.lifetimeAccess && <Badge variant="default">Lifetime</Badge>}
+                  </div>
                 </td>
                 <td className="px-4 py-3">
-                  <AccountActions accountId={account.id} isActive={account.isActive} />
+                  <AccountActions accountId={account.id} isActive={account.isActive} lifetimeAccess={account.lifetimeAccess} />
                 </td>
               </tr>
             ))}

@@ -46,7 +46,7 @@ export async function runBillingSweep(now: Date = new Date()): Promise<BillingSw
   let accountsPaused = 0;
 
   const accounts = await prisma.account.findMany({
-    where: { isActive: true, plan: { price: { gt: 0 } } },
+    where: { isActive: true, lifetimeAccess: false, plan: { price: { gt: 0 } } },
     include: { plan: true },
   });
 
@@ -126,7 +126,7 @@ export async function runFreeTrialSweep(now: Date = new Date()): Promise<FreeTri
   let accountsPaused = 0;
 
   const accounts = await prisma.account.findMany({
-    where: { isActive: true, plan: { price: 0 }, trialEndsAt: { not: null } },
+    where: { isActive: true, lifetimeAccess: false, plan: { price: 0 }, trialEndsAt: { not: null } },
   });
 
   for (const account of accounts) {

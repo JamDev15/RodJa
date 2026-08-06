@@ -27,7 +27,13 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
   const updated = await prisma.account.update({
     where: { id },
-    data: { isActive: parsed.data.isActive },
+    data: {
+      isActive: parsed.data.isActive,
+      lifetimeAccess: parsed.data.lifetimeAccess,
+      // Granting lifetime access also clears the trial clock — it no
+      // longer means anything once the account is exempt from it.
+      trialEndsAt: parsed.data.lifetimeAccess ? null : undefined,
+    },
   });
   return NextResponse.json(updated);
 }
