@@ -1,10 +1,12 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { SettingsForm } from "./settings-form";
+import { ChangePasswordForm } from "@/components/dashboard/change-password-form";
 
 export default async function SettingsPage() {
   const session = await auth();
-  const accountId = (session?.user as any)?.accountId;
+  const user = session?.user as any;
+  const accountId = user?.accountId;
 
   const account = await prisma.account.findUnique({ where: { id: accountId } });
 
@@ -15,6 +17,7 @@ export default async function SettingsPage() {
         <p className="text-gray-400 text-sm mt-1">Manage your account and payment details</p>
       </div>
       <SettingsForm account={account} />
+      {user?.role === "LANDLORD" && <ChangePasswordForm />}
     </div>
   );
 }
