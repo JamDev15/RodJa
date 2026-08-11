@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { ledgerCreateSchema, formatZodError } from "@/lib/validations";
+import { upsertMonthlyLedger } from "@/lib/ledger";
 
 const carryOverSchema = z.object({
   tenantId: z.string().min(1),
@@ -44,36 +45,23 @@ export async function POST(req: Request) {
   if (!tenant) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   const { tenantId, month } = data;
-  const rentAmount = data.rentAmount;
-  const rentPaidAmt = body.rentPaidAmount != null && body.rentPaidAmount !== "" ? Number(body.rentPaidAmount) : null;
-  const electricAmt = data.electricAmount ?? null;
-  const electricPaidAmt = body.electricPaidAmount != null && body.electricPaidAmount !== "" ? Number(body.electricPaidAmount) : null;
-  const waterAmt = data.waterAmount ?? null;
-  const waterPaidAmt = body.waterPaidAmount != null && body.waterPaidAmount !== "" ? Number(body.waterPaidAmount) : null;
-  const otherAmt = data.otherAmount ?? null;
-  const otherPaidAmt = body.otherPaidAmount != null && body.otherPaidAmount !== "" ? Number(body.otherPaidAmount) : null;
-  const balance = body.balance != null ? Number(body.balance) || 0 : 0;
-  const balancePaid = body.balancePaid ?? false;
-
-  // Derive paid booleans from paid amounts
-  const rentPaid      = rentPaidAmt != null ? rentPaidAmt >= rentAmount : (body.rentPaid ?? false);
-  const electricPaid  = electricAmt != null && electricPaidAmt != null ? electricPaidAmt >= electricAmt : (body.electricPaid ?? false);
-  const waterPaid     = waterAmt != null && waterPaidAmt != null ? waterPaidAmt >= waterAmt : (body.waterPaid ?? false);
-  const otherPaid     = otherAmt != null && otherPaidAmt != null ? otherPaidAmt >= otherAmt : (body.otherPaid ?? false);
-
-  const shared = {
-    rentAmount, rentPaidAmount: rentPaidAmt, rentPaid,
-    electricAmount: electricAmt, electricPaidAmount: electricPaidAmt, electricPaid,
-    waterAmount: waterAmt, waterPaidAmount: waterPaidAmt, waterPaid,
-    otherAmount: otherAmt, otherPaidAmount: otherPaidAmt, otherLabel: data.otherLabel || null, otherPaid,
-    balance, balancePaid,
+  const entry = await upsertMonthlyLedger(tenantId, month, {
+    rentAmount: data.rentAmount,
+    rentPaidAmount: body.rentPaidAmount != null && body.rentPaidAmount !== "" ? Number(body.rentPaidAmount) : null,
+    electricAmount: data.electricAmount ?? null,
+    electricPaidAmount: body.electricPaidAmount != null && body.electricPaidAmount !== "" ? Number(body.electricPaidAmount) : null,
+    waterAmount: data.waterAmount ?? null,
+    waterPaidAmount: body.waterPaidAmount != null && body.waterPaidAmount !== "" ? Number(body.waterPaidAmount) : null,
+    otherAmount: data.otherAmount ?? null,
+    otherPaidAmount: body.otherPaidAmount != null && body.otherPaidAmount !== "" ? Number(body.otherPaidAmount) : null,
+    otherLabel: data.otherLabel || null,
+    balance: body.balance != null ? Number(body.balance) || 0 : 0,
+    balancePaid: body.balancePaid ?? false,
+    rentPaid: body.rentPaid ?? false,
+    electricPaid: body.electricPaid ?? false,
+    waterPaid: body.waterPaid ?? false,
+    otherPaid: body.otherPaid ?? false,
     notes: data.notes || null,
-  };
-
-  const entry = await prisma.monthlyLedger.upsert({
-    where: { tenantId_month: { tenantId, month } },
-    update: shared,
-    create: { tenantId, month, ...shared },
   });
   return NextResponse.json(entry);
 }

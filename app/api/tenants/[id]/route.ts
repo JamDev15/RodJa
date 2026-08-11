@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import bcrypt from "bcryptjs";
 import { tenantUpdateSchema, formatZodError } from "@/lib/validations";
+import { applyTenantUpdate, PhoneTakenError } from "@/lib/tenants";
 
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -36,30 +36,13 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
   const parsed = tenantUpdateSchema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: formatZodError(parsed.error) }, { status: 400 });
-  const { name, email, phone, moveInDate, moveOutDate, dueDay, depositAmount, depositPaid, portalPin, emergencyContact, notes, isActive } = parsed.data;
 
-  // Check phone uniqueness if changed
-  if (phone && phone !== tenant.phone) {
-    const existing = await prisma.tenant.findUnique({ where: { phone } });
-    if (existing) return NextResponse.json({ error: "Phone number already registered" }, { status: 400 });
+  let updated;
+  try {
+    updated = await applyTenantUpdate(id, tenant.phone, parsed.data);
+  } catch (err) {
+    if (err instanceof PhoneTakenError) return NextResponse.json({ error: err.message }, { status: 400 });
+    throw err;
   }
-
-  const updated = await prisma.tenant.update({
-    where: { id },
-    data: {
-      name,
-      email: email || null,
-      phone,
-      moveInDate: moveInDate ? new Date(moveInDate) : undefined,
-      moveOutDate: moveOutDate ? new Date(moveOutDate) : null,
-      dueDay: dueDay ?? undefined,
-      depositAmount: depositAmount != null ? Number(depositAmount) : undefined,
-      depositPaid: depositPaid ?? undefined,
-      portalPin: portalPin ? await bcrypt.hash(portalPin, 10) : undefined,
-      emergencyContact: emergencyContact || null,
-      notes: notes || null,
-      isActive: isActive ?? undefined,
-    },
-  });
   return NextResponse.json(updated);
 }

@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { Sidebar } from "@/components/dashboard/sidebar";
+import { AssistantWidget } from "@/components/dashboard/assistant-widget";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
@@ -18,6 +19,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           {children}
         </div>
       </main>
+      {user?.role === "LANDLORD" && <AssistantWidget />}
     </div>
   );
 }

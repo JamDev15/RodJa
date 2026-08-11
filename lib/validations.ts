@@ -95,6 +95,20 @@ export const maintenanceCreateSchema = z.object({
   priority: z.enum(["low", "normal", "high", "urgent"]).optional(),
 });
 
+// Landlord-initiated maintenance log (e.g. via the chat assistant) — unlike
+// maintenanceCreateSchema above, tenantId is explicit since it isn't coming
+// from a tenant-portal session.
+export const assistantMaintenanceSchema = maintenanceCreateSchema.extend({
+  tenantId: z.string().min(1),
+});
+
+export const assistantNoticeSchema = z.object({
+  tenantId: z.string().min(1).optional().nullable(),
+  title: z.string().trim().min(1).max(200),
+  content: z.string().trim().min(1).max(2000),
+  type: z.string().trim().min(1).max(50).optional(),
+});
+
 export const reminderConfigSchema = z.object({
   smsEnabled: z.boolean().optional(),
   emailEnabled: z.boolean().optional(),
@@ -112,6 +126,14 @@ export const ledgerCreateSchema = z.object({
   otherAmount: z.coerce.number().nonnegative().optional().nullable(),
   otherLabel: z.string().trim().max(100).optional().nullable(),
   notes: z.string().trim().max(2000).optional().nullable(),
+});
+
+export const assistantBillSchema = z.object({
+  tenantId: z.string().min(1),
+  month: z.string().trim().regex(/^\d{4}-\d{2}$/, "Expected YYYY-MM"),
+  billType: z.enum(["rent", "electric", "water", "other"]),
+  amount: z.coerce.number().nonnegative(),
+  otherLabel: z.string().trim().max(100).optional().nullable(),
 });
 
 export const ledgerUpdateSchema = z.object({
