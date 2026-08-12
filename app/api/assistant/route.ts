@@ -18,9 +18,13 @@ export async function POST(req: Request) {
   const user = session?.user as any;
   const accountId = user?.accountId;
   if (!accountId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  // Widget is landlord-only in the UI; enforce it here too so staff can't
-  // reach it by calling the API directly.
+  // Widget is landlord-only and Pro-only in the UI; enforce both here too
+  // so staff or a non-Pro account can't reach it by calling the API directly.
   if (user.role !== "LANDLORD") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  const account = await prisma.account.findUnique({ where: { id: accountId }, select: { plan: { select: { name: true } } } });
+  if (account?.plan.name !== "Pro") {
+    return NextResponse.json({ error: "Chat Assistant is a Pro plan feature." }, { status: 403 });
+  }
 
   let body: unknown;
   try { body = await req.json(); } catch { return NextResponse.json({ error: "Invalid body" }, { status: 400 }); }

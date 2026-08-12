@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import { prisma } from "@/lib/prisma";
 import { Sidebar } from "@/components/dashboard/sidebar";
 import { AssistantWidget } from "@/components/dashboard/assistant-widget";
 
@@ -11,6 +12,13 @@ export default async function DashboardLayout({ children }: { children: React.Re
     redirect("/login");
   }
 
+  // Chat Assistant is a Pro-plan perk.
+  let isPro = false;
+  if (user.role === "LANDLORD" && user.accountId) {
+    const account = await prisma.account.findUnique({ where: { id: user.accountId }, select: { plan: { select: { name: true } } } });
+    isPro = account?.plan.name === "Pro";
+  }
+
   return (
     <div className="flex h-screen bg-[#080c14]">
       <Sidebar accountName={user?.accountName} />
@@ -19,7 +27,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           {children}
         </div>
       </main>
-      {user?.role === "LANDLORD" && <AssistantWidget />}
+      {isPro && <AssistantWidget />}
     </div>
   );
 }

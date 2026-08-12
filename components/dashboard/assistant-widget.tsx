@@ -29,6 +29,23 @@ function uid() {
   return Math.random().toString(36).slice(2);
 }
 
+// The parser's replies use light **bold** markdown (e.g. tenant names) —
+// render it instead of showing the literal asterisks.
+function renderBold(text: string) {
+  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+  return parts.map((part, i) =>
+    part.startsWith("**") && part.endsWith("**")
+      ? <strong key={i} className="font-semibold">{part.slice(2, -2)}</strong>
+      : <span key={i}>{part}</span>
+  );
+}
+
+const EXAMPLES = [
+  "add ₱500 electric bill for Juan this month",
+  "change Maria's phone to 0917 123 4567",
+  "log a water leak for unit 2",
+];
+
 export function AssistantWidget() {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
@@ -112,7 +129,7 @@ export function AssistantWidget() {
       </button>
 
       {open && (
-        <div className="fixed bottom-24 right-6 z-50 flex h-[32rem] w-96 max-w-[calc(100vw-3rem)] flex-col rounded-xl border border-white/10 bg-[#0d1117] shadow-2xl">
+        <div className="fixed right-6 top-24 bottom-6 z-50 flex w-[440px] max-w-[calc(100vw-3rem)] flex-col rounded-2xl border border-white/10 bg-[#0d1117] shadow-2xl animate-in">
           <div className="flex items-center gap-2 border-b border-white/10 px-4 py-3">
             <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-600">
               <MessageCircle className="h-3.5 w-3.5 text-white" />
@@ -129,7 +146,7 @@ export function AssistantWidget() {
                     msg.role === "user" ? "bg-blue-600 text-white" : "bg-white/5 text-gray-200"
                   )}
                 >
-                  <p className="whitespace-pre-wrap">{msg.text}</p>
+                  <p className="whitespace-pre-wrap">{renderBold(msg.text)}</p>
 
                   {msg.action && msg.actionState === "pending" && (
                     <div className="mt-2 flex gap-2">
@@ -173,6 +190,25 @@ export function AssistantWidget() {
                 </div>
               </div>
             ))}
+
+            {messages.length === 1 && !busy && (
+              <div className="pl-1">
+                <p className="text-xs text-gray-500 mb-2 opacity-0 animate-[rise-in_0.4s_ease_both]">Try asking:</p>
+                <div className="flex flex-col items-start gap-2">
+                  {EXAMPLES.map((example, i) => (
+                    <button
+                      key={example}
+                      onClick={() => send(example)}
+                      className="max-w-[90%] rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-left text-xs text-gray-300 opacity-0 animate-[rise-in_0.4s_ease_both] hover:border-blue-500/50 hover:bg-blue-500/10 hover:text-white transition-colors"
+                      style={{ animationDelay: `${0.15 + i * 0.12}s` }}
+                    >
+                      &ldquo;{example}&rdquo;
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {busy && (
               <div className="flex justify-start">
                 <div className="flex items-center gap-1 rounded-lg bg-white/5 px-3 py-2">
