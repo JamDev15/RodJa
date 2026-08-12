@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import {
   LayoutDashboard, Building2, Users, CreditCard, Bell,
-  Settings, LogOut, ChevronRight, Globe, Receipt, Home
+  Settings, LogOut, ChevronRight, Globe, Receipt, Home, HelpCircle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -17,6 +17,7 @@ const navItems = [
   { href: "/dashboard/listings", label: "Listings", icon: Globe },
   { href: "/dashboard/billing", label: "Billing", icon: Receipt },
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
+  { href: "/dashboard/help", label: "Help", icon: HelpCircle },
 ];
 
 interface SidebarProps {

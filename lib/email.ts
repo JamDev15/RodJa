@@ -3,6 +3,16 @@ import { Resend } from "resend";
 const resend = new Resend(process.env.RESEND_API_KEY);
 const FROM = process.env.EMAIL_FROM ?? "noreply@tenanthub.com";
 
+/** Escapes free-form user text before it's interpolated into an email's HTML body. */
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 export async function sendPaymentReminder(
   to: string,
   tenantName: string,
@@ -215,6 +225,41 @@ export async function sendBillingSubmittedNotification(
              (${formatted}).</p>
           <p>Reference number: <strong>${referenceNumber}</strong></p>
           <p>Review and approve it in the admin Billing page.</p>
+        </div>
+      `,
+    });
+    if (error) {
+      console.error("Resend rejected email:", error);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.error("Failed to send email:", err);
+    return false;
+  }
+}
+
+export async function sendHelpRequest(
+  to: string,
+  accountName: string,
+  senderName: string,
+  senderEmail: string,
+  subject: string,
+  message: string
+): Promise<boolean> {
+  try {
+    const { error } = await resend.emails.send({
+      from: FROM,
+      to,
+      replyTo: senderEmail,
+      subject: `[Help] ${subject} – ${accountName}`,
+      html: `
+        <div style="font-family:sans-serif;max-width:480px;margin:0 auto">
+          <h2 style="color:#1a1a2e">Help Request</h2>
+          <p><strong>${escapeHtml(senderName)}</strong> (${escapeHtml(accountName)}, ${escapeHtml(senderEmail)}) submitted a help request:</p>
+          <p><strong>${escapeHtml(subject)}</strong></p>
+          <p style="white-space:pre-wrap">${escapeHtml(message)}</p>
+          <p style="color:#6b7280;font-size:13px">Reply directly to this email to respond to ${senderName}.</p>
         </div>
       `,
     });

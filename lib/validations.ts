@@ -204,6 +204,11 @@ export const accountPasswordChangeSchema = z.object({
   newPassword: z.string().min(8).max(200),
 });
 
+export const helpRequestSchema = z.object({
+  subject: z.string().trim().min(1).max(200),
+  message: z.string().trim().min(1).max(5000),
+});
+
 /** Formats zod issues into a flat, client-friendly message. */
 export function formatZodError(error: z.ZodError): string {
   return error.issues.map((i) => `${i.path.join(".")}: ${i.message}`).join("; ");
