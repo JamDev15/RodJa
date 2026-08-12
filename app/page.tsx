@@ -22,7 +22,7 @@ const steps = [
 ];
 
 const plans = [
-  { name: "Free", price: "₱0", period: "7-day trial", features: ["1 property", "3 units", "20 tenants", "Manual tracking"], cta: "Get Started", highlight: false, planKey: "free" },
+  { name: "Free", price: "₱0", period: "1-day trial", features: ["1 property", "3 units", "20 tenants", "Manual tracking"], cta: "Get Started", highlight: false, planKey: "free" },
   { name: "Basic", price: "₱199", period: "/ month", features: ["3 properties", "15 units", "50 tenants", "Email reminders", "Payment proofs"], cta: "Subscribe", highlight: false, planKey: "basic" },
   { name: "Pro", price: "₱499", period: "/ month", features: ["Chat Assistant", "Unlimited everything", "Public listings", "Maintenance module", "PDF/CSV export", "Priority support"], cta: "Go Pro", highlight: true, planKey: "pro" },
 ];

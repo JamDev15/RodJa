@@ -16,7 +16,7 @@ interface PlatformSettings {
 }
 
 const PLAN_LABELS: Record<string, string> = {
-  free: "Free — ₱0 (7-day trial)",
+  free: "Free — ₱0 (1-day trial)",
   basic: "Basic — ₱199/month",
   pro: "Pro — ₱499/month",
 };
@@ -88,7 +88,7 @@ function SignupFormInner({ platformSettings }: { platformSettings: PlatformSetti
         </Link>
         <h1 className="text-2xl font-bold text-white">Create your account</h1>
         <p className="text-gray-400 text-sm mt-1">
-          {isPaidPlan ? "Pay to activate your subscription" : "Start managing your rentals free for 7 days"}
+          {isPaidPlan ? "Pay to activate your subscription" : "Start managing your rentals free for 1 day"}
         </p>
       </div>
 

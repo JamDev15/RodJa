@@ -8,7 +8,7 @@ import { BillingPayForm } from "./billing-pay-form";
 import { UpgradeButton } from "./upgrade-button";
 
 const PLAN_FEATURES: Record<string, string[]> = {
-  Free: ["Manual tracking", "Tenant portal", "7-day trial only"],
+  Free: ["Manual tracking", "Tenant portal", "1-day trial only"],
   Basic: ["SMS reminders", "Payment proof", "Email support"],
   Pro: ["Unlimited everything", "Public listings", "Maintenance module", "PDF/CSV export"],
 };
@@ -50,7 +50,7 @@ export default async function BillingPage() {
       {trialDaysLeft !== null && (
         <div className={`rounded-xl border p-4 text-sm ${trialDaysLeft <= 0 ? "border-red-500/30 bg-red-500/10 text-red-400" : "border-yellow-500/30 bg-yellow-500/10 text-yellow-400"}`}>
           {trialDaysLeft <= 0
-            ? "Your 7-day free trial has ended. Upgrade to Basic or Pro below to keep using TenantHub."
+            ? "Your free trial has ended. Upgrade to Basic or Pro below to keep using TenantHub."
             : `Your free trial ends in ${trialDaysLeft} day${trialDaysLeft === 1 ? "" : "s"}. Upgrade anytime to avoid interruption.`}
         </div>
       )}

@@ -117,9 +117,11 @@ export interface FreeTrialSweepResult {
 }
 
 /**
- * Free plan has no billing cycle — it's a 7-day trial only (Account.trialEndsAt,
- * set at signup). Sends a reminder 3 days before it ends, and auto-pauses the
- * account once it does, the same way an unpaid subscription pauses.
+ * Free plan has no billing cycle — it's a 1-day trial only (Account.trialEndsAt,
+ * set at signup). Would send a reminder 3 days before it ends, but a 1-day
+ * window never reaches that threshold — sendTrialEndingSoon effectively only
+ * fires if the trial length is ever lengthened again. Auto-pauses the
+ * account once the trial ends, the same way an unpaid subscription pauses.
  */
 export async function runFreeTrialSweep(now: Date = new Date()): Promise<FreeTrialSweepResult> {
   let remindersSent = 0;

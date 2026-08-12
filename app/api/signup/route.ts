@@ -85,8 +85,8 @@ export async function POST(req: Request) {
         planId: dbPlan.id,
         // Paid plans have no trial and stay inactive until the admin
         // approves the payment submitted below; Free is instant with a
-        // 7-day trial.
-        trialEndsAt: isPaidPlan ? null : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        // 1-day trial.
+        trialEndsAt: isPaidPlan ? null : new Date(Date.now() + 24 * 60 * 60 * 1000),
         isActive: !isPaidPlan,
       },
     });

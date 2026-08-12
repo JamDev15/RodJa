@@ -273,7 +273,7 @@ export async function sendTrialEnded(
         <div style="font-family:sans-serif;max-width:480px;margin:0 auto">
           <h2 style="color:#dc2626">Free Trial Ended</h2>
           <p>Hi ${ownerName},</p>
-          <p>Your 7-day free trial has ended, so your TenantHub account has been paused.
+          <p>Your free trial has ended, so your TenantHub account has been paused.
              Upgrade to Basic or Pro to restore access — contact support to arrange payment
              and get a login link once you're on a paid plan.</p>
         </div>
