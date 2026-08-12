@@ -12,11 +12,11 @@ const isDev = process.env.NODE_ENV !== "production";
 
 const csp = [
   "default-src 'self'",
-  `img-src 'self' data: blob:${supabaseHost ? ` https://${supabaseHost}` : ""}`,
+  `img-src 'self' data: blob: https://www.facebook.com${supabaseHost ? ` https://${supabaseHost}` : ""}`,
   "style-src 'self' 'unsafe-inline'",
-  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
+  `script-src 'self' 'unsafe-inline' https://connect.facebook.net${isDev ? " 'unsafe-eval'" : ""}`,
   "worker-src 'self'",
-  `connect-src 'self'${supabaseHost ? ` https://${supabaseHost}` : ""}`,
+  `connect-src 'self' https://www.facebook.com${supabaseHost ? ` https://${supabaseHost}` : ""}`,
   "font-src 'self'",
   "frame-ancestors 'none'",
   "base-uri 'self'",
