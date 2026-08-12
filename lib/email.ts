@@ -229,6 +229,37 @@ export async function sendBillingSubmittedNotification(
   }
 }
 
+export async function sendNewSignupNotification(
+  to: string,
+  accountName: string,
+  ownerName: string,
+  accountEmail: string,
+  planName: string
+): Promise<boolean> {
+  try {
+    const { error } = await resend.emails.send({
+      from: FROM,
+      to,
+      subject: `New landlord signed up – ${accountName}`,
+      html: `
+        <div style="font-family:sans-serif;max-width:480px;margin:0 auto">
+          <h2 style="color:#1a1a2e">New Signup</h2>
+          <p><strong>${accountName}</strong> (${ownerName}) just signed up on the <strong>${planName}</strong> plan.</p>
+          <p>Account email: ${accountEmail}</p>
+        </div>
+      `,
+    });
+    if (error) {
+      console.error("Resend rejected email:", error);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.error("Failed to send email:", err);
+    return false;
+  }
+}
+
 export async function sendTrialEndingSoon(
   to: string,
   ownerName: string,

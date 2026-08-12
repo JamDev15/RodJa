@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 import { isRateLimited, recordFailedAttempt, getClientIp } from "@/lib/rate-limit";
 import { signupSchema, formatZodError } from "@/lib/validations";
 import { uploadBillingProof, validateProofFile } from "@/lib/storage";
-import { sendBillingSubmittedNotification } from "@/lib/email";
+import { sendBillingSubmittedNotification, sendNewSignupNotification } from "@/lib/email";
 import { periodLabelFor, getNotificationRecipients } from "@/lib/billing";
 
 const PLAN_NAMES: Record<string, string> = {
@@ -91,6 +91,13 @@ export async function POST(req: Request) {
       },
     });
 
+    const notificationRecipients = await getNotificationRecipients();
+    await Promise.all(
+      notificationRecipients.map((email) =>
+        sendNewSignupNotification(email, account.name, account.ownerName, account.email, planName)
+      )
+    );
+
     if (isPaidPlan) {
       if (file && file.size > 0) {
         proofUrl = await uploadBillingProof(file, account.id, periodLabelFor(new Date()));
@@ -106,9 +113,8 @@ export async function POST(req: Request) {
           proofUrl,
         },
       });
-      const recipients = await getNotificationRecipients();
       await Promise.all(
-        recipients.map((email) =>
+        notificationRecipients.map((email) =>
           sendBillingSubmittedNotification(email, account.name, account.ownerName, record.amount, record.period, referenceNumber ?? "")
         )
       );
