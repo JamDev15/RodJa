@@ -4,11 +4,17 @@ const supabaseHost = process.env.NEXT_PUBLIC_SUPABASE_URL
   ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).host
   : "";
 
+// next dev's webpack HMR runtime wraps modules in eval() — without
+// 'unsafe-eval' the browser silently blocks every client bundle from
+// running, so no client component gets working event handlers locally.
+// Production builds don't use eval, so this relaxation never ships.
+const isDev = process.env.NODE_ENV !== "production";
+
 const csp = [
   "default-src 'self'",
   `img-src 'self' data: blob:${supabaseHost ? ` https://${supabaseHost}` : ""}`,
   "style-src 'self' 'unsafe-inline'",
-  "script-src 'self' 'unsafe-inline'",
+  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
   "worker-src 'self'",
   `connect-src 'self'${supabaseHost ? ` https://${supabaseHost}` : ""}`,
   "font-src 'self'",
