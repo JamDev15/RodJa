@@ -31,24 +31,24 @@ export default async function PaymentsPage({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">Payments</h1>
           <p className="text-gray-400 text-sm mt-1">{payments.length} records</p>
         </div>
         {/* Filters */}
         <div className="flex gap-2">
-          <form className="flex gap-2">
+          <form className="flex flex-wrap gap-2">
             <input
               type="month"
               name="month"
               defaultValue={month}
-              className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none"
+              className="min-w-0 flex-1 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none sm:flex-none"
             />
             <select
               name="status"
               defaultValue={qStatus ?? ""}
-              className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none"
+              className="min-w-0 flex-1 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none sm:flex-none"
             >
               <option value="">All Status</option>
               <option value="pending">Pending</option>
@@ -73,7 +73,7 @@ export default async function PaymentsPage({
         </div>
       )}
 
-      <div className="rounded-xl border border-white/10 overflow-hidden">
+      <div className="rounded-xl border border-white/10 overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-white/10 bg-white/5">

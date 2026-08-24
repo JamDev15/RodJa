@@ -22,8 +22,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
   return (
     <div className="flex h-screen bg-[#080c14]">
       <Sidebar accountName={user?.accountName} />
-      <main className="flex-1 ml-64 overflow-y-auto">
-        <div className="p-6 lg:p-8">
+      <main className="flex-1 pt-14 lg:pt-0 lg:ml-64 overflow-y-auto">
+        <div className="p-4 sm:p-6 lg:p-8">
           {children}
         </div>
       </main>

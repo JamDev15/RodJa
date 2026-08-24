@@ -132,7 +132,7 @@ export default async function DashboardPage() {
           <h2 className="text-lg font-semibold text-white">Recent Payments</h2>
           <Link href="/dashboard/payments" className="text-sm text-blue-400 hover:text-blue-300">View all →</Link>
         </div>
-        <div className="rounded-xl border border-white/10 overflow-hidden">
+        <div className="rounded-xl border border-white/10 overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-white/10 bg-white/5">
@@ -169,7 +169,7 @@ export default async function DashboardPage() {
           <h2 className="text-lg font-semibold text-white">Who Hasn&apos;t Paid</h2>
           <span className="text-sm text-gray-500">{unpaidRows.length} tenant{unpaidRows.length === 1 ? "" : "s"}</span>
         </div>
-        <div className="rounded-xl border border-white/10 overflow-hidden">
+        <div className="rounded-xl border border-white/10 overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-white/10 bg-white/5">

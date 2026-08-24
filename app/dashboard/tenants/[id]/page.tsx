@@ -108,7 +108,7 @@ export default async function TenantDetailPage({ params }: { params: Promise<{ i
           <h2 className="text-lg font-semibold text-white">Payment History</h2>
           <AddPaymentButton tenantId={tenant.id} rentAmount={tenant.unit.rentAmount} />
         </div>
-        <div className="rounded-xl border border-white/10 overflow-hidden">
+        <div className="rounded-xl border border-white/10 overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-white/10 bg-white/5">

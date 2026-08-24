@@ -45,7 +45,7 @@ export default async function AdminListingsPage() {
       {reviewed.length > 0 && (
         <div>
           <h2 className="text-lg font-semibold text-white mb-3">Reviewed</h2>
-          <div className="rounded-xl border border-white/10 overflow-hidden">
+          <div className="rounded-xl border border-white/10 overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-white/10 bg-white/5">

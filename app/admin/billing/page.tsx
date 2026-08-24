@@ -22,7 +22,7 @@ export default async function AdminBillingPage() {
           No billing records yet — they're created automatically for paid-plan accounts once their free trial ends.
         </div>
       ) : (
-        <div className="rounded-xl border border-white/10 overflow-hidden">
+        <div className="rounded-xl border border-white/10 overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-white/10 bg-white/5">

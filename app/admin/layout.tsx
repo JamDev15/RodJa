@@ -12,8 +12,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   return (
     <div className="flex h-screen bg-[#080c14]">
       <AdminNav />
-      <main className="flex-1 ml-64 overflow-y-auto">
-        <div className="p-6 lg:p-8">{children}</div>
+      <main className="flex-1 pt-14 lg:pt-0 lg:ml-64 overflow-y-auto">
+        <div className="p-4 sm:p-6 lg:p-8">{children}</div>
       </main>
     </div>
   );
