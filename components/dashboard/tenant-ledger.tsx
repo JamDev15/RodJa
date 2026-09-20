@@ -113,7 +113,7 @@ function BillSection({ icon, label, optional, billed, onBilled, paid, onPaid }: 
         <span className="text-sm font-semibold text-white">{label}</span>
         {optional && <span className="text-xs text-gray-500">(optional)</span>}
       </div>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div className="space-y-1">
           <Label className="text-xs">Billed (₱)</Label>
           <Input type="number" placeholder="0" min="0" value={billed}
@@ -493,7 +493,7 @@ export function TenantLedger({ tenantId, moveInDate, defaultRent }: {
               </div>
               <Input placeholder="Label (parking, dues...)" value={form.otherLabel}
                 onChange={(e) => setForm({ ...form, otherLabel: e.target.value })} />
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <Label className="text-xs">Billed (₱)</Label>
                   <Input type="number" placeholder="0" min="0" value={form.otherAmount}
@@ -536,7 +536,7 @@ export function TenantLedger({ tenantId, moveInDate, defaultRent }: {
                 </div>
               )}
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <Label className="text-xs text-gray-400">Balance Amount (₱)</Label>
                   <Input type="number" placeholder="0" min="0" value={form.balance}

@@ -86,7 +86,7 @@ export default function EditUnitPage() {
       </div>
 
       <form onSubmit={handleSubmit} className="rounded-xl border border-white/10 bg-white/5 p-6 space-y-5">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="unitNumber">Unit Number *</Label>
             <Input
@@ -108,7 +108,7 @@ export default function EditUnitPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="rentAmount">Monthly Rent (₱) *</Label>
             <Input

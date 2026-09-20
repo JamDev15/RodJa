@@ -93,18 +93,18 @@ function SignupFormInner({ platformSettings }: { platformSettings: PlatformSetti
       </div>
 
       <form onSubmit={handleSubmit} className="rounded-xl border border-white/10 bg-white/5 p-6 space-y-4">
-        <div className="grid grid-cols-2 gap-3">
-          <div className="space-y-2 col-span-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="space-y-2 col-span-1 sm:col-span-2">
             <Label>Business / Property Name *</Label>
             <Input placeholder="e.g. Santos Apartments" value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })} required />
           </div>
-          <div className="space-y-2 col-span-2">
+          <div className="space-y-2 col-span-1 sm:col-span-2">
             <Label>Your Full Name *</Label>
             <Input placeholder="Juan dela Cruz" value={form.ownerName}
               onChange={(e) => setForm({ ...form, ownerName: e.target.value })} required />
           </div>
-          <div className="space-y-2 col-span-2">
+          <div className="space-y-2 col-span-1 sm:col-span-2">
             <Label>Email *</Label>
             <Input type="email" placeholder="you@email.com" value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })} required />
@@ -119,7 +119,7 @@ function SignupFormInner({ platformSettings }: { platformSettings: PlatformSetti
             <Input placeholder="09xx-xxx-xxxx" value={form.phone}
               onChange={(e) => setForm({ ...form, phone: e.target.value })} />
           </div>
-          <div className="space-y-2 col-span-2">
+          <div className="space-y-2 col-span-1 sm:col-span-2">
             <Label>Plan</Label>
             <Select value={form.plan} onValueChange={(v) => setForm({ ...form, plan: v })}>
               <SelectTrigger><SelectValue /></SelectTrigger>
@@ -138,7 +138,7 @@ function SignupFormInner({ platformSettings }: { platformSettings: PlatformSetti
               Pay via GCash or Maya, then enter your reference number below. Your account activates once
               it&apos;s approved.
             </p>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {platformSettings?.gcashNumber && (
                 <div>
                   <p className="text-xs text-gray-500">GCash</p>

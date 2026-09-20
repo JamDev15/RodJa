@@ -50,7 +50,7 @@ export default function NewUnitPage() {
       </div>
 
       <form onSubmit={handleSubmit} className="rounded-xl border border-white/10 bg-white/5 p-6 space-y-5">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="unitNumber">Unit Number *</Label>
             <Input id="unitNumber" placeholder="e.g. 101" value={form.unitNumber}
@@ -63,7 +63,7 @@ export default function NewUnitPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="rentAmount">Monthly Rent (₱) *</Label>
             <Input id="rentAmount" type="number" placeholder="5000" value={form.rentAmount}

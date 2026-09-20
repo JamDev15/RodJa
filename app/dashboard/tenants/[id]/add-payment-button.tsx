@@ -72,7 +72,7 @@ export function AddPaymentButton({ tenantId, rentAmount }: { tenantId: string; r
         <form onSubmit={handleSubmit} className="space-y-4">
 
           {/* Month & Due Date */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label>Month</Label>
               <Input type="month" value={form.month}
@@ -136,7 +136,7 @@ export function AddPaymentButton({ tenantId, rentAmount }: { tenantId: string; r
           </div>
 
           {/* Method & Status */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label>Method</Label>
               <Select value={form.method} onValueChange={(v) => setForm({ ...form, method: v })}>
