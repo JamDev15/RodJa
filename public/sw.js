@@ -1,6 +1,9 @@
-const CACHE_NAME = "rodja-cache-v1";
+const CACHE_NAME = "rodja-cache-v2";
 const OFFLINE_URL = "/offline";
-const PRECACHE_URLS = [OFFLINE_URL, "/manifest.webmanifest", "/icon.svg", "/favicon.ico"];
+const PRECACHE_URLS = [
+  OFFLINE_URL, "/manifest.webmanifest", "/icon.svg", "/favicon.ico",
+  "/apple-touch-icon.png", "/icon-192.png", "/icon-512.png", "/icon-maskable-512.png",
+];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(

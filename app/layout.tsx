@@ -13,8 +13,15 @@ export const metadata: Metadata = {
     title: "TenantHub",
   },
   icons: {
-    icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
     shortcut: "/icon.svg",
+    // iOS Safari reads this specifically for the home-screen icon — it
+    // ignores the manifest's icons array entirely, and doesn't accept SVG.
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
   },
 };
 

@@ -32,9 +32,9 @@ export default function LandingPage() {
     <div className="min-h-screen bg-[#080c14] text-white overflow-x-hidden">
       {/* Nav */}
       <nav className="sticky top-0 z-50 border-b border-white/10 bg-[#080c14]/80 backdrop-blur-md">
-        <div className="flex items-center justify-between px-6 py-4 max-w-6xl mx-auto">
-          <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-4 max-w-6xl mx-auto">
+          <div className="flex items-center gap-2 shrink-0">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 shrink-0">
               <Home className="h-4 w-4 text-white" />
             </div>
             <span className="font-bold text-white text-lg">TenantHub</span>
@@ -44,10 +44,11 @@ export default function LandingPage() {
             <a href="#how-it-works" className="hover:text-white transition-colors">How it works</a>
             <a href="#pricing" className="hover:text-white transition-colors">Pricing</a>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <Link href="/login" className="text-sm text-gray-400 hover:text-white transition-colors">Sign In</Link>
-            <Link href="/signup" className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors">
-              Get Started Free
+            <Link href="/signup" className="whitespace-nowrap rounded-lg bg-blue-600 px-3 py-1.5 sm:px-4 sm:py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors">
+              <span className="sm:hidden">Start Free</span>
+              <span className="hidden sm:inline">Get Started Free</span>
             </Link>
           </div>
         </div>
