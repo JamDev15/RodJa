@@ -135,6 +135,13 @@ export function AssistantWidget() {
               <MessageCircle className="h-3.5 w-3.5 text-white" />
             </div>
             <p className="text-sm font-semibold text-white">Assistant</p>
+            <button
+              onClick={() => setOpen(false)}
+              className="ml-auto flex h-7 w-7 items-center justify-center rounded-lg text-gray-400 hover:bg-white/5 hover:text-white"
+              aria-label="Close assistant"
+            >
+              <X className="h-4 w-4" />
+            </button>
           </div>
 
           <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto px-4 py-3">
