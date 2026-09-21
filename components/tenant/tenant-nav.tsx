@@ -1,8 +1,8 @@
 "use client";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { Home, CreditCard, Wrench, Bell, LogOut } from "lucide-react";
+import { Home, CreditCard, Wrench, Bell, LogOut, ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -14,12 +14,25 @@ const navItems = [
 
 export function TenantNav({ tenantName }: { tenantName?: string }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const isHome = pathname === "/tenant/dashboard";
 
   return (
     <>
       {/* Top header */}
       <header className="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-[#0d1117]">
         <div className="flex items-center gap-2">
+          <div className="flex h-7 w-7 shrink-0 items-center justify-center">
+            {!isHome && (
+              <button
+                onClick={() => router.back()}
+                className="flex h-7 w-7 items-center justify-center rounded-lg text-gray-400 hover:bg-white/5 hover:text-white"
+                aria-label="Go back"
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </button>
+            )}
+          </div>
           <div className="h-7 w-7 rounded-full bg-blue-600 flex items-center justify-center text-xs font-bold text-white">
             {tenantName?.[0] ?? "T"}
           </div>

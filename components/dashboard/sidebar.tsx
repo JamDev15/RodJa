@@ -1,11 +1,11 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
 import {
   LayoutDashboard, Building2, Users, CreditCard, Bell,
-  Settings, LogOut, ChevronRight, Globe, Receipt, Home, HelpCircle, Menu, X
+  Settings, LogOut, ChevronRight, Globe, Receipt, Home, HelpCircle, Menu, X, ArrowLeft
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -27,13 +27,26 @@ interface SidebarProps {
 
 export function Sidebar({ accountName }: SidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const [open, setOpen] = useState(false);
+  const isHome = pathname === "/dashboard";
 
   return (
     <>
       {/* Mobile top bar */}
       <div className="fixed top-0 left-0 right-0 z-30 flex h-14 items-center justify-between border-b border-white/10 bg-[#0d1117] px-4 lg:hidden">
         <div className="flex items-center gap-2">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center">
+            {!isHome && (
+              <button
+                onClick={() => router.back()}
+                className="flex h-9 w-9 items-center justify-center rounded-lg text-gray-400 hover:bg-white/5 hover:text-white"
+                aria-label="Go back"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </button>
+            )}
+          </div>
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600">
             <Home className="h-4 w-4 text-white" />
           </div>
