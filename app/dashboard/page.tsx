@@ -118,12 +118,12 @@ export default async function DashboardPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-        <StatCard title="Collected" value={collected} icon={CheckCircle} isCurrency variant="success" trend={`${collectedCount} payments`} />
-        <StatCard title="Pending" value={pending} icon={Clock} isCurrency variant="warning" trend={`${pendingRows.length} tenants`} />
-        <StatCard title="Overdue" value={overdue} icon={AlertTriangle} isCurrency variant="danger" trend={`${overdueRows.length} tenants`} />
-        <StatCard title="Total Units" value={totalUnits} icon={Home} />
-        <StatCard title="Occupied" value={occupiedUnits} icon={Users} variant="success" trend={`${vacantUnits} vacant`} />
-        <StatCard title="Active Tenants" value={tenants.length} icon={Users} variant="default" />
+        <StatCard title="Collected" value={collected} icon={CheckCircle} isCurrency variant="success" trend={`${collectedCount} payments`} href="/dashboard/analytics" />
+        <StatCard title="Pending" value={pending} icon={Clock} isCurrency variant="warning" trend={`${pendingRows.length} tenants`} href="/dashboard/payments?status=pending" />
+        <StatCard title="Overdue" value={overdue} icon={AlertTriangle} isCurrency variant="danger" trend={`${overdueRows.length} tenants`} href="/dashboard/payments?status=late" />
+        <StatCard title="Total Units" value={totalUnits} icon={Home} href="/dashboard/units" />
+        <StatCard title="Occupied" value={occupiedUnits} icon={Users} variant="success" trend={`${vacantUnits} vacant`} href="/dashboard/units?status=occupied" />
+        <StatCard title="Active Tenants" value={tenants.length} icon={Users} variant="default" href="/dashboard/tenants" />
       </div>
 
       {/* Recent Payments */}

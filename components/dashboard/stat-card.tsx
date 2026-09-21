@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { cn, formatCurrency } from "@/lib/utils";
 import type { LucideIcon } from "lucide-react";
 
@@ -8,9 +9,10 @@ interface StatCardProps {
   trend?: string;
   isCurrency?: boolean;
   variant?: "default" | "success" | "warning" | "danger";
+  href?: string;
 }
 
-export function StatCard({ title, value, icon: Icon, trend, isCurrency, variant = "default" }: StatCardProps) {
+export function StatCard({ title, value, icon: Icon, trend, isCurrency, variant = "default", href }: StatCardProps) {
   const colorMap = {
     default: "text-blue-400 bg-blue-400/10",
     success: "text-green-400 bg-green-400/10",
@@ -18,8 +20,8 @@ export function StatCard({ title, value, icon: Icon, trend, isCurrency, variant 
     danger: "text-red-400 bg-red-400/10",
   };
 
-  return (
-    <div className="rounded-xl border border-white/10 bg-white/5 p-5 hover:bg-white/[0.07] transition-colors">
+  const content = (
+    <>
       <div className="flex items-center justify-between mb-3">
         <span className="text-sm text-gray-400">{title}</span>
         <div className={cn("rounded-lg p-2", colorMap[variant])}>
@@ -30,6 +32,13 @@ export function StatCard({ title, value, icon: Icon, trend, isCurrency, variant 
         {isCurrency ? formatCurrency(Number(value)) : value}
       </p>
       {trend && <p className="text-xs text-gray-500 mt-1">{trend}</p>}
-    </div>
+    </>
   );
+
+  const className = "block rounded-xl border border-white/10 bg-white/5 p-5 hover:bg-white/[0.07] transition-colors";
+
+  if (href) {
+    return <Link href={href} className={className}>{content}</Link>;
+  }
+  return <div className={className}>{content}</div>;
 }

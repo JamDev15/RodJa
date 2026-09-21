@@ -75,6 +75,9 @@ export const propertyCreateSchema = z.object({
 export const paymentCreateSchema = z.object({
   tenantId: z.string().min(1),
   amount: z.coerce.number().nonnegative(),
+  rentAmount: z.coerce.number().nonnegative().optional().nullable(),
+  electricAmount: z.coerce.number().nonnegative().optional().nullable(),
+  waterAmount: z.coerce.number().nonnegative().optional().nullable(),
   month: z.string().trim().min(1).max(20),
   dueDate: z.coerce.date(),
   status: z.enum(["pending", "submitted", "approved", "late", "waived"]).optional(),

@@ -13,7 +13,7 @@ export async function POST(req: Request) {
 
   const parsed = paymentCreateSchema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: formatZodError(parsed.error) }, { status: 400 });
-  const { tenantId, amount, month, dueDate, status, method, notes } = parsed.data;
+  const { tenantId, amount, rentAmount, electricAmount, waterAmount, month, dueDate, status, method, notes } = parsed.data;
 
   const tenant = await prisma.tenant.findFirst({
     where: { id: tenantId, unit: { property: { accountId } } },
@@ -24,6 +24,9 @@ export async function POST(req: Request) {
     data: {
       tenantId,
       amount,
+      rentAmount: rentAmount || null,
+      electricAmount: electricAmount || null,
+      waterAmount: waterAmount || null,
       month,
       dueDate,
       paidDate: status === "approved" ? new Date() : null,
