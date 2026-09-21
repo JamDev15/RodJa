@@ -549,3 +549,51 @@ export async function sendTenantBillReminder(
     return false;
   }
 }
+
+export async function sendMonthlyReport(
+  to: string,
+  ownerName: string,
+  monthLabel: string,
+  totals: { collected: number; rent: number; electric: number; water: number; other: number },
+  xlsxBuffer: Buffer
+): Promise<boolean> {
+  const money = (n: number) =>
+    new Intl.NumberFormat("en-PH", { style: "currency", currency: "PHP", minimumFractionDigits: 0 }).format(n);
+
+  try {
+    const { error } = await resend.emails.send({
+      from: FROM,
+      to,
+      subject: `Your ${monthLabel} report is ready`,
+      attachments: [
+        {
+          filename: `TenantHub-Report-${monthLabel.replace(/\s+/g, "-")}.xlsx`,
+          content: xlsxBuffer,
+        },
+      ],
+      html: `
+        <div style="font-family:sans-serif;max-width:480px;margin:0 auto">
+          <h2 style="color:#1a1a2e">${escapeHtml(monthLabel)} Report</h2>
+          <p>Hi <strong>${escapeHtml(ownerName)}</strong>,</p>
+          <p>Here's your collected-payments summary for ${escapeHtml(monthLabel)}. The full breakdown, including every payment recorded this month, is attached as an Excel sheet.</p>
+          <table style="width:100%;border-collapse:collapse;margin:16px 0">
+            <tr><td style="padding:6px 0;color:#666">Total Collected</td><td style="padding:6px 0;text-align:right;font-weight:bold">${money(totals.collected)}</td></tr>
+            <tr><td style="padding:6px 0;color:#666">Rent</td><td style="padding:6px 0;text-align:right">${money(totals.rent)}</td></tr>
+            <tr><td style="padding:6px 0;color:#666">Electric (Kuryente)</td><td style="padding:6px 0;text-align:right">${money(totals.electric)}</td></tr>
+            <tr><td style="padding:6px 0;color:#666">Water</td><td style="padding:6px 0;text-align:right">${money(totals.water)}</td></tr>
+            <tr><td style="padding:6px 0;color:#666">Other</td><td style="padding:6px 0;text-align:right">${money(totals.other)}</td></tr>
+          </table>
+          <p style="color:#666;font-size:12px">— TenantHub</p>
+        </div>
+      `,
+    });
+    if (error) {
+      console.error("Resend rejected email:", error);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.error("Failed to send email:", err);
+    return false;
+  }
+}

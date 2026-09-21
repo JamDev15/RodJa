@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { runReminderSweep } from "@/lib/reminders";
 import { runBillingSweep, runFreeTrialSweep } from "@/lib/billing";
 import { runBillReminderSweep } from "@/lib/bill-reminders";
+import { runMonthlyReportSweep } from "@/lib/monthly-report";
 
 export async function GET(req: Request) {
   const cronSecret = process.env.CRON_SECRET;
@@ -16,5 +17,6 @@ export async function GET(req: Request) {
   const billReminders = await runBillReminderSweep();
   const billing = await runBillingSweep();
   const freeTrials = await runFreeTrialSweep();
-  return NextResponse.json({ reminders, billReminders, billing, freeTrials });
+  const monthlyReports = await runMonthlyReportSweep();
+  return NextResponse.json({ reminders, billReminders, billing, freeTrials, monthlyReports });
 }

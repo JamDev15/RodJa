@@ -56,6 +56,7 @@ model Account {
   users          User[]
   billingRecords BillingRecord[]
   pushSubscriptions PushSubscription[]
+  monthlyReportLogs MonthlyReportLog[]
 }
 
 model User {
@@ -258,6 +259,16 @@ model BillReminder {
   createdAt       DateTime      @default(now())
 
   @@unique([ledgerId, billType, trigger])
+}
+
+model MonthlyReportLog {
+  id        String   @id @default(cuid())
+  accountId String
+  account   Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  monthKey  String   // "2026-08" — the month the report covers
+  sentAt    DateTime @default(now())
+
+  @@unique([accountId, monthKey])
 }
 
 // ─── Security ─────────────────────────────────────────────────────────────────
