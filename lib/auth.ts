@@ -221,5 +221,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     signIn: "/login",
     error: "/login",
   },
-  session: { strategy: "jwt" },
+  // Explicit rather than relying on the framework default: stay signed in
+  // for 60 days of inactivity, only ending on an actual sign-out. Without
+  // this, some browsers/devices are more aggressive about treating an
+  // implicit/unstated expiry as a session-only cookie and drop it on close.
+  session: { strategy: "jwt", maxAge: 60 * 24 * 60 * 60 },
+  trustHost: true,
 });
