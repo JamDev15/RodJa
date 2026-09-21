@@ -230,7 +230,7 @@ export function AssistantWidget() {
               onChange={(e) => setInput(e.target.value)}
               placeholder="Type a message..."
               disabled={busy}
-              className="flex-1 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:opacity-50"
+              className="flex-1 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-base sm:text-sm text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:opacity-50"
             />
             <button
               type="submit"
