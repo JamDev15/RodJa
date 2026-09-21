@@ -55,6 +55,7 @@ model Account {
   properties     Property[]
   users          User[]
   billingRecords BillingRecord[]
+  pushSubscriptions PushSubscription[]
 }
 
 model User {
@@ -222,7 +223,41 @@ model MonthlyLedger {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
+  billReminders  BillReminder[]
+
   @@unique([tenantId, month])
+}
+
+// Per-device Web Push subscription for a landlord account — used to send
+// real push notifications (owner bill reminders) even when the app isn't
+// open. A landlord can have more than one (phone + laptop, etc).
+model PushSubscription {
+  id        String   @id @default(cuid())
+  accountId String
+  account   Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+}
+
+// Dedup ledger for the itemized per-bill reminder sweep (lib/bill-reminders.ts)
+// — one row per (ledger row, bill type, trigger day), tracking which of the
+// three sends (owner email/push, tenant email) actually succeeded so a
+// partial failure doesn't get silently skipped next run, and a successful
+// send never goes out twice.
+model BillReminder {
+  id              String        @id @default(cuid())
+  ledgerId        String
+  ledger          MonthlyLedger @relation(fields: [ledgerId], references: [id], onDelete: Cascade)
+  billType        String        // "rent" | "electric" | "water" | "other"
+  trigger         String        // "2days_before" | "1day_before" | "due_date"
+  ownerEmailSent  Boolean       @default(false)
+  ownerPushSent   Boolean       @default(false)
+  tenantEmailSent Boolean       @default(false)
+  createdAt       DateTime      @default(now())
+
+  @@unique([ledgerId, billType, trigger])
 }
 
 // ─── Security ─────────────────────────────────────────────────────────────────

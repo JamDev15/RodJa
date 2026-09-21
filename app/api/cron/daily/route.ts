@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { runReminderSweep } from "@/lib/reminders";
 import { runBillingSweep, runFreeTrialSweep } from "@/lib/billing";
+import { runBillReminderSweep } from "@/lib/bill-reminders";
 
 export async function GET(req: Request) {
   const cronSecret = process.env.CRON_SECRET;
@@ -10,9 +11,10 @@ export async function GET(req: Request) {
   }
 
   // Sequential, not parallel — the Supabase pooler here has a low
-  // concurrent-connection cap, and all three sweeps touch the DB heavily.
+  // concurrent-connection cap, and all sweeps touch the DB heavily.
   const reminders = await runReminderSweep();
+  const billReminders = await runBillReminderSweep();
   const billing = await runBillingSweep();
   const freeTrials = await runFreeTrialSweep();
-  return NextResponse.json({ reminders, billing, freeTrials });
+  return NextResponse.json({ reminders, billReminders, billing, freeTrials });
 }

@@ -209,6 +209,14 @@ export const helpRequestSchema = z.object({
   message: z.string().trim().min(1).max(5000),
 });
 
+export const pushSubscribeSchema = z.object({
+  endpoint: z.string().trim().min(1).max(2000),
+  keys: z.object({
+    p256dh: z.string().trim().min(1),
+    auth: z.string().trim().min(1),
+  }),
+});
+
 /** Formats zod issues into a flat, client-friendly message. */
 export function formatZodError(error: z.ZodError): string {
   return error.issues.map((i) => `${i.path.join(".")}: ${i.message}`).join("; ");

@@ -462,3 +462,90 @@ export async function sendWelcomeTenant(
     return false;
   }
 }
+
+/** "2days_before" | "1day_before" | "due_date" -> a short human phrase. */
+function billTriggerPhrase(trigger: string): string {
+  if (trigger === "due_date") return "due today";
+  if (trigger === "1day_before") return "due tomorrow";
+  if (trigger === "2days_before") return "due in 2 days";
+  return "due soon";
+}
+
+export async function sendOwnerBillReminder(
+  to: string,
+  ownerName: string,
+  tenantName: string,
+  billLabel: string,
+  amount: number,
+  dueDate: Date,
+  trigger: string
+): Promise<boolean> {
+  const formatted = new Intl.NumberFormat("en-PH", { style: "currency", currency: "PHP", minimumFractionDigits: 0 }).format(amount);
+  const phrase = billTriggerPhrase(trigger);
+  const label = escapeHtml(billLabel);
+
+  try {
+    const { error } = await resend.emails.send({
+      from: FROM,
+      to,
+      subject: `${billLabel} for ${tenantName} is ${phrase} – ${formatted}`,
+      html: `
+        <div style="font-family:sans-serif;max-width:480px;margin:0 auto">
+          <h2 style="color:#1a1a2e">Bill Reminder</h2>
+          <p>Hi ${escapeHtml(ownerName)},</p>
+          <p><strong>${escapeHtml(tenantName)}</strong>'s <strong>${label}</strong> of
+             <strong>${formatted}</strong> is ${phrase}
+             (<strong>${new Intl.DateTimeFormat("en-PH", { dateStyle: "long" }).format(dueDate)}</strong>).</p>
+          <p>This reminder will stop once it's marked paid in the tenant's ledger.</p>
+        </div>
+      `,
+    });
+    if (error) {
+      console.error("Resend rejected email:", error);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.error("Failed to send email:", err);
+    return false;
+  }
+}
+
+export async function sendTenantBillReminder(
+  to: string,
+  tenantName: string,
+  billLabel: string,
+  amount: number,
+  dueDate: Date,
+  trigger: string,
+  landlordName: string
+): Promise<boolean> {
+  const formatted = new Intl.NumberFormat("en-PH", { style: "currency", currency: "PHP", minimumFractionDigits: 0 }).format(amount);
+  const phrase = billTriggerPhrase(trigger);
+  const label = escapeHtml(billLabel);
+
+  try {
+    const { error } = await resend.emails.send({
+      from: FROM,
+      to,
+      subject: `${billLabel} ${phrase} – ${formatted}`,
+      html: `
+        <div style="font-family:sans-serif;max-width:480px;margin:0 auto">
+          <h2 style="color:#1a1a2e">${label} Reminder</h2>
+          <p>Hi <strong>${escapeHtml(tenantName)}</strong>,</p>
+          <p>Your <strong>${label}</strong> of <strong>${formatted}</strong> is ${phrase}
+             (<strong>${new Intl.DateTimeFormat("en-PH", { dateStyle: "long" }).format(dueDate)}</strong>).</p>
+          <p style="color:#666;font-size:12px">— ${escapeHtml(landlordName)}</p>
+        </div>
+      `,
+    });
+    if (error) {
+      console.error("Resend rejected email:", error);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.error("Failed to send email:", err);
+    return false;
+  }
+}
