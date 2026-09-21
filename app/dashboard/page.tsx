@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { formatCurrency, formatDate, getMonthLabel, getCurrentMonth } from "@/lib/utils";
-import { daysBetween, dueDateForMonth } from "@/lib/due-dates";
+import { computeUnpaidRows } from "@/lib/unpaid";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { PaymentBadge } from "@/components/dashboard/payment-badge";
 import { GettingStarted } from "@/components/dashboard/getting-started";
@@ -40,28 +40,7 @@ export default async function DashboardPage() {
   const occupiedUnits = allUnits.filter((u) => u.status === "occupied").length;
   const vacantUnits = allUnits.filter((u) => u.status === "vacant").length;
 
-  // Tenants with no Payment row yet this month (not billed/submitted at all)
-  // are otherwise invisible to the stats below — a rent due date has still
-  // passed or is approaching for them even without a record, so they're
-  // resolved against the same day-5 default the reminder engine uses.
-  const unpaidRows = tenants
-    .map((tenant) => {
-      const payment = allPayments.find((p) => p.tenantId === tenant.id);
-      if (payment && ["approved", "waived"].includes(payment.status)) return null;
-      const dueDate = payment?.dueDate ?? dueDateForMonth(currentMonth, tenant.dueDay);
-      const diff = daysBetween(now, dueDate);
-      return {
-        tenantId: tenant.id,
-        tenantName: tenant.name,
-        unitLabel: `${tenant.unit.property.name} – ${tenant.unit.unitNumber}`,
-        amount: payment?.amount ?? tenant.unit.rentAmount,
-        dueDate,
-        status: payment?.status ?? (diff > 0 ? "late" : "pending"),
-        daysOverdue: diff,
-      };
-    })
-    .filter((r): r is NonNullable<typeof r> => r !== null)
-    .sort((a, b) => b.daysOverdue - a.daysOverdue);
+  const unpaidRows = computeUnpaidRows(tenants, allPayments, currentMonth, now);
 
   const collected = allPayments.filter((p) => p.status === "approved").reduce((s, p) => s + p.amount, 0);
   const collectedCount = allPayments.filter((p) => p.status === "approved").length;
@@ -119,8 +98,8 @@ export default async function DashboardPage() {
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
         <StatCard title="Collected" value={collected} icon={CheckCircle} isCurrency variant="success" trend={`${collectedCount} payments`} href="/dashboard/analytics" />
-        <StatCard title="Pending" value={pending} icon={Clock} isCurrency variant="warning" trend={`${pendingRows.length} tenants`} href="/dashboard/payments?status=pending" />
-        <StatCard title="Overdue" value={overdue} icon={AlertTriangle} isCurrency variant="danger" trend={`${overdueRows.length} tenants`} href="/dashboard/payments?status=late" />
+        <StatCard title="Pending" value={pending} icon={Clock} isCurrency variant="warning" trend={`${pendingRows.length} tenants`} href="/dashboard/unpaid?status=pending" />
+        <StatCard title="Overdue" value={overdue} icon={AlertTriangle} isCurrency variant="danger" trend={`${overdueRows.length} tenants`} href="/dashboard/unpaid?status=late" />
         <StatCard title="Total Units" value={totalUnits} icon={Home} href="/dashboard/units" />
         <StatCard title="Occupied" value={occupiedUnits} icon={Users} variant="success" trend={`${vacantUnits} vacant`} href="/dashboard/units?status=occupied" />
         <StatCard title="Active Tenants" value={tenants.length} icon={Users} variant="default" href="/dashboard/tenants" />
