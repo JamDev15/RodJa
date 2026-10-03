@@ -388,13 +388,15 @@ export async function sendBillingReminder(
   amount: number,
   dueDate: Date,
   period: string,
-  log?: LogContext
+  log?: LogContext,
+  attachments?: EmailAttachment[]
 ): Promise<boolean> {
   const formatted = peso(amount);
   return sendEmail({
     to,
     subject: `Subscription payment due soon – ${formatted}`,
     log,
+    attachments,
     html: `
       <div style="font-family:sans-serif;max-width:480px;margin:0 auto">
         <h2 style="color:#1a1a2e">Subscription Payment Reminder</h2>
@@ -403,6 +405,7 @@ export async function sendBillingReminder(
            <strong>${longDate(dueDate)}</strong>.</p>
         <p>Please pay and submit your reference number in the Billing section of your dashboard to avoid
            your account being paused.</p>
+        ${attachments?.length ? "<p>Your invoice is attached as a PDF.</p>" : ""}
       </div>
     `,
   });
@@ -413,18 +416,20 @@ export async function sendBillingApproved(
   ownerName: string,
   period: string,
   loginUrl: string,
-  log?: LogContext
+  log?: LogContext,
+  attachments?: EmailAttachment[]
 ): Promise<boolean> {
   // The login link is a one-time credential, so the logged preview omits it.
   const ok = await sendEmail({
     to,
     subject: `Payment confirmed – ${period}`,
+    attachments,
     html: `
       <div style="font-family:sans-serif;max-width:480px;margin:0 auto">
         <h2 style="color:#16a34a">Payment Confirmed ✓</h2>
         <p>Hi ${escapeHtml(ownerName)},</p>
         <p>Your subscription payment for <strong>${escapeHtml(period)}</strong> has been confirmed. Thank you!</p>
-        <p>Your account is active and ready to go.</p>
+        <p>Your account is active and ready to go.${attachments?.length ? " Your receipt is attached as a PDF." : ""}</p>
         <p><a href="${loginUrl}" style="background:#2563eb;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;display:inline-block">Log In Now</a></p>
         <p style="color:#666;font-size:12px">This link signs you in directly and expires in 48 hours.</p>
       </div>
@@ -436,7 +441,9 @@ export async function sendBillingApproved(
       channel: "email",
       to,
       subject: `Payment confirmed – ${period}`,
-      body: `Subscription payment for ${period} confirmed. Account active. (One-time login link included.)`,
+      body: `Subscription payment for ${period} confirmed. Account active. (One-time login link included.)${
+        attachments?.length ? `\n[Attached: ${attachments.map((a) => a.filename).join(", ")}]` : ""
+      }`,
       status: ok ? "sent" : "failed",
     });
   }
@@ -493,19 +500,21 @@ export async function sendTrialEndingSoon(
   ownerName: string,
   trialEndsAt: Date,
   renewUrl?: string,
-  log?: LogContext
+  log?: LogContext,
+  attachments?: EmailAttachment[]
 ): Promise<boolean> {
   return sendEmail({
     to,
     subject: "Your TenantHub free trial ends tomorrow",
     log,
+    attachments,
     html: emailLayout(`
       <h2 style="margin:0 0 12px">Your free trial ends tomorrow</h2>
       <p>Hi ${escapeHtml(ownerName)},</p>
       <p>Your 3-day TenantHub trial ends on <strong>${longDate(trialEndsAt)}</strong>.
          Keep your tenants, ledgers, contracts, and reminders running for just <strong>₱499/month</strong>.</p>
       ${renewUrl ? button(renewUrl, "Subscribe for ₱499/month") : ""}
-      <p style="color:#6b7280;font-size:13px">Pay via GCash or Maya. You can also subscribe from Billing in your dashboard.</p>`),
+      <p style="color:#6b7280;font-size:13px">Pay via GCash or Maya. You can also subscribe from Billing in your dashboard.${attachments?.length ? " Your invoice is attached." : ""}</p>`),
   });
 }
 
@@ -701,5 +710,37 @@ export async function sendWorkflowEmail(opts: {
       textToHtml(opts.body),
       `You're receiving this because you signed up for TenantHub. <a href="${opts.unsubscribeUrl}" style="color:#9ca3af">Unsubscribe</a>`
     ),
+  });
+}
+
+/** Owner's copy of an invoice/receipt that was just sent to one of their tenants. */
+export async function sendOwnerDocumentCopy(opts: {
+  to: string;
+  ownerName: string;
+  tenantName: string;
+  kind: "invoice" | "receipt";
+  number: string;
+  total: number;
+  periodLabel: string | null;
+  tenantEmailed: boolean;
+  tenantPageUrl: string;
+  pdf: Buffer;
+  log?: LogContext;
+}): Promise<boolean> {
+  const label = opts.kind === "invoice" ? "Invoice" : "Receipt";
+  const period = opts.periodLabel ? ` for ${escapeHtml(opts.periodLabel)}` : "";
+  return sendEmail({
+    to: opts.to,
+    subject: `Copy: ${label} ${opts.number} → ${opts.tenantName} (${peso(opts.total)})`,
+    log: opts.log,
+    attachments: [{ filename: `${opts.number}.pdf`, content: opts.pdf }],
+    html: emailLayout(`
+      <h2 style="margin:0 0 12px">${label} ${escapeHtml(opts.number)} — your copy</h2>
+      <p>Hi ${escapeHtml(opts.ownerName)},</p>
+      <p>${opts.kind === "invoice" ? "An invoice" : "A receipt"}${period} for <strong>${peso(opts.total)}</strong> was ${
+        opts.tenantEmailed ? "emailed to" : "posted to the portal of"
+      } <strong>${escapeHtml(opts.tenantName)}</strong>. The PDF is attached for your records.</p>
+      ${button(opts.tenantPageUrl, "Open tenant")}`,
+      "You can turn owner copies off in Reminders → Owner copies."),
   });
 }

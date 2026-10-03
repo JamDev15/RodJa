@@ -4,7 +4,9 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { formatZodError } from "@/lib/validations";
 
-const schema = z.object({ autoSendReceipts: z.boolean() });
+const schema = z
+  .object({ autoSendReceipts: z.boolean().optional(), emailOwnerCopies: z.boolean().optional() })
+  .refine((d) => d.autoSendReceipts !== undefined || d.emailOwnerCopies !== undefined, { message: "Nothing to update" });
 
 export async function PATCH(req: Request) {
   const session = await auth();

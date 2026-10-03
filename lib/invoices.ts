@@ -2,7 +2,7 @@ import crypto from "crypto";
 import { prisma } from "@/lib/prisma";
 import type { Account, Invoice, MonthlyLedger, Payment, Property, Tenant, Unit } from "@prisma/client";
 import { buildInvoicePdf } from "@/lib/pdf";
-import { APP_URL, sendInvoiceEmail } from "@/lib/email";
+import { APP_URL, sendInvoiceEmail, sendOwnerDocumentCopy } from "@/lib/email";
 import { logMessage } from "@/lib/message-log";
 import { dueDateForMonth } from "@/lib/due-dates";
 import { getMonthLabel } from "@/lib/utils";
@@ -169,8 +169,9 @@ export async function issueDocument(opts: IssueOptions): Promise<{ invoice: Invo
   const label = opts.type === "invoice" ? "Invoice" : "Receipt";
 
   let emailed = false;
+  let pdf: Buffer | null = null;
   if (opts.tenant.email) {
-    const pdf = await invoicePdf(invoice, opts.account, opts.tenant);
+    pdf = await invoicePdf(invoice, opts.account, opts.tenant);
     emailed = await sendInvoiceEmail({
       to: opts.tenant.email,
       tenantName: opts.tenant.name,
@@ -187,6 +188,24 @@ export async function issueDocument(opts: IssueOptions): Promise<{ invoice: Invo
       log,
     });
     if (emailed) invoice = await prisma.invoice.update({ where: { id: invoice.id }, data: { sentAt: new Date() } });
+  }
+
+  // Owner's copy (on by default; toggle on the Reminders page).
+  if (opts.account.emailOwnerCopies) {
+    pdf ??= await invoicePdf(invoice, opts.account, opts.tenant);
+    await sendOwnerDocumentCopy({
+      to: opts.account.email,
+      ownerName: opts.account.ownerName,
+      tenantName: opts.tenant.name,
+      kind: opts.type,
+      number: invoice.number,
+      total,
+      periodLabel: opts.month ? getMonthLabel(opts.month) : null,
+      tenantEmailed: emailed,
+      tenantPageUrl: `${APP_URL}/dashboard/tenants/${opts.tenant.id}`,
+      pdf,
+      log: { ...log, recipientType: "owner", recipientName: opts.account.ownerName },
+    });
   }
 
   const money = new Intl.NumberFormat("en-PH", { style: "currency", currency: "PHP", minimumFractionDigits: 0 }).format(total);

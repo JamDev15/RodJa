@@ -12,7 +12,7 @@ export default async function RemindersPage() {
 
   const [config, account] = await Promise.all([
     prisma.reminderConfig.findUnique({ where: { accountId } }),
-    prisma.account.findUnique({ where: { id: accountId }, select: { autoSendReceipts: true } }),
+    prisma.account.findUnique({ where: { id: accountId }, select: { autoSendReceipts: true, emailOwnerCopies: true } }),
   ]);
 
   return (
@@ -34,7 +34,7 @@ export default async function RemindersPage() {
       </div>
 
       <ReminderConfig config={config} accountId={accountId} />
-      <AutoReceiptToggle initial={account?.autoSendReceipts ?? true} />
+      <AutoReceiptToggle initial={account?.autoSendReceipts ?? true} initialOwnerCopies={account?.emailOwnerCopies ?? true} />
       {user?.role === "LANDLORD" && <PushSubscribeToggle />}
     </div>
   );

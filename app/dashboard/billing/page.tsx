@@ -197,6 +197,7 @@ export default async function BillingPage() {
                   <th className="text-left px-4 py-3 text-gray-400 font-medium">Amount</th>
                   <th className="text-left px-4 py-3 text-gray-400 font-medium">Status</th>
                   <th className="text-left px-4 py-3 text-gray-400 font-medium">Paid At</th>
+                  <th className="text-left px-4 py-3 text-gray-400 font-medium">Documents</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/10">
@@ -210,6 +211,12 @@ export default async function BillingPage() {
                       </Badge>
                     </td>
                     <td className="px-4 py-3 text-gray-400">{b.paidAt ? formatDate(b.paidAt) : "—"}</td>
+                    <td className="px-4 py-3">
+                      <div className="flex gap-3 text-xs">
+                        <a href={`/api/billing/${b.id}/pdf?type=invoice`} className="text-blue-400 hover:text-blue-300">Invoice</a>
+                        {b.status === "paid" && <a href={`/api/billing/${b.id}/pdf?type=receipt`} className="text-green-400 hover:text-green-300">Receipt</a>}
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>

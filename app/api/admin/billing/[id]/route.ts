@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { sendBillingApproved, sendBillingRejected } from "@/lib/email";
 import { exitWorkflowsOnConversion } from "@/lib/workflows";
+import { subscriptionAttachment } from "@/lib/subscription-docs";
 import { adminBillingReviewSchema, formatZodError } from "@/lib/validations";
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -59,7 +60,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       },
     });
     const loginUrl = `${process.env.NEXT_PUBLIC_APP_URL}/magic-login?token=${token}`;
-    await sendBillingApproved(record.account.email, record.account.ownerName, record.period, loginUrl, ownerLog);
+    await sendBillingApproved(record.account.email, record.account.ownerName, record.period, loginUrl, ownerLog, await subscriptionAttachment(record.id, "receipt"));
     return NextResponse.json(updated);
   }
 

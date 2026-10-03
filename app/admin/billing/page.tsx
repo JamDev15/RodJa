@@ -19,7 +19,7 @@ export default async function AdminBillingPage() {
 
       {records.length === 0 ? (
         <div className="rounded-xl border border-white/10 bg-white/5 p-8 text-center text-gray-500 text-sm">
-          No billing records yet — they're created automatically for paid-plan accounts once their free trial ends.
+          No billing records yet — they&apos;re created automatically for paid-plan accounts once their free trial ends.
         </div>
       ) : (
         <div className="rounded-xl border border-white/10 overflow-x-auto">
@@ -57,6 +57,10 @@ export default async function AdminBillingPage() {
                   </td>
                   <td className="px-4 py-3">
                     {r.status !== "paid" && <BillingActions recordId={r.id} hasSubmission={r.status === "submitted"} />}
+                    <div className="mt-1 flex gap-3 text-xs">
+                      <a href={`/api/admin/billing/${r.id}/pdf?type=invoice`} className="text-blue-400 hover:text-blue-300">Invoice</a>
+                      {r.status === "paid" && <a href={`/api/admin/billing/${r.id}/pdf?type=receipt`} className="text-green-400 hover:text-green-300">Receipt</a>}
+                    </div>
                   </td>
                 </tr>
               ))}

@@ -63,6 +63,8 @@ model Account {
   trialAdminAlertSentAt DateTime?
   // Email the tenant a receipt automatically when a bill is marked paid.
   autoSendReceipts      Boolean              @default(true)
+  // Email the owner a copy of every invoice/receipt sent to their tenants.
+  emailOwnerCopies      Boolean              @default(true)
   createdAt             DateTime             @default(now())
   updatedAt             DateTime             @updatedAt
   properties            Property[]
@@ -321,6 +323,9 @@ model BillingRecord {
   // switch to once this bill is approved (regular recurring renewals leave
   // this null since the plan isn't changing).
   targetPlanId    String?
+  // Platform-issued documents for this subscription bill (TH-INV-000001 / TH-RCPT-000001).
+  invoiceNumber   String?   @unique
+  receiptNumber   String?   @unique
   createdAt       DateTime  @default(now())
 }
 

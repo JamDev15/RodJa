@@ -3,6 +3,7 @@ import type { Account } from "@prisma/client";
 import { sendBillingReminder, sendAccountPaused, sendTrialEndingSoon, sendTrialEnded, sendAdminTrialAlert, type SignupDetails } from "@/lib/email";
 import { daysBetween } from "@/lib/due-dates";
 import { renewUrlFor } from "@/lib/tokens";
+import { subscriptionAttachment } from "@/lib/subscription-docs";
 import { triggerWorkflows } from "@/lib/workflows";
 import type { LogContext } from "@/lib/message-log";
 
@@ -27,10 +28,11 @@ export function signupDetailsOf(account: Account): SignupDetails {
 }
 
 /** "Expires tomorrow": owner gets a subscribe nudge, platform admin gets a heads-up, workflows fire. */
-async function trialExpiringSoon(account: Account, trialEndsAt: Date, now: Date): Promise<boolean> {
+async function trialExpiringSoon(account: Account, trialEndsAt: Date, now: Date, billingRecordId?: string): Promise<boolean> {
   let sent = false;
   if (!account.trialReminderSentAt) {
-    sent = await sendTrialEndingSoon(account.email, account.ownerName, trialEndsAt, renewUrlFor(account.id), ownerLog(account, "trial"));
+    const attachments = billingRecordId ? await subscriptionAttachment(billingRecordId, "invoice") : [];
+    sent = await sendTrialEndingSoon(account.email, account.ownerName, trialEndsAt, renewUrlFor(account.id), ownerLog(account, "trial"), attachments);
     if (sent) await prisma.account.update({ where: { id: account.id }, data: { trialReminderSentAt: now } });
   }
   if (!account.trialAdminAlertSentAt) {
@@ -144,7 +146,7 @@ export async function runBillingSweep(now: Date = new Date()): Promise<BillingSw
       const inTrial = !!account.trialEndsAt && !(await prisma.billingRecord.findFirst({ where: { accountId: account.id, status: "paid" }, select: { id: true } }));
 
       if (inTrial) {
-        if (diff === -1 && (await trialExpiringSoon(account, latest.dueDate, now))) remindersSent++;
+        if (diff === -1 && (await trialExpiringSoon(account, latest.dueDate, now, latest.id))) remindersSent++;
         // A payment submitted for review keeps the account open until the admin decides.
         if (now >= latest.dueDate && latest.status !== "submitted") {
           await prisma.billingRecord.update({ where: { id: latest.id }, data: { status: "overdue" } });
@@ -155,7 +157,10 @@ export async function runBillingSweep(now: Date = new Date()): Promise<BillingSw
       }
 
       if (diff === -3 && !latest.reminderSentAt) {
-        const sent = await sendBillingReminder(account.email, account.ownerName, latest.amount, latest.dueDate, latest.period, ownerLog(account, "billing"));
+        const sent = await sendBillingReminder(
+          account.email, account.ownerName, latest.amount, latest.dueDate, latest.period,
+          ownerLog(account, "billing"), await subscriptionAttachment(latest.id, "invoice")
+        );
         if (sent) {
           await prisma.billingRecord.update({ where: { id: latest.id }, data: { reminderSentAt: now } });
           remindersSent++;
