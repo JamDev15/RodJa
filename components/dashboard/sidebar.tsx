@@ -5,7 +5,8 @@ import { usePathname, useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
 import {
   LayoutDashboard, Building2, Users, CreditCard, Bell,
-  Settings, LogOut, ChevronRight, Globe, Receipt, Home, HelpCircle, Menu, X, ArrowLeft
+  Settings, LogOut, ChevronRight, Globe, Receipt, Home, HelpCircle, Menu, X, ArrowLeft,
+  History, Zap, FileSignature
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -14,7 +15,10 @@ const navItems = [
   { href: "/dashboard/properties", label: "Properties", icon: Building2 },
   { href: "/dashboard/tenants", label: "Tenants", icon: Users },
   { href: "/dashboard/payments", label: "Payments", icon: CreditCard },
+  { href: "/dashboard/contracts", label: "Contracts", icon: FileSignature },
   { href: "/dashboard/reminders", label: "Reminders", icon: Bell },
+  { href: "/dashboard/automations", label: "Automations", icon: Zap },
+  { href: "/dashboard/messages", label: "Message History", icon: History },
   { href: "/dashboard/listings", label: "Listings", icon: Globe },
   { href: "/dashboard/billing", label: "Billing", icon: Receipt },
   { href: "/dashboard/settings", label: "Settings", icon: Settings },

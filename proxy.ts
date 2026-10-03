@@ -5,7 +5,10 @@ import type { NextRequest } from "next/server";
 // "Public" here means no session cookie is required at this layer — routes
 // under /api/cron enforce their own CRON_SECRET bearer-token check instead,
 // since Vercel Cron triggers carry no user session.
-const PUBLIC_API_PREFIXES = ["/api/auth", "/api/signup", "/api/cron"];
+// /api/sign, /api/docs, /api/renew and /api/unsubscribe are authorized by the
+// unguessable or signed token in their URL instead of a session (tenants sign
+// contracts and open invoices from an emailed link without logging in).
+const PUBLIC_API_PREFIXES = ["/api/auth", "/api/signup", "/api/cron", "/api/sign/", "/api/docs/", "/api/renew", "/api/unsubscribe"];
 const TENANT_API_PREFIXES = ["/api/tenant/", "/api/payments/submit", "/api/maintenance"];
 const ADMIN_API_PREFIXES = ["/api/admin"];
 

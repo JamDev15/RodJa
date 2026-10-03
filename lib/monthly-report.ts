@@ -157,7 +157,12 @@ export async function runMonthlyReportSweep(now: Date = new Date()): Promise<Mon
     }
 
     const { buffer, totals, monthLabel } = await buildMonthlyReportWorkbook(account.id, monthKey);
-    const ok = await sendMonthlyReport(account.email, account.ownerName, monthLabel, totals, buffer);
+    const ok = await sendMonthlyReport(account.email, account.ownerName, monthLabel, totals, buffer, {
+      accountId: account.id,
+      recipientType: "owner",
+      recipientName: account.ownerName,
+      category: "report",
+    });
     if (ok) {
       await prisma.monthlyReportLog.create({ data: { accountId: account.id, monthKey } });
       result.sent++;

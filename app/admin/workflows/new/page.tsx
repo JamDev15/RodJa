@@ -1,0 +1,29 @@
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
+import { WORKFLOW_TEMPLATES } from "@/lib/workflow-meta";
+import { WorkflowBuilder } from "../workflow-builder";
+
+export default async function NewWorkflowPage({ searchParams }: { searchParams: Promise<{ template?: string }> }) {
+  const { template } = await searchParams;
+  const t = WORKFLOW_TEMPLATES.find((x) => x.key === template);
+
+  return (
+    <div className="space-y-6 max-w-5xl">
+      <div className="flex items-center gap-3">
+        <Link href="/admin/workflows" className="rounded-lg p-1.5 hover:bg-white/10 text-gray-400 hover:text-white"><ArrowLeft className="h-5 w-5" /></Link>
+        <h1 className="text-2xl font-bold text-white">{t ? t.name : "New workflow"}</h1>
+      </div>
+      <WorkflowBuilder
+        initial={{
+          name: t?.name ?? "",
+          description: t?.description ?? "",
+          isActive: true,
+          trigger: t?.trigger ?? "manual",
+          triggerValue: t?.triggerValue ?? "",
+          stopOnConversion: true,
+          steps: t ? structuredClone(t.steps) : [{ type: "email", subject: "", body: "Hi {{first_name}},\n\n" }],
+        }}
+      />
+    </div>
+  );
+}

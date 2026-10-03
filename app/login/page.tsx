@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { signIn, getSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -13,6 +13,10 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [form, setForm] = useState({ email: "", password: "" });
+  const [justRegistered, setJustRegistered] = useState(false);
+  useEffect(() => {
+    setJustRegistered(new URLSearchParams(window.location.search).get("registered") === "1");
+  }, []);
 
   const [mode, setMode] = useState<"login" | "forgot">("login");
   const [forgotEmail, setForgotEmail] = useState("");
@@ -103,8 +107,19 @@ export default function LoginPage() {
                   value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required />
               </div>
             </div>
+            {justRegistered && !error && (
+              <div className="rounded-lg bg-green-500/10 border border-green-500/20 p-3 text-sm text-green-400">
+                🎉 Your 3-day free trial has started! Sign in to set up your first property.
+              </div>
+            )}
             {error && (
-              <div className="rounded-lg bg-red-500/10 border border-red-500/20 p-3 text-sm text-red-400">{error}</div>
+              <div className="rounded-lg bg-red-500/10 border border-red-500/20 p-3 text-sm text-red-400">
+                {error}
+                <p className="mt-1 text-xs text-gray-400">
+                  Free trial ended or account paused?{" "}
+                  <Link href="/renew" className="text-blue-400 hover:text-blue-300">Reactivate your account →</Link>
+                </p>
+              </div>
             )}
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? "Signing in..." : "Sign In"}

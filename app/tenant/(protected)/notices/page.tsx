@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { formatDate } from "@/lib/utils";
+import Link from "next/link";
 import { Bell, AlertTriangle, Info } from "lucide-react";
 
 export default async function TenantNoticesPage() {
@@ -54,7 +55,10 @@ export default async function TenantNoticesPage() {
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-white">{notice.title}</p>
                   <p className="text-xs text-gray-500 mt-0.5">{formatDate(notice.createdAt)}</p>
-                  <p className="text-sm text-gray-400 mt-2">{notice.content}</p>
+                  <p className="text-sm text-gray-400 mt-2 whitespace-pre-wrap">{notice.content}</p>
+                  {["contract", "invoice", "receipt"].includes(notice.type) && (
+                    <Link href="/tenant/documents" className="mt-2 inline-block text-sm text-blue-400 hover:text-blue-300">Open Documents →</Link>
+                  )}
                 </div>
               </div>
             </div>

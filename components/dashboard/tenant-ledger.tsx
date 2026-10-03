@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
-import { Plus, Pencil, Check, X, Zap, Droplets, Home, MoreHorizontal, Trash2, RefreshCw, AlertCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Plus, Pencil, Check, X, Zap, Droplets, Home, MoreHorizontal, Trash2, RefreshCw, AlertCircle, FileText, ReceiptText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -58,6 +59,10 @@ function entryTotalBalance(e: LedgerEntry) {
     billBalance(e.otherAmount, e.otherPaidAmount, e.otherPaid) +
     (e.balancePaid ? 0 : e.balance)
   );
+}
+
+function entryTotalBilled(e: LedgerEntry) {
+  return (e.rentAmount || 0) + (e.electricAmount || 0) + (e.waterAmount || 0) + (e.otherAmount || 0) + (e.balance || 0);
 }
 
 // ─── Small bill cell for the table ──────────────────────────────────────────
@@ -164,6 +169,9 @@ export function TenantLedger({ tenantId, moveInDate, defaultRent }: {
   moveInDate: Date;
   defaultRent: number;
 }) {
+  // Refreshes the server-rendered panels (receipts, message history) after
+  // actions that can issue documents.
+  const router = useRouter();
   const [entries, setEntries] = useState<Map<string, LedgerEntry>>(new Map());
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -259,6 +267,7 @@ export function TenantLedger({ tenantId, moveInDate, defaultRent }: {
       await fetchEntries();
       setDialogMonth(null);
       toast({ title: "Saved!", variant: "success" });
+      router.refresh();
     } catch {
       toast({ title: "Failed to save", variant: "destructive" });
     } finally {
@@ -278,9 +287,38 @@ export function TenantLedger({ tenantId, moveInDate, defaultRent }: {
         body: JSON.stringify(patch),
       });
       if (!res.ok) throw new Error();
+      router.refresh();
     } catch {
       setEntries(prev);
       toast({ title: "Failed to update", variant: "destructive" });
+    }
+  }
+
+  const [sendingDoc, setSendingDoc] = useState<string | null>(null);
+  async function sendDoc(month: string, type: "invoice" | "receipt") {
+    const entry = entries.get(month);
+    if (!entry) return;
+    const what = type === "invoice" ? "an invoice for the unpaid balance" : "a receipt for everything paid";
+    if (!confirm(`Send ${what} for this month to the tenant?`)) return;
+    setSendingDoc(`${month}:${type}`);
+    try {
+      const res = await fetch("/api/invoices", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ledgerId: entry.id, type }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Failed");
+      toast({
+        title: `${type === "invoice" ? "Invoice" : "Receipt"} ${data.number} created`,
+        description: data.emailed ? "Emailed to the tenant and posted in their portal." : data.hasEmail ? "Email failed — it's still in their portal." : "No tenant email on file — it's in their portal.",
+        variant: "success",
+      });
+      router.refresh();
+    } catch (err: any) {
+      toast({ title: err.message, variant: "destructive" });
+    } finally {
+      setSendingDoc(null);
     }
   }
 
@@ -443,6 +481,18 @@ export function TenantLedger({ tenantId, moveInDate, defaultRent }: {
                         {e ? <Pencil className="h-3 w-3" /> : <Plus className="h-3 w-3" />}
                         {e ? "Edit" : "Add"}
                       </button>
+                      {e && outstanding! > 0 && (
+                        <button onClick={() => sendDoc(month, "invoice")} disabled={sendingDoc !== null} title="Send invoice"
+                          className="flex items-center gap-1 rounded-md bg-blue-500/10 hover:bg-blue-500/20 px-2 py-1 text-xs text-blue-300 transition-colors disabled:opacity-50">
+                          <FileText className="h-3 w-3" />{sendingDoc === `${month}:invoice` ? "…" : "Invoice"}
+                        </button>
+                      )}
+                      {e && outstanding! < entryTotalBilled(e) && (
+                        <button onClick={() => sendDoc(month, "receipt")} disabled={sendingDoc !== null} title="Send receipt"
+                          className="flex items-center gap-1 rounded-md bg-green-500/10 hover:bg-green-500/20 px-2 py-1 text-xs text-green-300 transition-colors disabled:opacity-50">
+                          <ReceiptText className="h-3 w-3" />{sendingDoc === `${month}:receipt` ? "…" : "Receipt"}
+                        </button>
+                      )}
                       {e && (
                         <button onClick={() => deleteEntry(month)}
                           className="flex h-6 w-6 items-center justify-center rounded-md bg-white/10 hover:bg-red-500/20 text-gray-500 hover:text-red-400 transition-colors">

@@ -3,11 +3,13 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { LayoutDashboard, Users, CreditCard, Globe, Settings, LogOut, ShieldCheck, Tag, Menu, X, ArrowLeft } from "lucide-react";
+import { LayoutDashboard, Users, CreditCard, Globe, Settings, LogOut, ShieldCheck, Tag, Menu, X, ArrowLeft, UserPlus, Workflow } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/admin/signups", label: "Signups", icon: UserPlus },
+  { href: "/admin/workflows", label: "Workflows", icon: Workflow },
   { href: "/admin/accounts", label: "Accounts", icon: Users },
   { href: "/admin/plans", label: "Plans", icon: Tag },
   { href: "/admin/listings", label: "Listings", icon: Globe },

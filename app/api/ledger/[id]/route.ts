@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { ledgerUpdateSchema, formatZodError } from "@/lib/validations";
+import { autoReceiptForLedgerChange } from "@/lib/invoices";
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -19,6 +20,8 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   if (!parsed.success) return NextResponse.json({ error: formatZodError(parsed.error) }, { status: 400 });
 
   const updated = await prisma.monthlyLedger.update({ where: { id }, data: parsed.data });
+  // Bills that just flipped to paid get an automatic receipt emailed to the tenant.
+  await autoReceiptForLedgerChange(entry, updated);
   return NextResponse.json(updated);
 }
 
