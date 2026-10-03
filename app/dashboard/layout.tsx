@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
@@ -5,6 +6,9 @@ import { Sidebar } from "@/components/dashboard/sidebar";
 import { AssistantWidget } from "@/components/dashboard/assistant-widget";
 import { getAccessState } from "@/lib/access";
 import { createSignedToken } from "@/lib/tokens";
+
+// Private app area — keep it out of search results.
+export const metadata: Metadata = { robots: { index: false, follow: false } };
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();

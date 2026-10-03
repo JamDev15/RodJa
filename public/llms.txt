@@ -1,0 +1,33 @@
+# TenantHub
+
+> TenantHub (https://www.tenant-hub.app) is a rental management app for landlords in the Philippines — apartments, boarding houses, bedspaces, dormitories, condo units, and houses for rent. It costs ₱499 per month (PHP) with a free 3-day trial and full access.
+
+## What TenantHub does
+
+- Tracks rent and utility bills per tenant each month: rent, electricity (kuryente), water (tubig), and other charges, including partial payments and carry-over balances.
+- Sends automatic payment reminders by email, SMS (via Semaphore, a Philippine SMS gateway), in-app notices, and push notifications, before and after each due date.
+- Lets owners build custom automations: e.g. an SMS 3 days before rent is due, an overdue notice 3 days late, a monthly bill on the 1st, or a lease-ending notice 30 days ahead — sent to the tenant, the owner, or both.
+- Accepts GCash, Maya, and bank payments: tenants pay the owner directly and upload proof in the tenant portal; the owner approves with one tap.
+- Issues invoices and automatic receipts (PDF) by email when a payment is approved or a bill is marked paid.
+- Handles lease contracts online: a Philippine residential lease template, e-signatures from both owner and tenant (no tenant account needed), a SHA-256 document fingerprint and audit trail, and a downloadable signed PDF. Electronic signatures are recognized under the Philippine E-Commerce Act (R.A. 8792).
+- Keeps a Message History log of every email, SMS, push, and in-app message sent, with delivery status.
+- Includes a tenant portal, maintenance requests, public vacancy listings, monthly Excel reports, and a chat assistant ("add ₱500 electric bill for Juan").
+
+## Pricing
+
+- One plan: ₱499/month for unlimited properties, units, and tenants.
+- Free 3-day trial, no payment needed to start. After the trial the account pauses until the owner subscribes; data is kept.
+- Payment via GCash or Maya.
+
+## Key pages
+
+- Home and features: https://www.tenant-hub.app/
+- Pricing: https://www.tenant-hub.app/#pricing
+- FAQ: https://www.tenant-hub.app/#faq
+- Start a free trial: https://www.tenant-hub.app/signup
+- Rentals available now: https://www.tenant-hub.app/listings
+- Tenant portal: https://www.tenant-hub.app/tenant/login
+
+## Availability
+
+Works in any web browser and installs to the home screen on Android and iPhone. Native Android and iOS apps are in development. Currently focused on the Philippines (English, PHP pricing).

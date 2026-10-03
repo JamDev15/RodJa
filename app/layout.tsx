@@ -3,10 +3,45 @@ import Script from "next/script";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { RegisterServiceWorker } from "@/components/register-sw";
+import { DEFAULT_DESCRIPTION, DEFAULT_TITLE, KEYWORDS, SITE_NAME, SITE_URL } from "@/lib/seo";
 
 export const metadata: Metadata = {
-  title: "TenantHub – Rental Management for Philippine Landlords",
-  description: "Manage your rental properties, tenants, and payments with ease.",
+  metadataBase: new URL(SITE_URL),
+  title: { default: DEFAULT_TITLE, template: `%s | ${SITE_NAME}` },
+  description: DEFAULT_DESCRIPTION,
+  applicationName: SITE_NAME,
+  keywords: KEYWORDS,
+  category: "business",
+  creator: SITE_NAME,
+  publisher: SITE_NAME,
+  // Canonical URLs are set per page — a canonical here would be inherited by
+  // every page and point them all at the homepage.
+  openGraph: {
+    type: "website",
+    locale: "en_PH",
+    siteName: SITE_NAME,
+    title: DEFAULT_TITLE,
+    description: DEFAULT_DESCRIPTION,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: DEFAULT_TITLE,
+    description: DEFAULT_DESCRIPTION,
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 },
+  },
+  formatDetection: { telephone: false },
+  ...(process.env.GOOGLE_SITE_VERIFICATION || process.env.BING_SITE_VERIFICATION
+    ? {
+        verification: {
+          ...(process.env.GOOGLE_SITE_VERIFICATION ? { google: process.env.GOOGLE_SITE_VERIFICATION } : {}),
+          ...(process.env.BING_SITE_VERIFICATION ? { other: { "msvalidate.01": process.env.BING_SITE_VERIFICATION } } : {}),
+        },
+      }
+    : {}),
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
@@ -31,7 +66,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="h-full" suppressHydrationWarning>
+    <html lang="en-PH" className="h-full" suppressHydrationWarning>
       <body className="min-h-full bg-[#080c14] text-white antialiased" suppressHydrationWarning>
         {children}
         <Toaster />
