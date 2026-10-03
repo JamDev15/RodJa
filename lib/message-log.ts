@@ -37,6 +37,7 @@ export interface LogEntry extends LogContext {
 /** Turns an email's HTML into a short plain-text preview for the history list. */
 export function htmlToText(html: string): string {
   return html
+    .replace(/<!--brand-->[\s\S]*?<!--\/brand-->/g, "")
     .replace(/<style[\s\S]*?<\/style>/gi, "")
     .replace(/<br\s*\/?>/gi, "\n")
     .replace(/<\/(p|h[1-6]|li|tr|div)>/gi, "\n")

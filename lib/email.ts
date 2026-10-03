@@ -95,9 +95,9 @@ export async function sendEmail(opts: SendEmailOptions): Promise<boolean> {
 export function emailLayout(inner: string, footer = "TenantHub · Rental management made simple"): string {
   return `
     <div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;max-width:520px;margin:0 auto;color:#111827;line-height:1.55">
-      <div style="padding:18px 0;border-bottom:2px solid #2563eb;margin-bottom:20px">
+      <!--brand--><div style="padding:18px 0;border-bottom:2px solid #2563eb;margin-bottom:20px">
         <span style="font-weight:700;font-size:18px;color:#2563eb">TenantHub</span>
-      </div>
+      </div><!--/brand-->
       ${inner}
       <p style="color:#9ca3af;font-size:12px;margin-top:28px;border-top:1px solid #e5e7eb;padding-top:12px">${footer}</p>
     </div>`;

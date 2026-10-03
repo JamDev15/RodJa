@@ -103,7 +103,9 @@ export default async function AdminSignupsPage({
           <Link href="/admin/workflows" className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-gray-300 hover:bg-white/10">
             <Workflow className="h-4 w-4" /> Workflows
           </Link>
-          <a href="/api/admin/signups/export" className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-gray-300 hover:bg-white/10">
+          {/* Plain <a>: this is a file download from an API route, not a page navigation. */}
+          {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+          <a href="/api/admin/signups/export" download className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-gray-300 hover:bg-white/10">
             <Download className="h-4 w-4" /> Export CSV
           </a>
         </div>

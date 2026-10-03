@@ -16,7 +16,7 @@ function makeSanitizer(font: PDFFont) {
   const cache = new Map<string, string>();
   return (text: string): string => {
     let out = "";
-    for (const ch of text.replace(/₱/g, "PHP ").replace(/[“”]/g, '"').replace(/[‘’]/g, "'").replace(/\t/g, "    ")) {
+    for (const ch of text.replace(/₱\s?(?=\d)/g, "PHP ").replace(/₱/g, "PHP").replace(/[“”]/g, '"').replace(/[‘’]/g, "'").replace(/\t/g, "    ")) {
       if (ch === "\n") { out += ch; continue; }
       let mapped = cache.get(ch);
       if (mapped === undefined) {
@@ -38,11 +38,15 @@ export function pesoText(n: number): string {
   return `PHP ${new Intl.NumberFormat("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n)}`;
 }
 
-export function pdfDate(d: Date, withTime = false): string {
+/**
+ * Date-only fields (due dates, lease terms) are stored as UTC midnight, so
+ * they're formatted in UTC; real moments (issued, signed) in Philippine time.
+ */
+export function pdfDate(d: Date, withTime = false, moment = withTime): string {
   return new Intl.DateTimeFormat("en-PH", {
     dateStyle: "long",
     ...(withTime ? { timeStyle: "short" } : {}),
-    timeZone: withTime ? "Asia/Manila" : "UTC",
+    timeZone: moment ? "Asia/Manila" : "UTC",
   }).format(d) + (withTime ? " (PHT)" : "");
 }
 
@@ -298,7 +302,7 @@ export async function buildInvoicePdf(inv: InvoicePdfInput): Promise<Buffer> {
   w.page.drawText(title, { x: PAGE_W - MARGIN - tw, y: top - 22, size: 22, font: bold, color: isInvoice ? BRAND : rgb(0.09, 0.64, 0.29) });
   const meta = [
     `No. ${inv.number}`,
-    `${isInvoice ? "Issued" : "Date paid"}: ${pdfDate(inv.issuedAt)}`,
+    `${isInvoice ? "Issued" : "Date paid"}: ${pdfDate(inv.issuedAt, false, true)}`,
     ...(isInvoice && inv.dueDate ? [`Due: ${pdfDate(inv.dueDate)}`] : []),
   ];
   meta.forEach((l, i) => {
@@ -332,8 +336,9 @@ export async function buildInvoicePdf(inv: InvoicePdfInput): Promise<Buffer> {
   w.ensure(34);
   const totalLabel = isInvoice ? "Total due" : "Amount received";
   const total = pesoText(inv.total);
-  w.page.drawText(totalLabel, { x: amtX - 8 - 150, y: w.y - 22, size: 11, font: bold, color: INK });
-  w.page.drawText(total, { x: amtX - 8 - bold.widthOfTextAtSize(total, 13), y: w.y - 22, size: 13, font: bold, color: INK });
+  const totalX = amtX - 8 - bold.widthOfTextAtSize(total, 13);
+  w.page.drawText(totalLabel, { x: totalX - 18 - bold.widthOfTextAtSize(totalLabel, 11), y: w.y - 22, size: 11, font: bold, color: INK });
+  w.page.drawText(total, { x: totalX, y: w.y - 22, size: 13, font: bold, color: INK });
   w.y -= 40;
 
   if (isInvoice && (inv.gcash || inv.maya || inv.bankDetails)) {

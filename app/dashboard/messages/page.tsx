@@ -6,6 +6,10 @@ import { MessageHistoryList, CATEGORY_LABELS } from "@/components/dashboard/mess
 
 const PAGE_SIZE = 50;
 
+function daysAgo(days: number): Date {
+  return new Date(Date.now() - days * 86400000);
+}
+
 const selectClass =
   "min-w-0 flex-1 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-base sm:text-sm text-white focus:border-blue-500 focus:outline-none sm:flex-none";
 
@@ -39,7 +43,7 @@ export default async function MessageHistoryPage({
     ];
   }
 
-  const since30 = new Date(Date.now() - 30 * 86400000);
+  const since30 = daysAgo(30);
   const [messages, total, sent30, failed30] = await Promise.all([
     prisma.messageLog.findMany({
       where,
