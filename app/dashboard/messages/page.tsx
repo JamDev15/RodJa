@@ -113,7 +113,7 @@ export default async function MessageHistoryPage({
         </select>
         <select name="category" defaultValue={sp.category ?? ""} className={selectClass}>
           <option value="">All types</option>
-          {["reminder", "bill_reminder", "automation", "invoice", "receipt", "contract", "billing", "report"].map((c) => (
+          {["reminder", "bill_reminder", "automation", "workflow", "invoice", "receipt", "contract", "billing", "report"].map((c) => (
             <option key={c} value={c}>{CATEGORY_LABELS[c]}</option>
           ))}
         </select>

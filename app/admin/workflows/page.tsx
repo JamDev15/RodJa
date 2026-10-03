@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Plus, Workflow as WorkflowIcon } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { WORKFLOW_TEMPLATES, WORKFLOW_TRIGGERS, leadStatusLabel, totalDays, type WorkflowStep } from "@/lib/workflow-meta";
-import { WorkflowToggle } from "./workflow-toggle";
+import { WorkflowToggle } from "@/components/workflows/workflow-toggle";
 
 export default async function AdminWorkflowsPage() {
   const workflows = await prisma.workflow.findMany({ orderBy: { createdAt: "asc" } });
@@ -39,7 +39,10 @@ export default async function AdminWorkflowsPage() {
                       <span className="text-green-400">{countFor(w.id, "active")} active</span> · {countFor(w.id, "completed")} completed · {countFor(w.id, "exited")} exited
                     </p>
                   </Link>
-                  <WorkflowToggle id={w.id} isActive={w.isActive} />
+                  <div className="flex flex-col items-end gap-2">
+                    <WorkflowToggle id={w.id} isActive={w.isActive} />
+                    <Link href={`/admin/workflows/${w.id}`} className="text-xs text-purple-300 hover:text-purple-200">Edit →</Link>
+                  </div>
                 </div>
               </li>
             );

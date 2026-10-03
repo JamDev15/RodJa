@@ -316,3 +316,31 @@ export const renewSchema = z.object({
   token: z.string().min(10).max(500),
   referenceNumber: z.string().trim().min(1).max(100),
 });
+
+const ownerWorkflowStepSchema = z.discriminatedUnion("type", [
+  z.object({ type: z.literal("wait"), days: z.coerce.number().int().min(0).max(365) }),
+  z.object({ type: z.literal("email"), subject: z.string().trim().min(1, "Email subject is empty").max(200), body: z.string().trim().min(1, "Email message is empty").max(5000) }),
+  z.object({ type: z.literal("sms"), body: z.string().trim().min(1, "SMS message is empty").max(450) }),
+  z.object({ type: z.literal("portal"), title: z.string().trim().min(1, "Notice title is empty").max(200), body: z.string().trim().min(1, "Notice text is empty").max(2000) }),
+  z.object({ type: z.literal("send_invoice") }),
+  z.object({ type: z.literal("notify_owner"), subject: z.string().trim().min(1).max(200), body: z.string().trim().min(1).max(2000) }),
+]);
+
+export const ownerWorkflowSchema = z
+  .object({
+    name: z.string().trim().min(1, "Give the workflow a name").max(120),
+    description: z.string().trim().max(500).optional().nullable(),
+    isActive: z.boolean().optional(),
+    trigger: z.enum(["tenant_added", "before_due", "on_due", "after_due", "day_of_month", "lease_end", "manual"]),
+    offsetDays: z.coerce.number().int().min(0).max(365).optional(),
+    steps: z.array(ownerWorkflowStepSchema).min(1, "Add at least one step").max(40),
+    stopWhenPaid: z.boolean().optional(),
+  })
+  .refine((d) => d.trigger !== "day_of_month" || ((d.offsetDays ?? 0) >= 1 && (d.offsetDays ?? 0) <= 31), {
+    message: "Day of month must be between 1 and 31",
+    path: ["offsetDays"],
+  });
+
+export const ownerWorkflowEnrollSchema = z.object({
+  tenantIds: z.array(z.string().min(1)).min(1).max(500),
+});

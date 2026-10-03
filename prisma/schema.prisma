@@ -75,6 +75,7 @@ model Account {
   contracts             Contract[]
   invoices              Invoice[]
   workflowEnrollments   WorkflowEnrollment[]
+  ownerWorkflows        OwnerWorkflow[]
 }
 
 model User {
@@ -122,32 +123,33 @@ model Unit {
 }
 
 model Tenant {
-  id                  String               @id @default(cuid())
-  unitId              String
-  unit                Unit                 @relation(fields: [unitId], references: [id])
-  name                String
-  email               String?
-  phone               String               @unique
-  moveInDate          DateTime
-  moveOutDate         DateTime?
-  dueDay              Int                  @default(5)
-  depositAmount       Float?
-  depositPaid         Boolean              @default(false)
-  portalPin           String
-  isActive            Boolean              @default(true)
-  emergencyContact    String?
-  notes               String?
-  createdAt           DateTime             @default(now())
-  updatedAt           DateTime             @updatedAt
-  payments            Payment[]
-  maintenanceRequests MaintenanceRequest[]
-  reminders           Reminder[]
-  notices             Notice[]
-  ledger              MonthlyLedger[]
-  messageLogs         MessageLog[]
-  automationRuns      AutomationRun[]
-  contracts           Contract[]
-  invoices            Invoice[]
+  id                       String                    @id @default(cuid())
+  unitId                   String
+  unit                     Unit                      @relation(fields: [unitId], references: [id])
+  name                     String
+  email                    String?
+  phone                    String                    @unique
+  moveInDate               DateTime
+  moveOutDate              DateTime?
+  dueDay                   Int                       @default(5)
+  depositAmount            Float?
+  depositPaid              Boolean                   @default(false)
+  portalPin                String
+  isActive                 Boolean                   @default(true)
+  emergencyContact         String?
+  notes                    String?
+  createdAt                DateTime                  @default(now())
+  updatedAt                DateTime                  @updatedAt
+  payments                 Payment[]
+  maintenanceRequests      MaintenanceRequest[]
+  reminders                Reminder[]
+  notices                  Notice[]
+  ledger                   MonthlyLedger[]
+  messageLogs              MessageLog[]
+  automationRuns           AutomationRun[]
+  contracts                Contract[]
+  invoices                 Invoice[]
+  ownerWorkflowEnrollments OwnerWorkflowEnrollment[]
 }
 
 model Payment {
@@ -519,5 +521,54 @@ model WorkflowEnrollment {
   completedAt DateTime?
 
   @@unique([workflowId, accountId])
+  @@index([status, nextRunAt])
+}
+
+// ─── Owner Workflows (multi-step sequences for tenants) ──────────────────────
+
+// A landlord's own GoHighLevel-style sequence, e.g. "on the 1st send the
+// invoice → wait 5 days → SMS if still unpaid → wait 3 days → notify me".
+model OwnerWorkflow {
+  id           String                    @id @default(cuid())
+  accountId    String
+  account      Account                   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  name         String
+  description  String?
+  isActive     Boolean                   @default(true)
+  // tenant_added | before_due | on_due | after_due | day_of_month | lease_end | manual
+  trigger      String
+  offsetDays   Int                       @default(0)
+  // [{ type: "wait", days } | { type: "email", subject, body } | { type: "sms", body }
+  //  | { type: "portal", title, body } | { type: "notify_owner", subject, body }
+  //  | { type: "send_invoice" }]
+  steps        Json
+  // Bill-based workflows end as soon as that month's bills are fully paid.
+  stopWhenPaid Boolean                   @default(true)
+  createdAt    DateTime                  @default(now())
+  updatedAt    DateTime                  @updatedAt
+  enrollments  OwnerWorkflowEnrollment[]
+
+  @@index([accountId])
+}
+
+model OwnerWorkflowEnrollment {
+  id          String        @id @default(cuid())
+  workflowId  String
+  workflow    OwnerWorkflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  tenantId    String
+  tenant      Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  // Which occurrence this run is for (e.g. "due:2026-10"), so each bill
+  // month or lease end starts the sequence once per tenant.
+  periodKey   String
+  monthKey    String // bill month the merge tags and "stop when paid" refer to
+  status      String        @default("active") // active | completed | exited
+  stepIndex   Int           @default(0)
+  nextRunAt   DateTime      @default(now())
+  lastError   String?
+  exitReason  String?
+  enrolledAt  DateTime      @default(now())
+  completedAt DateTime?
+
+  @@unique([workflowId, tenantId, periodKey])
   @@index([status, nextRunAt])
 }

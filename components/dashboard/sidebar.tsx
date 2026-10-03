@@ -6,7 +6,7 @@ import { signOut } from "next-auth/react";
 import {
   LayoutDashboard, Building2, Users, CreditCard, Bell,
   Settings, LogOut, ChevronRight, Globe, Receipt, Home, HelpCircle, Menu, X, ArrowLeft,
-  History, Zap, FileSignature
+  History, Zap, FileSignature, Workflow
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -18,6 +18,7 @@ const navItems = [
   { href: "/dashboard/contracts", label: "Contracts", icon: FileSignature },
   { href: "/dashboard/reminders", label: "Reminders", icon: Bell },
   { href: "/dashboard/automations", label: "Automations", icon: Zap },
+  { href: "/dashboard/workflows", label: "Workflows", icon: Workflow },
   { href: "/dashboard/messages", label: "Message History", icon: History },
   { href: "/dashboard/listings", label: "Listings", icon: Globe },
   { href: "/dashboard/billing", label: "Billing", icon: Receipt },

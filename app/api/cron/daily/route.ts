@@ -5,6 +5,7 @@ import { runBillReminderSweep } from "@/lib/bill-reminders";
 import { runMonthlyReportSweep } from "@/lib/monthly-report";
 import { runAutomationSweep } from "@/lib/automations";
 import { runWorkflowSweep } from "@/lib/workflows";
+import { runOwnerWorkflowSweep } from "@/lib/owner-workflows";
 
 export async function GET(req: Request) {
   const cronSecret = process.env.CRON_SECRET;
@@ -28,9 +29,10 @@ export async function GET(req: Request) {
   const reminders = await run("reminders", () => runReminderSweep());
   const billReminders = await run("billReminders", () => runBillReminderSweep());
   const automations = await run("automations", () => runAutomationSweep());
+  const ownerWorkflows = await run("ownerWorkflows", () => runOwnerWorkflowSweep());
   const billing = await run("billing", () => runBillingSweep());
   const freeTrials = await run("freeTrials", () => runFreeTrialSweep());
   const workflows = await run("workflows", () => runWorkflowSweep());
   const monthlyReports = await run("monthlyReports", () => runMonthlyReportSweep());
-  return NextResponse.json({ reminders, billReminders, automations, billing, freeTrials, workflows, monthlyReports });
+  return NextResponse.json({ reminders, billReminders, automations, ownerWorkflows, billing, freeTrials, workflows, monthlyReports });
 }

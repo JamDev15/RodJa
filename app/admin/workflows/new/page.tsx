@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { WORKFLOW_TEMPLATES } from "@/lib/workflow-meta";
-import { WorkflowBuilder } from "../workflow-builder";
+import { WorkflowBuilder } from "@/components/workflows/workflow-builder";
 
 export default async function NewWorkflowPage({ searchParams }: { searchParams: Promise<{ template?: string }> }) {
   const { template } = await searchParams;
@@ -14,14 +14,15 @@ export default async function NewWorkflowPage({ searchParams }: { searchParams: 
         <h1 className="text-2xl font-bold text-white">{t ? t.name : "New workflow"}</h1>
       </div>
       <WorkflowBuilder
+        kind="admin"
         initial={{
           name: t?.name ?? "",
           description: t?.description ?? "",
           isActive: true,
           trigger: t?.trigger ?? "manual",
-          triggerValue: t?.triggerValue ?? "",
-          stopOnConversion: true,
-          steps: t ? structuredClone(t.steps) : [{ type: "email", subject: "", body: "Hi {{first_name}},\n\n" }],
+          triggerParam: t?.triggerValue ?? "",
+          stopFlag: true,
+          steps: t ? (structuredClone(t.steps) as unknown as Record<string, unknown>[]) : [{ type: "email", subject: "", body: "Hi {{first_name}},\n\n" }],
         }}
       />
     </div>

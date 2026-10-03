@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { ToggleSwitch } from "@/components/ui/toggle-switch";
 import { toast } from "@/hooks/use-toast";
 
-export function WorkflowToggle({ id, isActive }: { id: string; isActive: boolean }) {
+export function WorkflowToggle({ id, isActive, apiBase = "/api/admin/workflows" }: { id: string; isActive: boolean; apiBase?: string }) {
   const router = useRouter();
   const [on, setOn] = useState(isActive);
   const [busy, setBusy] = useState(false);
@@ -16,7 +16,7 @@ export function WorkflowToggle({ id, isActive }: { id: string; isActive: boolean
       onChange={async (next) => {
         setOn(next);
         setBusy(true);
-        const res = await fetch(`/api/admin/workflows/${id}`, {
+        const res = await fetch(`${apiBase}/${id}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ isActive: next }),

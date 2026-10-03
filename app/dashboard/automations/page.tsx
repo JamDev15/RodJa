@@ -37,6 +37,8 @@ export default async function AutomationsPage() {
           Build your own reminder rules for tenants and yourself — by email, SMS, tenant portal, or push.
           Everything sent is recorded in{" "}
           <Link href="/dashboard/messages" className="text-blue-400 hover:text-blue-300">Message History</Link>.
+          For multi-step sequences (wait, follow up, stop when paid), use{" "}
+          <Link href="/dashboard/workflows" className="text-blue-400 hover:text-blue-300">Workflows</Link>.
         </p>
       </div>
       <AutomationsManager automations={rows} smsConfigured={isSmsConfigured()} />

@@ -2,9 +2,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { prisma } from "@/lib/prisma";
-import { describeStep, type LeadStatus, type WorkflowStep, type WorkflowTrigger } from "@/lib/workflow-meta";
-import { WorkflowBuilder } from "../workflow-builder";
-import { RemoveEnrollmentButton } from "./remove-enrollment";
+import { describeStep, type WorkflowStep } from "@/lib/workflow-meta";
+import { WorkflowBuilder } from "@/components/workflows/workflow-builder";
+import { RemoveEnrollmentButton } from "@/components/workflows/remove-enrollment";
 
 const when = (d: Date) =>
   new Intl.DateTimeFormat("en-PH", { month: "short", day: "numeric", timeZone: "Asia/Manila" }).format(d);
@@ -32,15 +32,16 @@ export default async function WorkflowPage({ params }: { params: Promise<{ id: s
       </div>
 
       <WorkflowBuilder
+        kind="admin"
         initial={{
           id: workflow.id,
           name: workflow.name,
           description: workflow.description ?? "",
           isActive: workflow.isActive,
-          trigger: workflow.trigger as WorkflowTrigger,
-          triggerValue: (workflow.triggerValue ?? "") as LeadStatus | "",
-          stopOnConversion: workflow.stopOnConversion,
-          steps,
+          trigger: workflow.trigger,
+          triggerParam: workflow.triggerValue ?? "",
+          stopFlag: workflow.stopOnConversion,
+          steps: steps as unknown as Record<string, unknown>[],
         }}
       />
 

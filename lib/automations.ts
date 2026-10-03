@@ -18,7 +18,7 @@ export function fillTemplate(template: string, vars: Record<string, string>): st
   return template.replace(/\{\{\s*(\w+)\s*\}\}/g, (match, key: string) => (key in vars ? vars[key] : match));
 }
 
-type TenantFull = Tenant & {
+export type TenantFull = Tenant & {
   unit: Unit & { property: Property };
   ledger: MonthlyLedger[];
   payments: Payment[];
@@ -53,14 +53,14 @@ export function amountDueFor(tenant: TenantFull, monthKey: string): number {
   return payment?.amount ?? tenant.unit.rentAmount;
 }
 
-function leaseEndOf(tenant: TenantFull): Date | null {
+export function leaseEndOf(tenant: TenantFull): Date | null {
   if (tenant.moveOutDate) return tenant.moveOutDate;
   const fromContract = tenant.contracts.map((c) => c.endDate).filter((d): d is Date => !!d);
   if (fromContract.length === 0) return null;
   return fromContract.sort((a, b) => b.getTime() - a.getTime())[0];
 }
 
-interface Match {
+export interface Match {
   periodKey: string;
   monthKey: string;
   dueDate: Date | null;
@@ -68,7 +68,7 @@ interface Match {
 }
 
 /** Decides whether an automation fires for this tenant today, and for which period. */
-export function matchAutomation(automation: Automation, tenant: TenantFull, now: Date): Match | null {
+export function matchAutomation(automation: Pick<Automation, "trigger" | "offsetDays">, tenant: TenantFull, now: Date): Match | null {
   const thisMonth = monthKeyOf(now);
   const n = automation.offsetDays;
 
@@ -99,7 +99,7 @@ export function matchAutomation(automation: Automation, tenant: TenantFull, now:
   return null;
 }
 
-function varsFor(account: Account, tenant: TenantFull, automation: Automation, match: Match): Record<string, string> {
+export function varsFor(account: Account, tenant: TenantFull, automation: Pick<Automation, "offsetDays">, match: Match): Record<string, string> {
   return {
     tenant_name: tenant.name,
     first_name: tenant.name.split(/\s+/)[0] ?? tenant.name,
@@ -169,7 +169,7 @@ export interface AutomationSweepResult {
   failed: number;
 }
 
-const tenantInclude = (now: Date) => {
+export const tenantInclude = (now: Date) => {
   const thisMonth = monthKeyOf(now);
   const months = [shiftMonthKey(thisMonth, -1), thisMonth, shiftMonthKey(thisMonth, 1)];
   return {
