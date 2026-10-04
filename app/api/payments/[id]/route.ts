@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { formatZodError } from "@/lib/validations";
+import { issueDocument, receiptItemsFromPayment } from "@/lib/invoices";
 
 const paymentActionSchema = z.object({
   action: z.enum(["approve", "reject"]),
@@ -24,6 +25,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
   const payment = await prisma.payment.findFirst({
     where: { id, tenant: { unit: { property: { accountId } } } },
+    include: { tenant: { include: { unit: { include: { property: { include: { account: true } } } } } } },
   });
   if (!payment) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
@@ -35,5 +37,22 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       rejectedReason: action === "reject" ? rejectedReason : null,
     },
   });
+
+  // Approving a payment emails the tenant a receipt (unless the owner turned that off).
+  const account = payment.tenant.unit.property.account;
+  if (action === "approve" && payment.status !== "approved" && account.autoSendReceipts) {
+    try {
+      await issueDocument({
+        account,
+        tenant: payment.tenant,
+        type: "receipt",
+        items: receiptItemsFromPayment(updated),
+        month: updated.month,
+        paymentId: updated.id,
+      });
+    } catch (err) {
+      console.error("Receipt on approval failed:", err);
+    }
+  }
   return NextResponse.json(updated);
 }

@@ -104,7 +104,13 @@ export async function runBillReminderSweep(now: Date = new Date()): Promise<Bill
         let anySuccess = false;
 
         if (!ownerEmailSent) {
-          ownerEmailSent = await sendOwnerBillReminder(account.email, account.ownerName, tenant.name, label, amount, dueDate, trigger);
+          ownerEmailSent = await sendOwnerBillReminder(account.email, account.ownerName, tenant.name, label, amount, dueDate, trigger, {
+            accountId: account.id,
+            tenantId: tenant.id,
+            recipientType: "owner",
+            recipientName: account.ownerName,
+            category: "bill_reminder",
+          });
           if (ownerEmailSent) anySuccess = true;
         }
         if (!ownerPushSent) {
@@ -113,6 +119,12 @@ export async function runBillReminderSweep(now: Date = new Date()): Promise<Bill
             title: `${label} ${phrase}`,
             body: `${tenant.name} — ${new Intl.NumberFormat("en-PH", { style: "currency", currency: "PHP", minimumFractionDigits: 0 }).format(amount)}`,
             url: "/dashboard/tenants",
+          }, {
+            accountId: account.id,
+            tenantId: tenant.id,
+            recipientType: "owner",
+            recipientName: account.ownerName,
+            category: "bill_reminder",
           });
           if (pushSent > 0) {
             ownerPushSent = true;
@@ -120,7 +132,13 @@ export async function runBillReminderSweep(now: Date = new Date()): Promise<Bill
           }
         }
         if (!tenantEmailSent && tenant.email) {
-          tenantEmailSent = await sendTenantBillReminder(tenant.email, tenant.name, label, amount, dueDate, trigger, account.ownerName);
+          tenantEmailSent = await sendTenantBillReminder(tenant.email, tenant.name, label, amount, dueDate, trigger, account.ownerName, {
+            accountId: account.id,
+            tenantId: tenant.id,
+            recipientType: "tenant",
+            recipientName: tenant.name,
+            category: "bill_reminder",
+          });
           if (tenantEmailSent) anySuccess = true;
         }
 

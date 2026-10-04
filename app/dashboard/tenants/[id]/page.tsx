@@ -2,13 +2,15 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Phone, Mail, Calendar, Home, Pencil, Clock } from "lucide-react";
+import { ArrowLeft, Phone, Mail, Calendar, Home, Pencil, Clock, FileSignature, Download } from "lucide-react";
 import { PaymentBadge } from "@/components/dashboard/payment-badge";
 import { Badge } from "@/components/ui/badge";
 import { ProofPreview } from "@/components/ui/proof-preview";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { AddPaymentButton } from "./add-payment-button";
 import { TenantLedger } from "@/components/dashboard/tenant-ledger";
+import { MessageHistoryList } from "@/components/dashboard/message-history";
+import { ContractStatusBadge } from "@/app/dashboard/contracts/status-badge";
 
 export default async function TenantDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -21,6 +23,9 @@ export default async function TenantDetailPage({ params }: { params: Promise<{ i
       unit: { include: { property: true } },
       payments: { orderBy: { dueDate: "desc" } },
       maintenanceRequests: { orderBy: { createdAt: "desc" }, take: 5 },
+      contracts: { where: { status: { not: "void" } }, orderBy: { updatedAt: "desc" } },
+      invoices: { orderBy: { createdAt: "desc" }, take: 12 },
+      messageLogs: { orderBy: { createdAt: "desc" }, take: 15 },
     },
   });
 
@@ -39,8 +44,15 @@ export default async function TenantDetailPage({ params }: { params: Promise<{ i
           <h1 className="text-2xl font-bold text-white">{tenant.name}</h1>
           <p className="text-gray-400 text-sm">{tenant.unit.property.name} – Unit {tenant.unit.unitNumber}</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center justify-end gap-2">
           <Badge variant={tenant.isActive ? "success" : "secondary"}>{tenant.isActive ? "Active" : "Past"}</Badge>
+          <Link
+            href={`/dashboard/contracts/new?tenantId=${id}`}
+            className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
+          >
+            <FileSignature className="h-3.5 w-3.5" />
+            Contract
+          </Link>
           <Link
             href={`/dashboard/tenants/${id}/edit`}
             className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
@@ -102,6 +114,54 @@ export default async function TenantDetailPage({ params }: { params: Promise<{ i
         />
       </div>
 
+      {/* Contracts + invoices/receipts */}
+      <div className="grid gap-4 md:grid-cols-2">
+        <div className="rounded-xl border border-white/10 bg-white/5 p-5">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="font-semibold text-white">Contracts</h2>
+            <Link href={`/dashboard/contracts/new?tenantId=${id}`} className="text-xs text-blue-400 hover:text-blue-300">+ New</Link>
+          </div>
+          {tenant.contracts.length === 0 ? (
+            <p className="text-sm text-gray-500">No contract yet. Send one to sign online.</p>
+          ) : (
+            <ul className="space-y-2">
+              {tenant.contracts.map((c) => (
+                <li key={c.id}>
+                  <Link href={`/dashboard/contracts/${c.id}`} className="flex items-center justify-between gap-2 rounded-lg px-2 py-1.5 hover:bg-white/5">
+                    <span className="truncate text-sm text-white">{c.title}</span>
+                    <ContractStatusBadge status={c.status} />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+        <div className="rounded-xl border border-white/10 bg-white/5 p-5">
+          <h2 className="mb-1 font-semibold text-white">Invoices &amp; receipts</h2>
+          <p className="mb-3 text-xs text-gray-500">Send from the bill tracker above. Receipts go out automatically when you mark bills paid.</p>
+          {tenant.invoices.length === 0 ? (
+            <p className="text-sm text-gray-500">None sent yet.</p>
+          ) : (
+            <ul className="space-y-1">
+              {tenant.invoices.map((inv) => (
+                <li key={inv.id} className="flex items-center justify-between gap-2 rounded-lg px-2 py-1.5 hover:bg-white/5">
+                  <div className="min-w-0">
+                    <p className="text-sm text-white">
+                      <span className={inv.type === "invoice" ? "text-blue-300" : "text-green-300"}>{inv.number}</span>
+                      <span className="text-gray-400"> · {formatCurrency(inv.total)}</span>
+                    </p>
+                    <p className="text-xs text-gray-500">{formatDate(inv.createdAt)}{inv.sentAt ? " · emailed" : ""}</p>
+                  </div>
+                  <a href={`/api/invoices/${inv.id}/pdf`} className="rounded-md p-1.5 text-gray-400 hover:bg-white/10 hover:text-white" title="Download PDF">
+                    <Download className="h-4 w-4" />
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+
       {/* Payments */}
       <div>
         <div className="flex items-center justify-between mb-3">
@@ -139,6 +199,19 @@ export default async function TenantDetailPage({ params }: { params: Promise<{ i
             </tbody>
           </table>
         </div>
+      </div>
+
+      {/* Message history */}
+      <div>
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-white">Messages sent</h2>
+          <Link href={`/dashboard/messages?q=${encodeURIComponent(tenant.name)}`} className="text-sm text-blue-400 hover:text-blue-300">View all →</Link>
+        </div>
+        <MessageHistoryList
+          messages={tenant.messageLogs}
+          showTenantLink={false}
+          emptyText="Nothing sent to or about this tenant yet."
+        />
       </div>
 
       {/* Maintenance Requests */}

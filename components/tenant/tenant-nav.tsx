@@ -2,13 +2,14 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { Home, CreditCard, Wrench, Bell, LogOut, ArrowLeft } from "lucide-react";
+import { Home, CreditCard, Wrench, Bell, LogOut, ArrowLeft, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { href: "/tenant/dashboard", label: "Home", icon: Home },
   { href: "/tenant/pay", label: "Pay", icon: CreditCard },
-  { href: "/tenant/maintenance", label: "Maintenance", icon: Wrench },
+  { href: "/tenant/documents", label: "Documents", icon: FileText },
+  { href: "/tenant/maintenance", label: "Repairs", icon: Wrench },
   { href: "/tenant/notices", label: "Notices", icon: Bell },
 ];
 

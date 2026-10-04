@@ -1,9 +1,18 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { Building2, MapPin, DoorOpen } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 
 export const revalidate = 60;
+
+export const metadata: Metadata = {
+  title: "Rooms, apartments & boarding houses for rent in the Philippines",
+  description:
+    "Browse vacant apartments, boarding houses, bedspaces, and rooms for rent posted directly by Philippine landlords on TenantHub. See monthly rent and contact the owner.",
+  alternates: { canonical: "/listings" },
+  openGraph: { url: "/listings" },
+};
 
 export default async function PublicListingsPage() {
   const properties = await prisma.property.findMany({
@@ -15,8 +24,8 @@ export default async function PublicListingsPage() {
   return (
     <div className="max-w-6xl mx-auto px-6 py-16">
       <div className="text-center mb-12">
-        <h1 className="text-3xl md:text-4xl font-bold text-white mb-3">Available Rentals</h1>
-        <p className="text-gray-400">Vacant units from landlords using TenantHub.</p>
+        <h1 className="text-3xl md:text-4xl font-bold text-white mb-3">Rentals available now</h1>
+        <p className="text-gray-400">Apartments, rooms, and boarding houses posted directly by landlords using TenantHub.</p>
       </div>
 
       {properties.length === 0 ? (

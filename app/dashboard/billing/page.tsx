@@ -8,9 +8,14 @@ import { BillingPayForm } from "./billing-pay-form";
 import { UpgradeButton } from "./upgrade-button";
 
 const PLAN_FEATURES: Record<string, string[]> = {
-  Free: ["Manual tracking", "Tenant portal", "1-day trial only"],
-  Basic: ["SMS reminders", "Payment proof", "Email support"],
-  Pro: ["Unlimited everything", "Public listings", "Maintenance module", "PDF/CSV export"],
+  Pro: [
+    "Unlimited properties, units & tenants",
+    "E-signed lease contracts (PDF)",
+    "Invoices & automatic receipts",
+    "Custom reminder automations",
+    "Message history",
+    "Chat assistant, listings & maintenance",
+  ],
 };
 
 export default async function BillingPage() {
@@ -25,9 +30,9 @@ export default async function BillingPage() {
     prisma.plan.findMany({ where: { isActive: true, price: { gt: 0 } }, orderBy: { price: "asc" } }),
   ]);
 
-  const trialDaysLeft = account?.plan.price === 0 && account.trialEndsAt
-    ? daysBetween(account.trialEndsAt, new Date())
-    : null;
+  const everPaid = account?.billingRecords.some((b) => b.status === "paid") ?? false;
+  const inTrial = !!account?.trialEndsAt && !everPaid && !account?.lifetimeAccess;
+  const trialDaysLeft = inTrial && account?.trialEndsAt ? daysBetween(account.trialEndsAt, new Date()) : null;
 
   const stats = await prisma.$transaction([
     prisma.property.count({ where: { accountId } }),
@@ -50,8 +55,8 @@ export default async function BillingPage() {
       {trialDaysLeft !== null && (
         <div className={`rounded-xl border p-4 text-sm ${trialDaysLeft <= 0 ? "border-red-500/30 bg-red-500/10 text-red-400" : "border-yellow-500/30 bg-yellow-500/10 text-yellow-400"}`}>
           {trialDaysLeft <= 0
-            ? "Your free trial has ended. Upgrade to Basic or Pro below to keep using TenantHub."
-            : `Your free trial ends in ${trialDaysLeft} day${trialDaysLeft === 1 ? "" : "s"}. Upgrade anytime to avoid interruption.`}
+            ? "Your free trial has ended. Subscribe for ₱499/month below to keep using TenantHub."
+            : `Your free trial ends in ${trialDaysLeft} day${trialDaysLeft === 1 ? "" : "s"} (${formatDate(account!.trialEndsAt!)}). Subscribe anytime for ₱499/month — no interruption, nothing to set up again.`}
         </div>
       )}
 
@@ -60,7 +65,7 @@ export default async function BillingPage() {
         <div className="flex items-center justify-between mb-3">
           <div>
             <p className="text-xs text-blue-400 font-medium uppercase tracking-wide">Current Plan</p>
-            <h2 className="text-2xl font-bold text-white mt-1">{account?.plan.name}</h2>
+            <h2 className="text-2xl font-bold text-white mt-1">{account?.plan.name}{inTrial ? " — Free trial" : ""}</h2>
           </div>
           <Badge variant="default" className="text-sm px-3 py-1">
             {account?.plan.price === 0 ? "Free" : `₱${account?.plan.price}/mo`}
@@ -91,7 +96,9 @@ export default async function BillingPage() {
           <div className="flex items-center justify-between mb-4">
             <div>
               <h2 className="text-lg font-semibold text-white">
-                {currentBill.status === "overdue"
+                {inTrial && currentBill.status === "pending"
+                  ? "Subscribe to keep TenantHub after your trial"
+                  : currentBill.status === "overdue"
                   ? "Account Paused — Payment Overdue"
                   : currentBill.status === "rejected"
                   ? "Payment Rejected — Please Resubmit"
@@ -144,14 +151,14 @@ export default async function BillingPage() {
       )}
 
       {/* Upgrade */}
-      {!currentBill && account?.plan.name !== "Pro" && (
+      {!currentBill && account?.plan.name !== "Pro" && plans.some((p) => p.name === "Pro") && (
         <div>
           <h2 className="text-lg font-semibold text-white mb-3">Upgrade Plan</h2>
           <p className="text-sm text-gray-400 mb-3">
-            Basic and Pro have no free trial — pay to activate, then it&apos;s active as soon as we approve your payment.
+            One simple plan with every feature. It&apos;s active as soon as we approve your GCash or Maya payment.
           </p>
           <div className="grid md:grid-cols-2 gap-3">
-            {plans.map((plan) => {
+            {plans.filter((p) => p.name === "Pro").map((plan) => {
               const isCurrent = plan.name === account?.plan.name;
               return (
                 <div key={plan.id} className={`rounded-xl border p-5 ${isCurrent ? "border-blue-500/50 bg-blue-500/10" : "border-white/10 bg-white/5 hover:bg-white/[0.07]"} transition-colors`}>
@@ -190,6 +197,7 @@ export default async function BillingPage() {
                   <th className="text-left px-4 py-3 text-gray-400 font-medium">Amount</th>
                   <th className="text-left px-4 py-3 text-gray-400 font-medium">Status</th>
                   <th className="text-left px-4 py-3 text-gray-400 font-medium">Paid At</th>
+                  <th className="text-left px-4 py-3 text-gray-400 font-medium">Documents</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/10">
@@ -203,6 +211,12 @@ export default async function BillingPage() {
                       </Badge>
                     </td>
                     <td className="px-4 py-3 text-gray-400">{b.paidAt ? formatDate(b.paidAt) : "—"}</td>
+                    <td className="px-4 py-3">
+                      <div className="flex gap-3 text-xs">
+                        <a href={`/api/billing/${b.id}/pdf?type=invoice`} className="text-blue-400 hover:text-blue-300">Invoice</a>
+                        {b.status === "paid" && <a href={`/api/billing/${b.id}/pdf?type=receipt`} className="text-green-400 hover:text-green-300">Receipt</a>}
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>

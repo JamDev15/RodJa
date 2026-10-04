@@ -4,20 +4,22 @@ export const forgotPasswordSchema = z.object({
   email: z.string().trim().toLowerCase().email().max(255),
 });
 
-export const signupSchema = z
-  .object({
-    name: z.string().trim().min(1).max(200),
-    ownerName: z.string().trim().min(1).max(200),
-    email: z.string().trim().toLowerCase().email().max(255),
-    password: z.string().min(8).max(200),
-    phone: z.string().trim().max(30).optional().nullable(),
-    plan: z.enum(["free", "basic", "pro"]).optional(),
-    referenceNumber: z.string().trim().max(100).optional(),
-  })
-  .refine((data) => (data.plan ?? "free") === "free" || !!data.referenceNumber, {
-    message: "Reference number is required for paid plans",
-    path: ["referenceNumber"],
-  });
+// Every signup starts a 3-day free trial of the single ₱499/month plan —
+// no plan picker, no payment up front.
+export const signupSchema = z.object({
+  ownerName: z.string().trim().min(2, "Please enter your full name").max(200),
+  name: z.string().trim().max(200).optional().nullable(),
+  email: z.string().trim().toLowerCase().email().max(255),
+  password: z.string().min(8, "Password must be at least 8 characters").max(200),
+  phone: z
+    .string()
+    .trim()
+    .min(7, "Please enter your phone number")
+    .max(30)
+    .regex(/^[+\d][\d\s\-().]{6,}$/, "Please enter a valid phone number"),
+  socialMedia: z.string().trim().min(2, "Please add your Facebook, Instagram, or other social media link").max(300),
+  wantsOnboardingCall: z.enum(["yes", "no"], { message: "Let us know if we can call you for onboarding" }),
+});
 
 export const tenantCreateSchema = z.object({
   unitId: z.string().min(1),
@@ -224,3 +226,121 @@ export const pushSubscribeSchema = z.object({
 export function formatZodError(error: z.ZodError): string {
   return error.issues.map((i) => `${i.path.join(".")}: ${i.message}`).join("; ");
 }
+
+// ─── Automations / contracts / invoices / CRM ────────────────────────────────
+
+export const automationSchema = z
+  .object({
+    name: z.string().trim().min(1).max(120),
+    isActive: z.boolean().optional(),
+    trigger: z.enum(["before_due", "on_due", "after_due", "day_of_month", "lease_end"]),
+    offsetDays: z.coerce.number().int().min(0).max(365),
+    audience: z.enum(["tenant", "owner", "both"]),
+    channels: z.array(z.enum(["email", "sms", "in_app", "push"])).min(1, "Pick at least one channel"),
+    subject: z.string().trim().min(1).max(200),
+    message: z.string().trim().min(1).max(2000),
+    onlyUnpaid: z.boolean().optional(),
+  })
+  .refine((d) => d.trigger !== "day_of_month" || (d.offsetDays >= 1 && d.offsetDays <= 31), {
+    message: "Day of month must be between 1 and 31",
+    path: ["offsetDays"],
+  });
+
+export const automationToggleSchema = z.object({ isActive: z.boolean() });
+
+const signatureDataUrl = z
+  .string()
+  .max(400_000, "Signature image is too large")
+  .regex(/^data:image\/png;base64,[A-Za-z0-9+/=]+$/, "Invalid signature image");
+
+export const contractCreateSchema = z.object({
+  tenantId: z.string().min(1),
+  title: z.string().trim().min(1).max(200),
+  body: z.string().trim().min(20, "Contract text is too short").max(50_000),
+  startDate: z.coerce.date().optional().nullable(),
+  endDate: z.coerce.date().optional().nullable(),
+  monthlyRent: z.coerce.number().nonnegative().optional().nullable(),
+  deposit: z.coerce.number().nonnegative().optional().nullable(),
+});
+
+export const contractUpdateSchema = contractCreateSchema.omit({ tenantId: true }).partial();
+
+export const signContractSchema = z.object({
+  signature: signatureDataUrl,
+  signedName: z.string().trim().min(2).max(200),
+  agree: z.literal(true, { message: "You must agree to sign electronically" }),
+});
+
+export const invoiceSendSchema = z.object({
+  ledgerId: z.string().min(1),
+  type: z.enum(["invoice", "receipt"]),
+  notes: z.string().trim().max(1000).optional().nullable(),
+});
+
+export const leadUpdateSchema = z.object({
+  leadStatus: z.enum(["new", "contacted", "onboarding", "interested", "not_interested", "converted", "lost"]).optional(),
+  leadNotes: z.string().trim().max(5000).optional().nullable(),
+});
+
+const workflowStepSchema = z.discriminatedUnion("type", [
+  z.object({ type: z.literal("wait"), days: z.coerce.number().int().min(0).max(365) }),
+  z.object({ type: z.literal("email"), subject: z.string().trim().min(1).max(200), body: z.string().trim().min(1).max(5000) }),
+  z.object({ type: z.literal("sms"), body: z.string().trim().min(1).max(450) }),
+  z.object({
+    type: z.literal("set_status"),
+    status: z.enum(["new", "contacted", "onboarding", "interested", "not_interested", "converted", "lost"]),
+  }),
+  z.object({ type: z.literal("notify_admin"), subject: z.string().trim().min(1).max(200), body: z.string().trim().min(1).max(2000) }),
+]);
+
+export const workflowSchema = z
+  .object({
+    name: z.string().trim().min(1).max(120),
+    description: z.string().trim().max(500).optional().nullable(),
+    isActive: z.boolean().optional(),
+    trigger: z.enum(["signup", "lead_status", "trial_ending", "trial_expired", "manual"]),
+    triggerValue: z.string().trim().max(50).optional().nullable(),
+    steps: z.array(workflowStepSchema).min(1, "Add at least one step").max(50),
+    stopOnConversion: z.boolean().optional(),
+  })
+  .refine((d) => d.trigger !== "lead_status" || !!d.triggerValue, {
+    message: "Pick which lead status starts this workflow",
+    path: ["triggerValue"],
+  });
+
+export const workflowEnrollSchema = z.object({
+  accountIds: z.array(z.string().min(1)).min(1).max(500),
+});
+
+export const renewSchema = z.object({
+  token: z.string().min(10).max(500),
+  referenceNumber: z.string().trim().min(1).max(100),
+});
+
+const ownerWorkflowStepSchema = z.discriminatedUnion("type", [
+  z.object({ type: z.literal("wait"), days: z.coerce.number().int().min(0).max(365) }),
+  z.object({ type: z.literal("email"), subject: z.string().trim().min(1, "Email subject is empty").max(200), body: z.string().trim().min(1, "Email message is empty").max(5000) }),
+  z.object({ type: z.literal("sms"), body: z.string().trim().min(1, "SMS message is empty").max(450) }),
+  z.object({ type: z.literal("portal"), title: z.string().trim().min(1, "Notice title is empty").max(200), body: z.string().trim().min(1, "Notice text is empty").max(2000) }),
+  z.object({ type: z.literal("send_invoice") }),
+  z.object({ type: z.literal("notify_owner"), subject: z.string().trim().min(1).max(200), body: z.string().trim().min(1).max(2000) }),
+]);
+
+export const ownerWorkflowSchema = z
+  .object({
+    name: z.string().trim().min(1, "Give the workflow a name").max(120),
+    description: z.string().trim().max(500).optional().nullable(),
+    isActive: z.boolean().optional(),
+    trigger: z.enum(["tenant_added", "before_due", "on_due", "after_due", "day_of_month", "lease_end", "manual"]),
+    offsetDays: z.coerce.number().int().min(0).max(365).optional(),
+    steps: z.array(ownerWorkflowStepSchema).min(1, "Add at least one step").max(40),
+    stopWhenPaid: z.boolean().optional(),
+  })
+  .refine((d) => d.trigger !== "day_of_month" || ((d.offsetDays ?? 0) >= 1 && (d.offsetDays ?? 0) <= 31), {
+    message: "Day of month must be between 1 and 31",
+    path: ["offsetDays"],
+  });
+
+export const ownerWorkflowEnrollSchema = z.object({
+  tenantIds: z.array(z.string().min(1)).min(1).max(500),
+});

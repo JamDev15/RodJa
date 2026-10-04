@@ -1,25 +1,82 @@
+import type { Metadata } from "next";
+import { cache } from "react";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { Building2, MapPin, Phone, ArrowLeft } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import { UnitStatusBadge } from "@/components/dashboard/payment-badge";
+import { SITE_URL, jsonLdString } from "@/lib/seo";
 
 export const revalidate = 60;
+
+// Shared between generateMetadata and the page so it's one query per request.
+const getListing = cache((slug: string) =>
+  prisma.property.findFirst({
+    where: { isListed: true, OR: [{ slug }, { id: slug }] },
+    include: { units: true, account: { select: { phone: true } } },
+  })
+);
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const property = await getListing(slug);
+  if (!property) return { title: "Listing not found", robots: { index: false } };
+
+  const vacant = property.units.filter((u) => u.status === "vacant");
+  const minRent = vacant.length ? Math.min(...vacant.map((u) => u.rentAmount)) : null;
+  const typeLabel = property.type ? property.type.charAt(0).toUpperCase() + property.type.slice(1) : "Rental";
+  const title = `${property.name} – ${typeLabel} for rent in ${property.address}`.slice(0, 120);
+  const description = [
+    vacant.length ? `${vacant.length} unit${vacant.length === 1 ? "" : "s"} available` : "Currently fully occupied",
+    minRent != null ? `from ${formatCurrency(minRent)}/month` : null,
+    property.description?.slice(0, 140),
+  ]
+    .filter(Boolean)
+    .join(" · ");
+  const path = `/listings/${property.slug ?? property.id}`;
+  return {
+    title,
+    description,
+    alternates: { canonical: path },
+    openGraph: { type: "website", url: path, title, description },
+    robots: vacant.length ? undefined : { index: false, follow: true },
+  };
+}
 
 export default async function PublicListingDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
 
-  const property = await prisma.property.findFirst({
-    where: { isListed: true, OR: [{ slug }, { id: slug }] },
-    include: { units: true, account: { select: { phone: true } } },
-  });
+  const property = await getListing(slug);
   if (!property) notFound();
+
+  const url = `${SITE_URL}/listings/${property.slug ?? property.id}`;
+  const listingLd = {
+    "@context": "https://schema.org",
+    "@type": "ApartmentComplex",
+    name: property.name,
+    url,
+    description: property.description ?? undefined,
+    address: { "@type": "PostalAddress", streetAddress: property.address, addressCountry: "PH" },
+    ...(property.account.phone ? { telephone: property.account.phone } : {}),
+    numberOfAvailableAccommodationUnits: property.units.filter((u) => u.status === "vacant").length,
+    makesOffer: property.units
+      .filter((u) => u.status === "vacant")
+      .map((u) => ({
+        "@type": "Offer",
+        name: `Unit ${u.unitNumber}`,
+        price: u.rentAmount,
+        priceCurrency: "PHP",
+        availability: "https://schema.org/InStock",
+        priceSpecification: { "@type": "UnitPriceSpecification", price: u.rentAmount, priceCurrency: "PHP", unitText: "MONTH" },
+      })),
+  };
 
   const units = [...property.units].sort((a, b) => (a.status === "vacant" ? -1 : 1) - (b.status === "vacant" ? -1 : 1));
 
   return (
     <div className="max-w-4xl mx-auto px-6 py-12">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdString(listingLd) }} />
       <Link href="/listings" className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-white transition-colors mb-6">
         <ArrowLeft className="h-3.5 w-3.5" /> Back to listings
       </Link>

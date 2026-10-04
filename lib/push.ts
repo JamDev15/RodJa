@@ -1,5 +1,6 @@
 import webpush from "web-push";
 import { prisma } from "@/lib/prisma";
+import { logMessage, type LogContext } from "@/lib/message-log";
 
 const vapidPublic = process.env.VAPID_PUBLIC_KEY;
 const vapidPrivate = process.env.VAPID_PRIVATE_KEY;
@@ -21,10 +22,15 @@ export interface PushPayload {
  * subscription (normal, expected over time) — deleted rather than treated
  * as a failure.
  */
-export async function sendPushToAccount(accountId: string, payload: PushPayload): Promise<{ sent: number; failed: number }> {
+export async function sendPushToAccount(
+  accountId: string,
+  payload: PushPayload,
+  log?: LogContext
+): Promise<{ sent: number; failed: number }> {
   if (!vapidPublic || !vapidPrivate || !vapidSubject) return { sent: 0, failed: 0 };
 
   const subscriptions = await prisma.pushSubscription.findMany({ where: { accountId } });
+  if (subscriptions.length === 0) return { sent: 0, failed: 0 };
   let sent = 0;
   let failed = 0;
 
@@ -48,5 +54,16 @@ export async function sendPushToAccount(accountId: string, payload: PushPayload)
     })
   );
 
+  if (log) {
+    await logMessage({
+      ...log,
+      channel: "push",
+      to: `${subscriptions.length} device${subscriptions.length === 1 ? "" : "s"}`,
+      subject: payload.title,
+      body: payload.body,
+      status: sent > 0 ? "sent" : "failed",
+      error: sent > 0 ? null : "No device accepted the notification",
+    });
+  }
   return { sent, failed };
 }

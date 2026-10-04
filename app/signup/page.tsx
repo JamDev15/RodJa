@@ -1,12 +1,13 @@
-import { prisma } from "@/lib/prisma";
+import type { Metadata } from "next";
 import { SignupForm } from "./signup-form";
 
-// Reads live PlatformSettings (GCash/Maya QR + numbers) — must never be
-// statically cached, or a payment-info update wouldn't show until rebuild.
-export const dynamic = "force-dynamic";
+export const metadata: Metadata = {
+  title: "Start your free 3-day trial",
+  description:
+    "Create your TenantHub account in a minute. Track rent, send reminders, e-sign lease contracts, and issue receipts — free for 3 days, then ₱499/month.",
+  alternates: { canonical: "/signup" },
+};
 
-export default async function SignupPage() {
-  const platformSettings = await prisma.platformSettings.findFirst();
-
-  return <SignupForm platformSettings={platformSettings} />;
+export default function SignupPage() {
+  return <SignupForm />;
 }

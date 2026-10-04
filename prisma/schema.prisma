@@ -32,31 +32,52 @@ model SuperAdmin {
 // ─── Sub-Accounts (Landlords/Property Owners) ────────────────────────────────
 
 model Account {
-  id             String          @id @default(cuid())
-  name           String
-  ownerName      String
-  email          String          @unique
-  password       String
-  phone          String?
-  planId         String
-  plan           Plan            @relation(fields: [planId], references: [id])
-  isActive       Boolean         @default(true)
+  id                    String               @id @default(cuid())
+  name                  String
+  ownerName             String
+  email                 String               @unique
+  password              String
+  phone                 String?
+  planId                String
+  plan                  Plan                 @relation(fields: [planId], references: [id])
+  isActive              Boolean              @default(true)
   // Exempt from the free-trial auto-pause and the recurring paid-plan
   // billing sweep entirely — for comped/owner accounts that shouldn't ever
   // be gated on payment.
-  lifetimeAccess Boolean         @default(false)
-  trialEndsAt    DateTime?
-  trialReminderSentAt DateTime?
-  gcashNumber    String?
-  mayaNumber     String?
-  bankDetails    String?
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
-  properties     Property[]
-  users          User[]
-  billingRecords BillingRecord[]
-  pushSubscriptions PushSubscription[]
-  monthlyReportLogs MonthlyReportLog[]
+  lifetimeAccess        Boolean              @default(false)
+  trialEndsAt           DateTime?
+  trialReminderSentAt   DateTime?
+  gcashNumber           String?
+  mayaNumber            String?
+  bankDetails           String?
+  // ─── Signup / CRM fields (admin Signups list + Workflows) ───
+  socialMedia           String?
+  wantsOnboardingCall   Boolean?
+  // new | contacted | onboarding | interested | not_interested | converted | lost
+  leadStatus            String               @default("new")
+  leadNotes             String?
+  // Set once the person clicks "unsubscribe" in a workflow (marketing) email.
+  // Never affects transactional mail (billing, receipts, password resets).
+  marketingOptOut       Boolean              @default(false)
+  // Dedup for the "trial expires tomorrow" alert to the platform admin.
+  trialAdminAlertSentAt DateTime?
+  // Email the tenant a receipt automatically when a bill is marked paid.
+  autoSendReceipts      Boolean              @default(true)
+  // Email the owner a copy of every invoice/receipt sent to their tenants.
+  emailOwnerCopies      Boolean              @default(true)
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
+  properties            Property[]
+  users                 User[]
+  billingRecords        BillingRecord[]
+  pushSubscriptions     PushSubscription[]
+  monthlyReportLogs     MonthlyReportLog[]
+  messageLogs           MessageLog[]
+  automations           Automation[]
+  contracts             Contract[]
+  invoices              Invoice[]
+  workflowEnrollments   WorkflowEnrollment[]
+  ownerWorkflows        OwnerWorkflow[]
 }
 
 model User {
@@ -104,48 +125,53 @@ model Unit {
 }
 
 model Tenant {
-  id               String               @id @default(cuid())
-  unitId           String
-  unit             Unit                 @relation(fields: [unitId], references: [id])
-  name             String
-  email            String?
-  phone            String               @unique
-  moveInDate       DateTime
-  moveOutDate      DateTime?
-  dueDay           Int                  @default(5)
-  depositAmount    Float?
-  depositPaid      Boolean              @default(false)
-  portalPin        String
-  isActive         Boolean              @default(true)
-  emergencyContact String?
-  notes            String?
-  createdAt        DateTime             @default(now())
-  updatedAt        DateTime             @updatedAt
-  payments         Payment[]
-  maintenanceRequests MaintenanceRequest[]
-  reminders        Reminder[]
-  notices          Notice[]
-  ledger           MonthlyLedger[]
+  id                       String                    @id @default(cuid())
+  unitId                   String
+  unit                     Unit                      @relation(fields: [unitId], references: [id])
+  name                     String
+  email                    String?
+  phone                    String                    @unique
+  moveInDate               DateTime
+  moveOutDate              DateTime?
+  dueDay                   Int                       @default(5)
+  depositAmount            Float?
+  depositPaid              Boolean                   @default(false)
+  portalPin                String
+  isActive                 Boolean                   @default(true)
+  emergencyContact         String?
+  notes                    String?
+  createdAt                DateTime                  @default(now())
+  updatedAt                DateTime                  @updatedAt
+  payments                 Payment[]
+  maintenanceRequests      MaintenanceRequest[]
+  reminders                Reminder[]
+  notices                  Notice[]
+  ledger                   MonthlyLedger[]
+  messageLogs              MessageLog[]
+  automationRuns           AutomationRun[]
+  contracts                Contract[]
+  invoices                 Invoice[]
+  ownerWorkflowEnrollments OwnerWorkflowEnrollment[]
 }
 
 model Payment {
-  id              String   @id @default(cuid())
-  tenantId        String
-  tenant          Tenant   @relation(fields: [tenantId], references: [id])
-  amount          Float
-  rentAmount      Float?
-  electricAmount  Float?
-  waterAmount     Float?
-  month           String
-  dueDate         DateTime
-  paidDate        DateTime?
-  status          String   @default("pending")
-  proofUrl        String?
-  method          String?
-  notes           String?
-  rejectedReason  String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id             String    @id @default(cuid())
+  tenantId       String
+  tenant         Tenant    @relation(fields: [tenantId], references: [id])
+  amount         Float
+  rentAmount     Float?
+  electricAmount Float?
+  waterAmount    Float?
+  month          String
+  dueDate        DateTime
+  paidDate       DateTime?
+  status         String    @default("pending")
+  proofUrl       String?
+  method         String?
+  notes          String?
+  rejectedReason String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 }
 
 model MaintenanceRequest {
@@ -163,14 +189,14 @@ model MaintenanceRequest {
 }
 
 model Reminder {
-  id        String   @id @default(cuid())
-  tenantId  String
-  tenant    Tenant   @relation(fields: [tenantId], references: [id])
-  type      String
-  trigger   String
-  sentAt    DateTime @default(now())
-  message   String
-  status    String   @default("sent")
+  id       String   @id @default(cuid())
+  tenantId String
+  tenant   Tenant   @relation(fields: [tenantId], references: [id])
+  type     String
+  trigger  String
+  sentAt   DateTime @default(now())
+  message  String
+  status   String   @default("sent")
 }
 
 model Notice {
@@ -196,35 +222,35 @@ model ReminderConfig {
 }
 
 model MonthlyLedger {
-  id             String   @id @default(cuid())
-  tenantId       String
-  tenant         Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  month          String   // "YYYY-MM"
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  month    String // "YYYY-MM"
 
-  rentAmount        Float
-  rentPaidAmount    Float?
-  rentPaid          Boolean  @default(false)
+  rentAmount     Float
+  rentPaidAmount Float?
+  rentPaid       Boolean @default(false)
 
-  electricAmount    Float?
+  electricAmount     Float?
   electricPaidAmount Float?
-  electricPaid      Boolean  @default(false)
+  electricPaid       Boolean @default(false)
 
-  waterAmount       Float?
-  waterPaidAmount   Float?
-  waterPaid         Boolean  @default(false)
+  waterAmount     Float?
+  waterPaidAmount Float?
+  waterPaid       Boolean @default(false)
 
-  otherAmount       Float?
-  otherPaidAmount   Float?
-  otherLabel        String?
-  otherPaid         Boolean  @default(false)
+  otherAmount     Float?
+  otherPaidAmount Float?
+  otherLabel      String?
+  otherPaid       Boolean @default(false)
 
-  balance           Float    @default(0)
-  balancePaid       Boolean  @default(false)
-  notes          String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  balance     Float    @default(0)
+  balancePaid Boolean  @default(false)
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  billReminders  BillReminder[]
+  billReminders BillReminder[]
 
   @@unique([tenantId, month])
 }
@@ -251,8 +277,8 @@ model BillReminder {
   id              String        @id @default(cuid())
   ledgerId        String
   ledger          MonthlyLedger @relation(fields: [ledgerId], references: [id], onDelete: Cascade)
-  billType        String        // "rent" | "electric" | "water" | "other"
-  trigger         String        // "2days_before" | "1day_before" | "due_date"
+  billType        String // "rent" | "electric" | "water" | "other"
+  trigger         String // "2days_before" | "1day_before" | "due_date"
   ownerEmailSent  Boolean       @default(false)
   ownerPushSent   Boolean       @default(false)
   tenantEmailSent Boolean       @default(false)
@@ -265,7 +291,7 @@ model MonthlyReportLog {
   id        String   @id @default(cuid())
   accountId String
   account   Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  monthKey  String   // "2026-08" — the month the report covers
+  monthKey  String // "2026-08" — the month the report covers
   sentAt    DateTime @default(now())
 
   @@unique([accountId, monthKey])
@@ -297,22 +323,25 @@ model BillingRecord {
   // switch to once this bill is approved (regular recurring renewals leave
   // this null since the plan isn't changing).
   targetPlanId    String?
+  // Platform-issued documents for this subscription bill (TH-INV-000001 / TH-RCPT-000001).
+  invoiceNumber   String?   @unique
+  receiptNumber   String?   @unique
   createdAt       DateTime  @default(now())
 }
 
 // Singleton row holding the platform's own GCash/Maya payment info, shown
 // to landlords when they pay their subscription.
 model PlatformSettings {
-  id               String   @id @default(cuid())
-  gcashNumber      String?
-  gcashQrUrl       String?
-  mayaNumber       String?
-  mayaQrUrl        String?
+  id                String   @id @default(cuid())
+  gcashNumber       String?
+  gcashQrUrl        String?
+  mayaNumber        String?
+  mayaQrUrl         String?
   // Where "new signup" / "payment submitted" notifications go — separate
   // from SuperAdmin login email so it can be a real, actively-checked
   // inbox without affecting who can log in as Super Admin.
   notificationEmail String?
-  updatedAt        DateTime @updatedAt
+  updatedAt         DateTime @updatedAt
 }
 
 // One-time, expiring login link sent in the billing-approved email so a
@@ -325,4 +354,226 @@ model LoginToken {
   expiresAt DateTime
   usedAt    DateTime?
   createdAt DateTime  @default(now())
+}
+
+// ─── Communication History ───────────────────────────────────────────────────
+
+// One row per message the platform sends (email, SMS, push, in-app) to a
+// tenant, an owner, the platform admin, or a signup lead — powers the
+// "Message History" page and the per-tenant history panel. accountId is the
+// landlord account the message is about (null only for platform-admin mail
+// not tied to any account).
+model MessageLog {
+  id            String   @id @default(cuid())
+  accountId     String?
+  account       Account? @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  tenantId      String?
+  tenant        Tenant?  @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  recipientType String // tenant | owner | admin | lead
+  recipientName String?
+  channel       String // email | sms | push | in_app
+  to            String?
+  subject       String?
+  body          String
+  category      String // reminder | bill_reminder | automation | invoice | receipt | contract | billing | trial | welcome | workflow | system
+  status        String   @default("sent") // sent | failed
+  error         String?
+  createdAt     DateTime @default(now())
+
+  @@index([accountId, createdAt])
+  @@index([tenantId, createdAt])
+}
+
+// ─── Owner Automations ───────────────────────────────────────────────────────
+
+model Automation {
+  id         String          @id @default(cuid())
+  accountId  String
+  account    Account         @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  name       String
+  isActive   Boolean         @default(true)
+  // before_due | on_due | after_due | day_of_month | lease_end
+  trigger    String
+  offsetDays Int             @default(0)
+  audience   String          @default("tenant") // tenant | owner | both
+  channels   Json            @default("[\"email\"]") // any of: email, sms, in_app, push
+  subject    String
+  message    String
+  // Skip tenants whose current-month bills are already fully paid.
+  onlyUnpaid Boolean         @default(true)
+  lastRunAt  DateTime?
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+  runs       AutomationRun[]
+
+  @@index([accountId])
+}
+
+// Dedup: an automation fires at most once per tenant per period (e.g. per
+// billing month, or per lease end date).
+model AutomationRun {
+  id           String     @id @default(cuid())
+  automationId String
+  automation   Automation @relation(fields: [automationId], references: [id], onDelete: Cascade)
+  tenantId     String
+  tenant       Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  periodKey    String
+  status       String     @default("sent") // sent | failed
+  createdAt    DateTime   @default(now())
+
+  @@unique([automationId, tenantId, periodKey])
+}
+
+// ─── Contracts (e-signature) ─────────────────────────────────────────────────
+
+model Contract {
+  id               String    @id @default(cuid())
+  accountId        String
+  account          Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  tenantId         String
+  tenant           Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  title            String
+  body             String
+  startDate        DateTime?
+  endDate          DateTime?
+  monthlyRent      Float?
+  deposit          Float?
+  status           String    @default("draft") // draft | sent | signed | void
+  // Secret for the tenant's no-login signing link — never shown in lists.
+  signToken        String    @unique
+  // SHA-256 of the title + body at the moment the owner signed; printed on
+  // the PDF audit trail so both parties can tell the text wasn't altered.
+  documentHash     String?
+  ownerSignature   String? // PNG data URL
+  ownerSignedName  String?
+  ownerSignedAt    DateTime?
+  ownerSignedIp    String?
+  tenantSignature  String?
+  tenantSignedName String?
+  tenantSignedAt   DateTime?
+  tenantSignedIp   String?
+  tenantUserAgent  String?
+  sentAt           DateTime?
+  viewedAt         DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@index([accountId])
+  @@index([tenantId])
+}
+
+// ─── Invoices & Receipts ─────────────────────────────────────────────────────
+
+model Invoice {
+  id        String    @id @default(cuid())
+  accountId String
+  account   Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  tenantId  String
+  tenant    Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  ledgerId  String?
+  paymentId String?
+  type      String // invoice | receipt
+  number    String // INV-000123 / OR-000123, sequential per account
+  month     String? // "YYYY-MM"
+  items     Json // [{ label, amount }]
+  total     Float
+  dueDate   DateTime?
+  notes     String?
+  // Secret for the public view/PDF link emailed to the tenant.
+  token     String    @unique
+  sentAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@unique([accountId, number])
+  @@index([tenantId])
+  @@index([ledgerId])
+}
+
+// ─── Platform CRM Workflows (GoHighLevel-style, for signups) ─────────────────
+
+model Workflow {
+  id               String               @id @default(cuid())
+  name             String
+  description      String?
+  isActive         Boolean              @default(true)
+  // signup | lead_status | trial_ending | trial_expired | manual
+  trigger          String
+  // For lead_status: the status that enrolls (e.g. "not_interested").
+  triggerValue     String?
+  // [{ type: "wait", days } | { type: "email", subject, body }
+  //  | { type: "sms", body } | { type: "set_status", status }
+  //  | { type: "notify_admin", subject, body }]
+  steps            Json
+  // Exit the lead as soon as they become a paying customer.
+  stopOnConversion Boolean              @default(true)
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+  enrollments      WorkflowEnrollment[]
+}
+
+model WorkflowEnrollment {
+  id          String    @id @default(cuid())
+  workflowId  String
+  workflow    Workflow  @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  accountId   String
+  account     Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  status      String    @default("active") // active | completed | exited
+  stepIndex   Int       @default(0)
+  nextRunAt   DateTime  @default(now())
+  lastError   String?
+  exitReason  String?
+  enrolledAt  DateTime  @default(now())
+  completedAt DateTime?
+
+  @@unique([workflowId, accountId])
+  @@index([status, nextRunAt])
+}
+
+// ─── Owner Workflows (multi-step sequences for tenants) ──────────────────────
+
+// A landlord's own GoHighLevel-style sequence, e.g. "on the 1st send the
+// invoice → wait 5 days → SMS if still unpaid → wait 3 days → notify me".
+model OwnerWorkflow {
+  id           String                    @id @default(cuid())
+  accountId    String
+  account      Account                   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  name         String
+  description  String?
+  isActive     Boolean                   @default(true)
+  // tenant_added | before_due | on_due | after_due | day_of_month | lease_end | manual
+  trigger      String
+  offsetDays   Int                       @default(0)
+  // [{ type: "wait", days } | { type: "email", subject, body } | { type: "sms", body }
+  //  | { type: "portal", title, body } | { type: "notify_owner", subject, body }
+  //  | { type: "send_invoice" }]
+  steps        Json
+  // Bill-based workflows end as soon as that month's bills are fully paid.
+  stopWhenPaid Boolean                   @default(true)
+  createdAt    DateTime                  @default(now())
+  updatedAt    DateTime                  @updatedAt
+  enrollments  OwnerWorkflowEnrollment[]
+
+  @@index([accountId])
+}
+
+model OwnerWorkflowEnrollment {
+  id          String        @id @default(cuid())
+  workflowId  String
+  workflow    OwnerWorkflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  tenantId    String
+  tenant      Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  // Which occurrence this run is for (e.g. "due:2026-10"), so each bill
+  // month or lease end starts the sequence once per tenant.
+  periodKey   String
+  monthKey    String // bill month the merge tags and "stop when paid" refer to
+  status      String        @default("active") // active | completed | exited
+  stepIndex   Int           @default(0)
+  nextRunAt   DateTime      @default(now())
+  lastError   String?
+  exitReason  String?
+  enrolledAt  DateTime      @default(now())
+  completedAt DateTime?
+
+  @@unique([workflowId, tenantId, periodKey])
+  @@index([status, nextRunAt])
 }

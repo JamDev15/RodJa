@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { ledgerCreateSchema, formatZodError } from "@/lib/validations";
 import { upsertMonthlyLedger } from "@/lib/ledger";
+import { autoReceiptForLedgerChange } from "@/lib/invoices";
 
 const carryOverSchema = z.object({
   tenantId: z.string().min(1),
@@ -45,6 +46,7 @@ export async function POST(req: Request) {
   if (!tenant) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   const { tenantId, month } = data;
+  const before = await prisma.monthlyLedger.findUnique({ where: { tenantId_month: { tenantId, month } } });
   const entry = await upsertMonthlyLedger(tenantId, month, {
     rentAmount: data.rentAmount,
     rentPaidAmount: body.rentPaidAmount != null && body.rentPaidAmount !== "" ? Number(body.rentPaidAmount) : null,
@@ -63,6 +65,7 @@ export async function POST(req: Request) {
     otherPaid: body.otherPaid ?? false,
     notes: data.notes || null,
   });
+  await autoReceiptForLedgerChange(before, entry);
   return NextResponse.json(entry);
 }
 

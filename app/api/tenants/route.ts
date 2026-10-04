@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { tenantCreateSchema, formatZodError } from "@/lib/validations";
+import { triggerOwnerWorkflows } from "@/lib/owner-workflows";
 
 export async function POST(req: Request) {
   const session = await auth();
@@ -47,6 +48,9 @@ export async function POST(req: Request) {
 
   // Mark unit as occupied
   await prisma.unit.update({ where: { id: unitId }, data: { status: "occupied" } });
+
+  // Start any "When a tenant is added" workflows (e.g. a welcome sequence).
+  await triggerOwnerWorkflows(accountId, tenant.id, "tenant_added");
 
   return NextResponse.json(tenant, { status: 201 });
 }

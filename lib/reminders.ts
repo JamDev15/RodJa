@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { sendPaymentReminder } from "@/lib/email";
 import { sendSMS, buildReminderMessage } from "@/lib/sms";
+import { logMessage, type LogContext } from "@/lib/message-log";
 import { daysBetween, monthKeyOf, shiftMonthKey, dueDateForMonth, toPhDateOnly } from "@/lib/due-dates";
 
 function computeTrigger(diff: number, daysBefore: number[], daysAfter: number[]): string | null {
@@ -73,9 +74,16 @@ export async function runReminderSweep(now: Date = new Date()): Promise<Reminder
         const message = buildReminderMessage(tenant.name, amount, dueDate, trigger, account.ownerName);
         const channelsUsed: string[] = [];
         let anySuccess = false;
+        const log: LogContext = {
+          accountId: config.accountId,
+          tenantId: tenant.id,
+          recipientType: "tenant",
+          recipientName: tenant.name,
+          category: "reminder",
+        };
 
         if (config.smsEnabled && tenant.phone) {
-          if (await sendSMS(tenant.phone, message)) {
+          if (await sendSMS(tenant.phone, message, log)) {
             channelsUsed.push("sms");
             anySuccess = true;
           }
@@ -88,7 +96,8 @@ export async function runReminderSweep(now: Date = new Date()): Promise<Reminder
             dueDate,
             account.ownerName,
             account.gcashNumber,
-            account.mayaNumber
+            account.mayaNumber,
+            log
           );
           if (ok) {
             channelsUsed.push("email");
@@ -96,15 +105,17 @@ export async function runReminderSweep(now: Date = new Date()): Promise<Reminder
           }
         }
         if (config.inAppEnabled) {
+          const title = trigger === "due_date" ? "Rent due today" : trigger.includes("before") ? "Upcoming rent due" : "Rent overdue";
           await prisma.notice.create({
             data: {
               tenantId: tenant.id,
               accountId: config.accountId,
-              title: trigger === "due_date" ? "Rent due today" : trigger.includes("before") ? "Upcoming rent due" : "Rent overdue",
+              title,
               content: message,
               type: "reminder",
             },
           });
+          await logMessage({ ...log, channel: "in_app", to: "Tenant portal", subject: title, body: message, status: "sent" });
           channelsUsed.push("in_app");
           anySuccess = true;
         }

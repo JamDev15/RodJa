@@ -2,9 +2,11 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "TenantHub",
+    name: "TenantHub – Rental Management",
     short_name: "TenantHub",
-    description: "Manage your rental properties, tenants, and payments with ease.",
+    description: "Track rent, send reminders, e-sign leases, and issue receipts. Built for Philippine landlords.",
+    lang: "en-PH",
+    categories: ["business", "finance", "productivity"],
     start_url: "/",
     display: "standalone",
     background_color: "#080c14",

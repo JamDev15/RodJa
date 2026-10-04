@@ -3,6 +3,8 @@ import crypto from "crypto";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { sendBillingApproved, sendBillingRejected } from "@/lib/email";
+import { exitWorkflowsOnConversion } from "@/lib/workflows";
+import { subscriptionAttachment } from "@/lib/subscription-docs";
 import { adminBillingReviewSchema, formatZodError } from "@/lib/validations";
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -26,6 +28,12 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
   const record = await prisma.billingRecord.findUnique({ where: { id }, include: { account: true } });
   if (!record) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  const ownerLog = {
+    accountId: record.accountId,
+    recipientType: "owner" as const,
+    recipientName: record.account.ownerName,
+    category: "billing" as const,
+  };
 
   if (parsed.data.action === "approve") {
     const updated = await prisma.billingRecord.update({
@@ -38,8 +46,10 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     // new plan too.
     await prisma.account.update({
       where: { id: record.accountId },
-      data: { isActive: true, planId: record.targetPlanId ?? undefined },
+      data: { isActive: true, planId: record.targetPlanId ?? undefined, leadStatus: "converted" },
     });
+    // A paying customer leaves any "stop on conversion" CRM workflow.
+    await exitWorkflowsOnConversion(record.accountId);
 
     const token = crypto.randomBytes(32).toString("base64url");
     await prisma.loginToken.create({
@@ -50,7 +60,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       },
     });
     const loginUrl = `${process.env.NEXT_PUBLIC_APP_URL}/magic-login?token=${token}`;
-    await sendBillingApproved(record.account.email, record.account.ownerName, record.period, loginUrl);
+    await sendBillingApproved(record.account.email, record.account.ownerName, record.period, loginUrl, ownerLog, await subscriptionAttachment(record.id, "receipt"));
     return NextResponse.json(updated);
   }
 
@@ -67,6 +77,6 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     where: { id },
     data: { status: "rejected" },
   });
-  await sendBillingRejected(record.account.email, record.account.ownerName, record.period);
+  await sendBillingRejected(record.account.email, record.account.ownerName, record.period, ownerLog);
   return NextResponse.json(updated);
 }
