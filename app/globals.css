@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* `dark:` follows the site theme attribute, not just the OS setting. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
 :root {
   --background: #080c14;
   --foreground: #f1f5f9;
@@ -53,4 +56,144 @@ body {
 @keyframes rise-in {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── Public site theme (landing, pricing, signup, login, listings, renew) ───
+   Scoped to .th-public so the app dashboard keeps its own dark styling.
+   Light is the default; dark follows the device or the visitor's toggle
+   (data-theme on <html>, set before paint by the script in app/layout.tsx). */
+
+@theme inline {
+  --color-th-page: var(--th-page);
+  --color-th-surface: var(--th-surface);
+  --color-th-raised: var(--th-raised);
+  --color-th-ink: var(--th-ink);
+  --color-th-muted: var(--th-muted);
+  --color-th-faint: var(--th-faint);
+  --color-th-line: var(--th-line);
+  --color-th-brand: var(--th-brand);
+  --color-th-brand-hover: var(--th-brand-hover);
+  --color-th-on-brand: var(--th-on-brand);
+  --color-th-brand-soft: var(--th-brand-soft);
+  --color-th-paid: var(--th-paid);
+  --color-th-paid-soft: var(--th-paid-soft);
+  --color-th-due: var(--th-due);
+  --color-th-due-soft: var(--th-due-soft);
+  --color-th-danger: var(--th-danger);
+  --color-th-tint: var(--th-tint);
+  --color-th-accent: var(--th-accent);
+  --color-th-band: var(--th-band);
+  --color-th-band-ink: var(--th-band-ink);
+  --color-th-band-muted: var(--th-band-muted);
+  --color-th-band-line: var(--th-band-line);
+  --font-serif: var(--font-serif-latin), var(--font-serif-ext), ui-serif, Georgia, serif;
+  --font-jakarta: var(--font-jakarta-latin), var(--font-jakarta-ext), ui-sans-serif, system-ui, sans-serif;
+}
+
+.th-public {
+  --th-page: #ffffff;
+  --th-surface: #ffffff;
+  --th-raised: #f2f6fb;
+  --th-tint: #eef4fb;
+  --th-ink: #0f1e3d;
+  --th-muted: #55637a;
+  --th-faint: #8592a6;
+  --th-line: #dbe4ef;
+  --th-brand: #13244a;
+  --th-brand-hover: #1f3768;
+  --th-on-brand: #ffffff;
+  --th-brand-soft: #e7eef9;
+  --th-accent: #4a70bd;
+  --th-band: #10214a;
+  --th-band-ink: #f3f6fb;
+  --th-band-muted: #a9b7d3;
+  --th-band-line: #26386a;
+  --th-paid: #1b7f55;
+  --th-paid-soft: #e4f4ec;
+  --th-due: #a45d06;
+  --th-due-soft: #fbf0df;
+  --th-danger: #b42318;
+  --th-shadow: 0 1px 2px rgb(15 30 61 / 0.05), 0 18px 40px -18px rgb(15 30 61 / 0.18);
+  color-scheme: light;
+  background: var(--th-page);
+  color: var(--th-ink);
+  font-family: var(--font-jakarta);
+}
+
+html[data-theme="dark"] .th-public {
+  --th-page: #091226;
+  --th-surface: #0f1b34;
+  --th-raised: #142445;
+  --th-tint: #12213f;
+  --th-ink: #eaf0f8;
+  --th-muted: #a0acc2;
+  --th-faint: #6f7d97;
+  --th-line: #21335a;
+  --th-brand: #dce6f7;
+  --th-brand-hover: #ffffff;
+  --th-on-brand: #0b1630;
+  --th-brand-soft: #1a2c55;
+  --th-accent: #93b2f2;
+  --th-band: #142a5c;
+  --th-band-ink: #f3f6fb;
+  --th-band-muted: #b2c1de;
+  --th-band-line: #2c4580;
+  --th-paid: #4cc995;
+  --th-paid-soft: #12302a;
+  --th-due: #f0b25a;
+  --th-due-soft: #33281a;
+  --th-danger: #ff8a7a;
+  --th-shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 18px 44px -18px rgb(0 0 0 / 0.7);
+  color-scheme: dark;
+}
+
+/* Page background behind public pages (overscroll, short pages). */
+html:has(.th-public) body { background: #ffffff; color: #0f1e3d; }
+html[data-theme="dark"]:has(.th-public) body { background: #091226; }
+
+.th-public .tabular { font-variant-numeric: tabular-nums; }
+/* Serif display: upright line, then an italic accent line underneath. */
+.th-public .th-display { font-family: var(--font-serif); font-weight: 400; letter-spacing: -0.02em; font-optical-sizing: auto; }
+.th-public .th-display em { font-style: italic; color: var(--th-accent); }
+.th-public .th-eyebrow { font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--th-muted); }
+.th-public .th-shadow { box-shadow: var(--th-shadow); }
+.th-public ::selection { background: var(--th-brand-soft); }
+.th-public :focus-visible { outline: 2px solid var(--th-brand); outline-offset: 2px; border-radius: 6px; }
+
+/* Shared form controls on public pages */
+.th-input {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid var(--th-line);
+  background: var(--th-surface);
+  color: var(--th-ink);
+  padding: 0.7rem 0.85rem;
+  font-size: 16px;
+  line-height: 1.4;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+@media (min-width: 640px) { .th-input { font-size: 15px; } }
+.th-input::placeholder { color: var(--th-faint); }
+.th-input:focus { outline: none; border-color: var(--th-brand); box-shadow: 0 0 0 3px var(--th-brand-soft); }
+.th-public .th-input:focus-visible { outline: none; }
+
+/* The one orchestrated moment: a rent row settles to paid, then a receipt chip appears. */
+@keyframes th-stamp {
+  0% { opacity: 0; transform: scale(1.35) rotate(-8deg); }
+  60% { opacity: 1; transform: scale(0.96) rotate(-8deg); }
+  100% { opacity: 1; transform: scale(1) rotate(-8deg); }
+}
+@keyframes th-chip {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes th-swap-out { to { opacity: 0; } }
+@keyframes th-swap-in { from { opacity: 0; } to { opacity: 1; } }
+.th-anim-due { animation: th-swap-out 0.25s ease 1.4s forwards; }
+.th-anim-paid { opacity: 0; animation: th-swap-in 0.25s ease 1.55s forwards; }
+.th-anim-stamp { opacity: 0; animation: th-stamp 0.45s cubic-bezier(.2,.8,.2,1) 1.6s forwards; }
+.th-anim-chip { opacity: 0; animation: th-chip 0.4s ease 2.1s forwards; }
+@media (prefers-reduced-motion: reduce) {
+  .th-anim-due { animation: none; opacity: 0; }
+  .th-anim-paid, .th-anim-stamp, .th-anim-chip { animation: none; opacity: 1; }
 }

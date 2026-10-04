@@ -2,9 +2,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { CheckCircle2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Notice, thHint, thLabel, thPrimary } from "@/components/public/ui";
 
 export function RenewLogin() {
   const router = useRouter();
@@ -33,17 +31,17 @@ export function RenewLogin() {
   }
 
   return (
-    <form onSubmit={submit} className="rounded-xl border border-white/10 bg-white/5 p-6 space-y-4 text-left">
+    <form onSubmit={submit} className="space-y-5">
       <div className="space-y-2">
-        <Label htmlFor="r-email">Email</Label>
-        <Input id="r-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+        <label htmlFor="r-email" className={thLabel}>Email</label>
+        <input id="r-email" className="th-input" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="r-pass">Password</Label>
-        <Input id="r-pass" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+        <label htmlFor="r-pass" className={thLabel}>Password</label>
+        <input id="r-pass" className="th-input" type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} required />
       </div>
-      {error && <p className="rounded-lg bg-red-500/10 border border-red-500/20 p-3 text-sm text-red-400">{error}</p>}
-      <Button type="submit" className="w-full" disabled={loading}>{loading ? "Checking…" : "Continue"}</Button>
+      {error && <Notice tone="error">{error}</Notice>}
+      <button type="submit" className={thPrimary} disabled={loading}>{loading ? "Checking…" : "Continue"}</button>
     </form>
   );
 }
@@ -84,10 +82,10 @@ export function RenewForm(props: {
 
   if (done) {
     return (
-      <div className="rounded-xl border border-green-500/30 bg-green-500/10 p-6 text-center">
-        <CheckCircle2 className="mx-auto h-8 w-8 text-green-400" />
-        <p className="mt-2 font-semibold text-white">Payment submitted</p>
-        <p className="mt-1 text-sm text-gray-400">We&apos;ll email you a login link as soon as it&apos;s approved — usually within the day.</p>
+      <div className="py-4 text-center">
+        <CheckCircle2 className="mx-auto h-9 w-9 text-th-paid" />
+        <p className="th-display mt-3 text-[26px] text-th-ink">Payment submitted.</p>
+        <p className="mt-2 text-[14px] text-th-muted">We&apos;ll email you a login link as soon as it&apos;s approved — usually within the day.</p>
       </div>
     );
   }
@@ -95,35 +93,35 @@ export function RenewForm(props: {
   const peso = new Intl.NumberFormat("en-PH", { style: "currency", currency: "PHP", minimumFractionDigits: 0 }).format(props.amount);
 
   return (
-    <form onSubmit={submit} className="rounded-xl border border-blue-500/20 bg-blue-500/5 p-6 space-y-4">
-      <p className="text-sm text-gray-300">Send <strong className="text-white">{peso}</strong> via GCash or Maya, then enter the reference number from your receipt.</p>
+    <form onSubmit={submit} className="space-y-5">
+      <p className="text-[15px] text-th-muted">Send <strong className="text-th-ink">{peso}</strong> by GCash or Maya, then enter the reference number from your receipt.</p>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {props.gcashNumber && (
           <div>
-            <p className="text-xs text-gray-500">GCash</p>
-            <p className="text-white text-sm font-medium">{props.gcashNumber}</p>
-            {props.gcashQrUrl && <img src={props.gcashQrUrl} alt="GCash QR code" className="mt-2 h-32 w-32 rounded-lg border border-white/10 bg-white object-contain" />}
+            <p className={thHint}>GCash</p>
+            <p className="tabular text-[15px] font-semibold text-th-ink">{props.gcashNumber}</p>
+            {props.gcashQrUrl && <img src={props.gcashQrUrl} alt="GCash QR code" className="mt-2 h-32 w-32 rounded-lg border border-th-line bg-white object-contain" />}
           </div>
         )}
         {props.mayaNumber && (
           <div>
-            <p className="text-xs text-gray-500">Maya</p>
-            <p className="text-white text-sm font-medium">{props.mayaNumber}</p>
-            {props.mayaQrUrl && <img src={props.mayaQrUrl} alt="Maya QR code" className="mt-2 h-32 w-32 rounded-lg border border-white/10 bg-white object-contain" />}
+            <p className={thHint}>Maya</p>
+            <p className="tabular text-[15px] font-semibold text-th-ink">{props.mayaNumber}</p>
+            {props.mayaQrUrl && <img src={props.mayaQrUrl} alt="Maya QR code" className="mt-2 h-32 w-32 rounded-lg border border-th-line bg-white object-contain" />}
           </div>
         )}
       </div>
-      {!props.gcashNumber && !props.mayaNumber && <p className="text-sm text-gray-500">Payment details aren&apos;t set up yet — reply to any TenantHub email for help.</p>}
+      {!props.gcashNumber && !props.mayaNumber && <p className="text-[14px] text-th-muted">Payment details aren&apos;t set up yet. Reply to any TenantHub email and we&apos;ll send them.</p>}
       <div className="space-y-2">
-        <Label htmlFor="r-ref">Reference number *</Label>
-        <Input id="r-ref" value={reference} onChange={(e) => setReference(e.target.value)} placeholder="From your GCash/Maya receipt" required />
+        <label htmlFor="r-ref" className={thLabel}>Reference number</label>
+        <input id="r-ref" className="th-input tabular" value={reference} onChange={(e) => setReference(e.target.value)} placeholder="From your GCash or Maya receipt" required />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="r-proof">Screenshot (optional)</Label>
-        <Input id="r-proof" type="file" accept="image/*,application/pdf" onChange={(e) => setProof(e.target.files?.[0] ?? null)} />
+        <label htmlFor="r-proof" className={thLabel}>Screenshot <span className="font-normal text-th-faint">(optional)</span></label>
+        <input id="r-proof" className="th-input file:mr-3 file:rounded-full file:border-0 file:bg-th-raised file:px-3 file:py-1 file:text-[13px] file:text-th-ink" type="file" accept="image/*,application/pdf" onChange={(e) => setProof(e.target.files?.[0] ?? null)} />
       </div>
-      {error && <p className="rounded-lg bg-red-500/10 border border-red-500/20 p-3 text-sm text-red-400">{error}</p>}
-      <Button type="submit" className="w-full" disabled={loading}>{loading ? "Submitting…" : `Submit ${peso} payment`}</Button>
+      {error && <Notice tone="error">{error}</Notice>}
+      <button type="submit" className={thPrimary} disabled={loading}>{loading ? "Submitting…" : `Submit ${peso} payment`}</button>
     </form>
   );
 }

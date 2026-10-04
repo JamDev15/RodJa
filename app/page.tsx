@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import {
-  Home, CheckCircle, Building2, Users, CreditCard, Bell, Globe, ArrowRight,
-  MessageCircle, UserPlus, Wallet, FileSignature, ReceiptText, History, Zap, ChevronDown,
-} from "lucide-react";
-import { HeroMockup } from "@/components/landing/hero-mockup";
+import { ArrowUpRight, Check, Bell, FileSignature, ReceiptText } from "lucide-react";
+import { SiteHeader } from "@/components/public/site-header";
+import { SiteFooter } from "@/components/public/site-footer";
+import { HeroBoard } from "@/components/public/hero-board";
 import {
   DEFAULT_DESCRIPTION, DEFAULT_TITLE, FAQ, PRICE_PHP,
   faqJsonLd, jsonLdString, organizationJsonLd, softwareJsonLd, websiteJsonLd,
@@ -17,158 +16,202 @@ export const metadata: Metadata = {
   openGraph: { url: "/", title: DEFAULT_TITLE, description: DEFAULT_DESCRIPTION },
 };
 
-const features = [
-  { icon: Bell, title: "Automatic rent reminders", desc: "Email, SMS, and in-app reminders before and after every due date — no more chasing tenants on Messenger." },
-  { icon: Zap, title: "Custom automations", desc: "Build your own rules: an SMS 3 days before rent is due, an overdue notice, a lease-ending heads-up — for your tenant, you, or both.", badge: "New" },
-  { icon: FileSignature, title: "Online lease contracts", desc: "Start from a Philippine lease template, sign on your phone, and your tenant signs from a link. Both get the signed PDF.", badge: "New" },
-  { icon: ReceiptText, title: "Invoices & automatic receipts", desc: "Send an itemized bill in one tap. Receipts are emailed automatically when you mark a payment as paid.", badge: "New" },
-  { icon: History, title: "Message history", desc: "See every reminder, invoice, and contract that went out — to whom, when, and whether it was delivered.", badge: "New" },
-  { icon: CreditCard, title: "GCash & Maya ready", desc: "Tenants pay the way they already do and upload their proof. You approve with one tap." },
-  { icon: Users, title: "Tenant portal", desc: "Tenants see their balance, pay, sign contracts, download receipts, and request repairs." },
-  { icon: Building2, title: "Itemized monthly bills", desc: "Rent, kuryente, tubig, and other charges per tenant, with partial payments and carry-over balances." },
-  { icon: MessageCircle, title: "Chat assistant", desc: "Type “add ₱500 electric bill for Juan” — it finds the right tenant and saves it. No forms." },
-  { icon: Globe, title: "Public listings", desc: "Post vacant units on a shareable listing page to find your next tenant." },
+const STRIP = ["Apartments, dorms, bedspaces", "GCash and Maya ready", "Leases signed online", `One plan, ₱${PRICE_PHP}/month`];
+
+const STEPS = [
+  { n: "01", title: "Add your rentals", body: "Start with one property and one tenant. Add the rent, due day, and their phone number." },
+  { n: "02", title: "Turn on reminders", body: "Pick when tenants hear from you — before the due date, on the day, and if they're late." },
+  { n: "03", title: "Approve and you're done", body: "Tenants pay by GCash or Maya and upload proof. You approve, and the receipt sends itself." },
 ];
 
-const steps = [
-  { icon: UserPlus, title: "Add your properties and tenants", desc: "Apartments, boarding houses, bedspaces, dorms — set them up in minutes, or we'll do it with you on a free onboarding call." },
-  { icon: Bell, title: "Reminders and contracts run themselves", desc: "Tenants get nudged before and after due dates, and sign their lease online. You get a copy of everything." },
-  { icon: Wallet, title: "Collect, approve, done", desc: "Tenants pay via GCash or Maya and upload proof; you approve and a receipt goes out automatically." },
+const INCLUDED = [
+  { tag: "Contracts", title: "E-signed lease agreements", body: "A Philippine lease template, filled in for each tenant, signed on any phone." },
+  { tag: "Invoices", title: "Bills and automatic receipts", body: "Itemized invoices for rent, kuryente, and tubig. Receipts email themselves when paid." },
+  { tag: "History", title: "Every message on record", body: "See each reminder, invoice, and receipt that went out, and whether it arrived." },
+  { tag: "Workflows", title: "Follow-ups that run themselves", body: "Invoice, wait, nudge, alert you. Stops the moment the tenant pays." },
+  { tag: "Tenant portal", title: "A home for your tenants", body: "Balances, payment upload, contracts, receipts, and repair requests in one place." },
+  { tag: "Listings", title: "Fill vacancies faster", body: "A shareable page for empty units, ready to post in Facebook groups." },
 ];
 
-const included = [
-  "Unlimited properties, units & tenants",
-  "Automatic reminders (email, SMS, push)",
-  "Custom reminder automations",
-  "E-signed lease contracts + PDF",
-  "Invoices & automatic receipts",
-  "Message history",
-  "Tenant portal & GCash/Maya proof upload",
-  "Chat assistant, listings & maintenance",
+const PLAN = [
+  "Unlimited properties, units, and tenants",
+  "Reminders by email, SMS, and push",
+  "Invoices and automatic receipts",
+  "E-signed lease contracts",
+  "Workflows and message history",
+  "Tenant portal, listings, and chat assistant",
 ];
 
-const audiences = ["Apartments", "Boarding houses", "Bedspaces", "Dormitories", "Condo units", "Houses for rent"];
+function Ledger() {
+  const rows = [
+    { name: "Ramon Villanueva", amt: "₱7,500.00", status: "Paid · Oct 2", paid: true },
+    { name: "Maria dela Cruz", amt: "₱9,550.00", status: "Paid · Oct 4", paid: true },
+    { name: "Joy Santiago", amt: "₱3,800.00", status: "Reminder sent", paid: false },
+  ];
+  return (
+    <div className="th-shadow w-full max-w-sm rotate-[-2deg] rounded-xl border border-th-line bg-th-surface p-4">
+      <div className="flex items-center justify-between">
+        <p className="text-[12px] font-semibold text-th-ink">Monthly rent ledger</p>
+        <p className="text-[11px] text-th-faint">October</p>
+      </div>
+      <ul className="mt-3 space-y-2.5">
+        {rows.map((r) => (
+          <li key={r.name} className="flex items-center justify-between gap-3 border-b border-th-line pb-2.5 text-[12px] last:border-0 last:pb-0">
+            <span className="flex items-center gap-2 text-th-ink">
+              <span className={`h-1.5 w-1.5 rounded-full ${r.paid ? "bg-th-paid" : "bg-th-due"}`} />{r.name}
+            </span>
+            <span className="tabular text-th-ink">{r.amt}</span>
+            <span className={`hidden text-[11px] sm:inline ${r.paid ? "text-th-paid" : "text-th-due"}`}>{r.status}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
 
 export default function LandingPage() {
   const ld = [organizationJsonLd(), websiteJsonLd(), softwareJsonLd(), faqJsonLd()];
+  const pill = "inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-[15px] font-semibold transition-colors";
 
   return (
-    <div className="min-h-screen bg-[#080c14] text-white overflow-x-hidden">
+    <div className="th-public min-h-screen overflow-x-hidden antialiased">
       {ld.map((data, i) => (
         <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdString(data) }} />
       ))}
 
-      {/* Nav */}
-      <nav className="sticky top-0 z-50 border-b border-white/10 bg-[#080c14]/80 backdrop-blur-md" aria-label="Main">
-        <div className="flex items-center justify-between px-4 sm:px-6 py-4 max-w-6xl mx-auto">
-          <Link href="/" className="flex items-center gap-2 shrink-0" aria-label="TenantHub home">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 shrink-0">
-              <Home className="h-4 w-4 text-white" />
-            </div>
-            <span className="font-bold text-white text-lg">TenantHub</span>
-          </Link>
-          <div className="hidden md:flex items-center gap-8 text-sm text-gray-400">
-            <a href="#features" className="hover:text-white transition-colors">Features</a>
-            <a href="#how-it-works" className="hover:text-white transition-colors">How it works</a>
-            <a href="#pricing" className="hover:text-white transition-colors">Pricing</a>
-            <a href="#faq" className="hover:text-white transition-colors">FAQ</a>
-          </div>
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            <Link href="/login" className="text-sm text-gray-400 hover:text-white transition-colors">Sign In</Link>
-            <Link href="/signup" className="whitespace-nowrap rounded-lg bg-blue-600 px-3 py-1.5 sm:px-4 sm:py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors">
-              <span className="sm:hidden">Try free</span>
-              <span className="hidden sm:inline">Start 3-day free trial</span>
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <SiteHeader />
 
       <main>
         {/* Hero */}
-        <section className="relative">
-          <div className="pointer-events-none absolute inset-0 overflow-hidden">
-            <div className="absolute -top-40 left-1/4 h-96 w-96 rounded-full bg-blue-600/20 blur-[120px]" />
-            <div className="absolute top-20 right-0 h-80 w-80 rounded-full bg-blue-500/10 blur-[100px]" />
-          </div>
-
-          <div className="relative max-w-6xl mx-auto px-6 pt-20 pb-24 grid lg:grid-cols-2 gap-16 items-center">
-            <div className="text-center lg:text-left">
-              <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/30 bg-blue-500/10 px-4 py-1.5 text-xs text-blue-400 mb-6">
-                Built for Philippine landlords 🇵🇭
-              </div>
-              <h1 className="text-4xl md:text-6xl font-bold text-white leading-tight mb-6 tracking-tight">
-                The rental management app<br />
-                <span className="bg-gradient-to-r from-blue-400 to-blue-500 bg-clip-text text-transparent">for Philippine landlords</span>
+        <section className="px-4 pb-16 pt-12 sm:px-6 sm:pt-20">
+          <div className="mx-auto grid max-w-6xl items-center gap-14 lg:grid-cols-[1fr_1.08fr] lg:gap-12">
+            <div>
+              <p className="th-eyebrow flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-th-accent" />Built for Philippine landlords</p>
+              <h1 className="th-display mt-5 text-[46px] leading-[1.02] text-th-ink sm:text-[64px]">
+                Every peso, accounted for.
+                <br />
+                <em>Every tenant, reminded.</em>
               </h1>
-              <p className="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto lg:mx-0 mb-8">
-                Track rent and bills, collect via GCash or Maya, send automatic reminders, e-sign lease contracts, and issue receipts — all from your phone.
+              <p className="mt-6 max-w-md text-[17px] leading-relaxed text-th-muted">
+                Track rent and bills, send reminders by SMS and email, sign leases online, and send receipts the moment a GCash payment lands.
               </p>
-              <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
-                <Link href="/signup" className="group flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-8 py-3.5 text-base font-semibold text-white hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/25 hover:shadow-blue-600/40">
-                  Start free for 3 days <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                <Link href="/signup" className={`${pill} bg-th-brand text-th-on-brand hover:bg-th-brand-hover`}>
+                  Start your free trial <ArrowUpRight className="h-4 w-4" />
                 </Link>
-                <Link href="/listings" className="flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-8 py-3.5 text-base font-semibold text-white hover:bg-white/10 transition-colors">
-                  Browse rentals
+                <Link href="#how-it-works" className={`${pill} border border-th-line text-th-ink hover:bg-th-raised`}>
+                  See how it works
                 </Link>
               </div>
-              <p className="mt-4 text-sm text-gray-500">No credit card · Then ₱{PRICE_PHP}/month · Cancel anytime</p>
+              <ul className="mt-5 flex flex-wrap gap-x-5 gap-y-1.5 text-[13px] text-th-muted">
+                {["3 days free", "No card or GCash needed", `₱${PRICE_PHP}/month after`].map((t) => (
+                  <li key={t} className="inline-flex items-center gap-1.5"><Check className="h-3.5 w-3.5 text-th-paid" strokeWidth={2.5} />{t}</li>
+                ))}
+              </ul>
             </div>
-
-            <HeroMockup />
+            <HeroBoard />
           </div>
         </section>
 
-        {/* Audiences */}
-        <section className="border-y border-white/10 bg-white/[0.02]" aria-label="Who it's for">
-          <div className="max-w-6xl mx-auto px-6 py-6 flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-sm text-gray-400">
-            <span className="text-gray-500">Made for:</span>
-            {audiences.map((a) => <span key={a}>{a}</span>)}
-          </div>
-        </section>
-
-        {/* Features */}
-        <section id="features" className="max-w-6xl mx-auto px-6 py-20">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-white mb-3">Everything you need to manage rentals</h2>
-            <p className="text-gray-400">One platform, built for how Philippine landlords actually collect rent.</p>
-          </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {features.map(({ icon: Icon, title, desc, badge }) => (
-              <div
-                key={title}
-                className={`group relative rounded-xl border p-5 transition-all hover:-translate-y-0.5 ${badge ? "border-blue-500/50 bg-blue-500/10 hover:bg-blue-500/[0.15]" : "border-white/10 bg-white/5 hover:bg-white/[0.07] hover:border-white/20"}`}
-              >
-                {badge && (
-                  <span className="absolute -top-2.5 right-4 rounded-full bg-blue-600 px-2.5 py-0.5 text-[10px] font-semibold text-white">{badge}</span>
-                )}
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600/20 mb-3 transition-colors group-hover:bg-blue-600/30">
-                  <Icon className="h-5 w-5 text-blue-400" />
-                </div>
-                <h3 className="font-semibold text-white mb-1">{title}</h3>
-                <p className="text-sm text-gray-400 leading-relaxed">{desc}</p>
-              </div>
+        {/* Strip */}
+        <section className="border-y border-th-line px-4 sm:px-6">
+          <ul className="mx-auto grid max-w-6xl grid-cols-2 gap-y-4 py-6 lg:grid-cols-4">
+            {STRIP.map((s) => (
+              <li key={s} className="flex items-center gap-2.5 text-[13px] font-medium text-th-ink">
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-th-line"><Check className="h-3 w-3 text-th-accent" strokeWidth={3} /></span>
+                {s}
+              </li>
             ))}
+          </ul>
+        </section>
+
+        {/* Bento */}
+        <section id="features" className="scroll-mt-20 px-4 py-20 sm:px-6 sm:py-28">
+          <div className="mx-auto max-w-6xl">
+            <div className="grid items-end gap-6 md:grid-cols-[1.4fr_1fr]">
+              <div>
+                <p className="th-eyebrow">Made for small landlords</p>
+                <h2 className="th-display mt-4 text-[38px] leading-[1.05] text-th-ink sm:text-[52px]">
+                  A few units to rent out.
+                  <br />
+                  <em>Not a second full-time job.</em>
+                </h2>
+              </div>
+              <p className="max-w-sm text-[15px] leading-relaxed text-th-muted md:justify-self-end">
+                Retire the notebook, the Excel file, and the “nabayaran mo na ba?” messages. Every part of collecting rent has a place here.
+              </p>
+            </div>
+
+            <div className="mt-12 grid gap-4 md:grid-cols-2">
+              <article className="grid items-center gap-8 overflow-hidden rounded-3xl border border-th-line bg-th-tint p-7 sm:p-10 md:col-span-2 md:grid-cols-[1fr_1fr]">
+                <div>
+                  <p className="th-eyebrow">01 / Rent, sorted</p>
+                  <h3 className="th-display mt-4 text-[32px] leading-[1.1] text-th-ink sm:text-[38px]">Know where every rent payment stands.</h3>
+                  <p className="mt-4 max-w-md text-[15px] leading-relaxed text-th-muted">
+                    Paid, partial, or overdue. Rent, kuryente, tubig, and carry-over balances in one monthly ledger per tenant.
+                  </p>
+                  <Link href="/signup" className="mt-6 inline-flex items-center gap-1.5 text-[14px] font-semibold text-th-ink hover:text-th-accent">
+                    Start tracking rent <ArrowUpRight className="h-4 w-4" />
+                  </Link>
+                </div>
+                <div className="flex justify-center md:justify-end"><Ledger /></div>
+              </article>
+
+              <article className="rounded-3xl border border-th-line bg-th-tint p-7 sm:p-9">
+                <p className="th-eyebrow">02 / Less following up</p>
+                <div className="th-shadow mt-6 flex max-w-xs items-center gap-3 rounded-xl border border-th-line bg-th-surface p-3">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-th-raised text-th-accent"><Bell className="h-4 w-4" /></span>
+                  <div>
+                    <p className="text-[12px] font-semibold text-th-ink">A friendly reminder</p>
+                    <p className="text-[11px] text-th-muted">Rent of ₱3,800 is due on the 5th</p>
+                  </div>
+                </div>
+                <h3 className="th-display mt-7 text-[28px] leading-[1.1] text-th-ink">A nudge, without the awkward text.</h3>
+                <p className="mt-3 text-[15px] leading-relaxed text-th-muted">Reminders go out by SMS and email on your schedule, and stop the moment they pay.</p>
+              </article>
+
+              <article className="rounded-3xl border border-th-line bg-th-raised p-7 sm:p-9">
+                <p className="th-eyebrow">03 / Nothing lost in the shuffle</p>
+                <div className="mt-6 flex flex-wrap gap-2">
+                  {[
+                    { icon: FileSignature, label: "Lease, signed" },
+                    { icon: ReceiptText, label: "Receipt RCPT-0128" },
+                    { icon: Bell, label: "12 messages sent" },
+                  ].map((c) => (
+                    <span key={c.label} className="th-shadow inline-flex items-center gap-1.5 rounded-lg border border-th-line bg-th-surface px-2.5 py-1.5 text-[12px] text-th-ink">
+                      <c.icon className="h-3.5 w-3.5 text-th-accent" />{c.label}
+                    </span>
+                  ))}
+                </div>
+                <h3 className="th-display mt-7 text-[28px] leading-[1.1] text-th-ink">All the paperwork. One clear record.</h3>
+                <p className="mt-3 text-[15px] leading-relaxed text-th-muted">Contracts, invoices, receipts, and every message sent, saved together for each tenant.</p>
+              </article>
+            </div>
           </div>
         </section>
 
-        {/* How it works */}
-        <section id="how-it-works" className="border-y border-white/10 bg-white/[0.02]">
-          <div className="max-w-6xl mx-auto px-6 py-20">
-            <div className="text-center mb-14">
-              <h2 className="text-3xl font-bold text-white mb-3">Up and running in three steps</h2>
-              <p className="text-gray-400">No spreadsheets, no back-and-forth over Messenger.</p>
+        {/* Navy band — a real sequence, so it's numbered */}
+        <section id="how-it-works" className="scroll-mt-20 px-4 sm:px-6">
+          <div className="mx-auto max-w-6xl overflow-hidden rounded-[28px] bg-th-band px-7 py-14 text-th-band-ink sm:px-12 sm:py-20">
+            <div className="flex flex-col justify-between gap-8 md:flex-row md:items-end">
+              <div>
+                <p className="th-eyebrow !text-th-band-muted">Getting started</p>
+                <h2 className="th-display mt-4 text-[38px] leading-[1.05] sm:text-[52px]">
+                  Set it up tonight.
+                  <br />
+                  <em className="!text-th-band-muted">Collect on the 5th.</em>
+                </h2>
+              </div>
+              <Link href="/signup" className="inline-flex items-center gap-1.5 self-start text-[14px] font-semibold text-th-band-ink hover:opacity-80 md:self-auto">
+                Add your first property <ArrowUpRight className="h-4 w-4" />
+              </Link>
             </div>
-            <ol className="grid md:grid-cols-3 gap-8 md:gap-4">
-              {steps.map(({ icon: Icon, title, desc }, i) => (
-                <li key={title} className="relative text-center md:text-left">
-                  <div className="flex items-center gap-3 mb-4 justify-center md:justify-start">
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-600/20">
-                      <Icon className="h-6 w-6 text-blue-400" />
-                    </div>
-                    <span className="text-3xl font-bold text-white/10">0{i + 1}</span>
-                  </div>
-                  <h3 className="font-semibold text-white text-lg mb-2">{title}</h3>
-                  <p className="text-sm text-gray-400 leading-relaxed">{desc}</p>
+            <ol className="mt-14 grid gap-10 border-t border-th-band-line pt-10 md:grid-cols-3">
+              {STEPS.map((s) => (
+                <li key={s.n}>
+                  <p className="th-display text-[44px] italic leading-none text-th-band-muted">{s.n}</p>
+                  <h3 className="mt-5 text-[17px] font-semibold">{s.title}</h3>
+                  <p className="mt-2 max-w-xs text-[15px] leading-relaxed text-th-band-muted">{s.body}</p>
                 </li>
               ))}
             </ol>
@@ -176,85 +219,142 @@ export default function LandingPage() {
         </section>
 
         {/* Pricing */}
-        <section className="max-w-5xl mx-auto px-6 py-20" id="pricing">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-white mb-3">One simple price</h2>
-            <p className="text-gray-400 text-sm">Every feature, no limits. Try it free for 3 days first.</p>
+        <section id="pricing" className="scroll-mt-20 px-4 py-20 sm:px-6 sm:py-28">
+          <div className="mx-auto grid max-w-6xl items-center gap-12 md:grid-cols-[1fr_440px] md:gap-20">
+            <div>
+              <p className="th-eyebrow">Simple pricing</p>
+              <h2 className="th-display mt-4 text-[38px] leading-[1.05] text-th-ink sm:text-[52px]">
+                One plan.
+                <br />
+                <em>Every feature included.</em>
+              </h2>
+              <p className="mt-5 max-w-md text-[16px] leading-relaxed text-th-muted">
+                No limits on units or tenants, no add-ons to buy. Try everything free for 3 days, then pay by GCash or Maya.
+              </p>
+              <Link href="#faq" className="mt-6 inline-flex items-center gap-1.5 text-[14px] font-semibold text-th-ink hover:text-th-accent">
+                Pricing questions <ArrowUpRight className="h-4 w-4" />
+              </Link>
+            </div>
+
+            <div className="th-shadow rounded-3xl border border-th-line bg-th-surface p-7 sm:p-8">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="th-eyebrow">Everything included</p>
+                  <p className="th-display mt-2 text-[26px] text-th-ink">TenantHub</p>
+                </div>
+                <p className="text-right">
+                  <span className="th-display tabular text-[44px] leading-none text-th-ink">₱{PRICE_PHP}</span>
+                  <span className="block text-[12px] text-th-muted">per month</span>
+                </p>
+              </div>
+              <ul className="mt-6 space-y-2.5">
+                {PLAN.map((l) => (
+                  <li key={l} className="flex items-start gap-2.5 text-[14px] text-th-ink">
+                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-th-paid" strokeWidth={2.5} />{l}
+                  </li>
+                ))}
+              </ul>
+              <Link href="/signup" className={`${pill} mt-7 w-full bg-th-brand text-th-on-brand hover:bg-th-brand-hover`}>
+                Start your free trial
+              </Link>
+              <div className="mt-6 flex items-center justify-between border-t border-dashed border-th-line pt-5">
+                <div>
+                  <p className="th-eyebrow">Free trial</p>
+                  <p className="mt-1 text-[14px] font-semibold text-th-ink">First 3 days</p>
+                  <p className="text-[12px] text-th-muted">No card or GCash needed to start</p>
+                </div>
+                <p className="th-display tabular text-[28px] text-th-paid">₱0</p>
+              </div>
+            </div>
           </div>
-          <div className="mx-auto max-w-md rounded-2xl border border-blue-500/50 bg-blue-500/10 p-8 shadow-xl shadow-blue-600/10">
-            <div className="flex items-center justify-between">
-              <h3 className="font-bold text-white text-lg">TenantHub</h3>
-              <span className="rounded-full bg-blue-600 px-3 py-1 text-xs font-semibold text-white">3 days free</span>
+          <p className="mx-auto mt-10 max-w-2xl text-center text-[13px] leading-relaxed text-th-faint">
+            When the trial ends your account pauses until you subscribe. Nothing is deleted — your properties, tenants, and records stay saved.
+          </p>
+        </section>
+
+        {/* Included grid */}
+        <section className="border-t border-th-line px-4 py-20 sm:px-6 sm:py-28">
+          <div className="mx-auto max-w-6xl">
+            <div className="grid items-end gap-6 md:grid-cols-[1.4fr_1fr]">
+              <div>
+                <p className="th-eyebrow">What you get</p>
+                <h2 className="th-display mt-4 text-[38px] leading-[1.05] text-th-ink sm:text-[52px]">
+                  Everything in one place.
+                  <br />
+                  <em>Nothing extra to buy.</em>
+                </h2>
+              </div>
+              <p className="max-w-sm text-[15px] leading-relaxed text-th-muted md:justify-self-end">
+                The tools you'd normally piece together from notebooks, chat threads, and spreadsheets — built in.
+              </p>
             </div>
-            <div className="mt-3 flex items-baseline gap-1">
-              <span className="text-5xl font-bold text-white">₱{PRICE_PHP}</span>
-              <span className="text-gray-400">/ month</span>
-            </div>
-            <p className="mt-1 text-sm text-gray-400">Pay via GCash or Maya. Cancel anytime.</p>
-            <ul className="mt-6 space-y-2.5">
-              {included.map((f) => (
-                <li key={f} className="flex items-center gap-2 text-sm text-gray-200">
-                  <CheckCircle className="h-4 w-4 text-green-400 shrink-0" />{f}
-                </li>
+            <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {INCLUDED.map((c) => (
+                <article key={c.tag} className="flex flex-col rounded-2xl border border-th-line bg-th-surface p-6 transition-colors hover:border-th-accent/50">
+                  <p className="th-eyebrow">{c.tag}</p>
+                  <h3 className="th-display mt-3 text-[22px] leading-snug text-th-ink">{c.title}</h3>
+                  <p className="mt-2 flex-1 text-[14px] leading-relaxed text-th-muted">{c.body}</p>
+                  <Link href="/signup" className="mt-5 inline-flex items-center gap-1 text-[13px] font-semibold text-th-ink hover:text-th-accent">
+                    Try it free <ArrowUpRight className="h-3.5 w-3.5" />
+                  </Link>
+                </article>
               ))}
-            </ul>
-            <Link href="/signup" className="mt-8 block w-full rounded-lg bg-blue-600 py-3 text-center text-sm font-semibold text-white hover:bg-blue-700 transition-colors">
-              Start your free trial
-            </Link>
-            <p className="mt-3 text-center text-xs text-gray-500">After 3 days your account pauses until you subscribe — your data stays safe.</p>
+            </div>
           </div>
         </section>
 
-        {/* FAQ — answer-first copy, mirrored in FAQPage structured data */}
-        <section id="faq" className="border-t border-white/10 bg-white/[0.02]">
-          <div className="max-w-3xl mx-auto px-6 py-20">
-            <h2 className="text-3xl font-bold text-white mb-8 text-center">Frequently asked questions</h2>
-            <div className="divide-y divide-white/10 rounded-xl border border-white/10 bg-white/5">
-              {FAQ.map((f, i) => (
-                <details key={f.q} className="group px-5 py-4" open={i === 0}>
-                  <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-medium text-white [&::-webkit-details-marker]:hidden">
-                    <h3 className="text-base">{f.q}</h3>
-                    <ChevronDown className="h-4 w-4 shrink-0 text-gray-400 transition-transform group-open:rotate-180" />
+        {/* FAQ */}
+        <section id="faq" className="scroll-mt-20 border-t border-th-line px-4 py-20 sm:px-6 sm:py-28">
+          <div className="mx-auto grid max-w-6xl gap-10 md:grid-cols-[1fr_1.5fr]">
+            <div>
+              <p className="th-eyebrow">Common questions</p>
+              <h2 className="th-display mt-4 text-[38px] leading-[1.05] text-th-ink sm:text-[48px]">
+                Questions,
+                <br />
+                <em>answered.</em>
+              </h2>
+              <p className="mt-5 max-w-xs text-[15px] leading-relaxed text-th-muted">
+                Still unsure? Tick “call me” when you sign up and we'll set up your first property with you.
+              </p>
+            </div>
+            <div className="divide-y divide-th-line border-y border-th-line">
+              {FAQ.map((f) => (
+                <details key={f.q} className="group py-5">
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-6 [&::-webkit-details-marker]:hidden">
+                    <h3 className="text-[15px] font-semibold text-th-ink">{f.q}</h3>
+                    <span aria-hidden className="relative h-3.5 w-3.5 shrink-0 text-th-muted">
+                      <span className="absolute left-0 top-1/2 h-[1.5px] w-3.5 -translate-y-1/2 bg-current" />
+                      <span className="absolute left-1/2 top-0 h-3.5 w-[1.5px] -translate-x-1/2 bg-current transition-transform group-open:scale-y-0" />
+                    </span>
                   </summary>
-                  <p className="mt-3 text-sm leading-relaxed text-gray-400">{f.a}</p>
+                  <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-th-muted">{f.a}</p>
                 </details>
               ))}
             </div>
           </div>
         </section>
 
-        {/* Final CTA */}
-        <section className="max-w-4xl mx-auto px-6 py-20">
-          <div className="relative overflow-hidden rounded-2xl border border-blue-500/30 bg-gradient-to-br from-blue-600/20 to-blue-500/5 px-8 py-14 text-center">
-            <div className="pointer-events-none absolute -top-16 -right-16 h-56 w-56 rounded-full bg-blue-500/20 blur-[90px]" />
-            <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">Ready to stop chasing rent manually?</h2>
-            <p className="text-gray-400 mb-8 max-w-lg mx-auto">Set up your first property in minutes — or tick “call me” at signup and we&apos;ll set it up with you.</p>
-            <Link href="/signup" className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-8 py-3.5 text-base font-semibold text-white hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/25">
-              Start free for 3 days <ArrowRight className="h-4 w-4" />
+        {/* Closing panel */}
+        <section className="px-4 pb-20 sm:px-6">
+          <div className="relative mx-auto max-w-6xl overflow-hidden rounded-[28px] bg-th-band px-7 pb-32 pt-14 text-th-band-ink sm:px-12 sm:pb-44 sm:pt-20">
+            <p className="th-eyebrow !text-th-band-muted">Less chasing, more living</p>
+            <h2 className="th-display mt-4 max-w-2xl text-[42px] leading-[1.02] sm:text-[64px]">
+              Let the reminders
+              <br />
+              <em className="!text-th-band-muted">send themselves.</em>
+            </h2>
+            <Link href="/signup" className={`${pill} mt-9 bg-th-band-ink text-th-band hover:opacity-90`}>
+              Start your free trial <ArrowUpRight className="h-4 w-4" />
             </Link>
+            <p className="mt-4 text-[13px] text-th-band-muted">Add your first property in minutes. Free for 3 days.</p>
+            <p aria-hidden className="th-display pointer-events-none absolute -bottom-[0.22em] left-4 select-none whitespace-nowrap text-[96px] leading-none text-th-band-ink/[0.06] sm:left-10 sm:text-[200px]">
+              TenantHub
+            </p>
           </div>
         </section>
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-white/10 py-10">
-        <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <Home className="h-4 w-4 text-blue-600" />
-            <span className="font-semibold text-white">TenantHub</span>
-            <span className="text-sm text-gray-600">· Rental management for the Philippines</span>
-          </div>
-          <nav className="flex flex-wrap items-center justify-center gap-6 text-sm text-gray-500" aria-label="Footer">
-            <a href="#features" className="hover:text-white transition-colors">Features</a>
-            <a href="#pricing" className="hover:text-white transition-colors">Pricing</a>
-            <a href="#faq" className="hover:text-white transition-colors">FAQ</a>
-            <Link href="/listings" className="hover:text-white transition-colors">Rentals</Link>
-            <Link href="/signup" className="hover:text-white transition-colors">Sign up</Link>
-            <Link href="/tenant/login" className="hover:text-white transition-colors">Tenant portal</Link>
-          </nav>
-          <p className="text-sm text-gray-600">© {new Date().getFullYear()} TenantHub. All rights reserved.</p>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

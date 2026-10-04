@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import Script from "next/script";
+import localFont from "next/font/local";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { RegisterServiceWorker } from "@/components/register-sw";
@@ -60,13 +61,56 @@ export const metadata: Metadata = {
   },
 };
 
+// Plus Jakarta Sans (OFL, by Tokotype) — self-hosted. The latin-ext file is a
+// second family in the stack so characters like ₱ render in the same face.
+const jakarta = localFont({
+  src: "./fonts/jakarta-latin.woff2",
+  weight: "200 800",
+  variable: "--font-jakarta-latin",
+  display: "swap",
+});
+const jakartaExt = localFont({
+  src: "./fonts/jakarta-latin-ext.woff2",
+  weight: "200 800",
+  variable: "--font-jakarta-ext",
+  display: "swap",
+  preload: false,
+});
+
+// Newsreader (OFL, Production Type) — serif for public-page headlines.
+const newsreader = localFont({
+  src: [
+    { path: "./fonts/newsreader-latin.woff2", style: "normal" },
+    { path: "./fonts/newsreader-latin-italic.woff2", style: "italic" },
+  ],
+  weight: "200 800",
+  variable: "--font-serif-latin",
+  display: "swap",
+});
+const newsreaderExt = localFont({
+  src: [
+    { path: "./fonts/newsreader-latin-ext.woff2", style: "normal" },
+    { path: "./fonts/newsreader-latin-ext-italic.woff2", style: "italic" },
+  ],
+  weight: "200 800",
+  variable: "--font-serif-ext",
+  display: "swap",
+  preload: false,
+});
+
+// Runs before paint: apply the saved or device theme so there's no flash.
+const themeScript = `(function(){try{var t=localStorage.getItem("th-theme");if(t!=="light"&&t!=="dark"){t=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}document.documentElement.dataset.theme=t}catch(e){}})();`;
+
 export const viewport: Viewport = {
   themeColor: "#2563eb",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en-PH" className="h-full" suppressHydrationWarning>
+    <html lang="en-PH" className={`h-full ${jakarta.variable} ${jakartaExt.variable} ${newsreader.variable} ${newsreaderExt.variable}`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
       <body className="min-h-full bg-[#080c14] text-white antialiased" suppressHydrationWarning>
         {children}
         <Toaster />
