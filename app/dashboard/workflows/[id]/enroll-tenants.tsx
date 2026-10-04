@@ -41,7 +41,7 @@ export function EnrollTenants({ workflowId, tenants, disabled }: { workflowId: s
           </DialogHeader>
           <div className="max-h-72 space-y-1 overflow-y-auto">
             {tenants.map((t) => (
-              <label key={t.id} className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-gray-300 hover:bg-white/5">
+              <label key={t.id} className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-th-ink/80 hover:bg-th-raised">
                 <input type="checkbox" checked={picked.has(t.id)} onChange={() => {
                   const next = new Set(picked);
                   if (next.has(t.id)) next.delete(t.id); else next.add(t.id);

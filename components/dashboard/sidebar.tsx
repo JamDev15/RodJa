@@ -9,6 +9,7 @@ import {
   History, Zap, FileSignature, Workflow
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ThemeToggle } from "@/components/public/theme-toggle";
 
 const navItems = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
@@ -39,31 +40,34 @@ export function Sidebar({ accountName }: SidebarProps) {
   return (
     <>
       {/* Mobile top bar */}
-      <div className="fixed top-0 left-0 right-0 z-30 flex h-14 items-center justify-between border-b border-white/10 bg-[#0d1117] px-4 lg:hidden">
+      <div className="fixed top-0 left-0 right-0 z-30 flex h-14 items-center justify-between border-b border-th-line bg-th-surface px-4 lg:hidden">
         <div className="flex items-center gap-2">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center">
             {!isHome && (
               <button
                 onClick={() => router.back()}
-                className="flex h-9 w-9 items-center justify-center rounded-lg text-gray-400 hover:bg-white/5 hover:text-white"
+                className="flex h-9 w-9 items-center justify-center rounded-lg text-th-muted hover:bg-th-raised hover:text-th-ink"
                 aria-label="Go back"
               >
                 <ArrowLeft className="h-5 w-5" />
               </button>
             )}
           </div>
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600">
-            <Home className="h-4 w-4 text-white" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-th-brand">
+            <Home className="h-4 w-4 text-th-on-brand" />
           </div>
-          <p className="text-sm font-bold text-white">TenantHub</p>
+          <p className="text-sm font-bold text-th-ink">TenantHub</p>
         </div>
-        <button
-          onClick={() => setOpen(true)}
-          className="flex h-9 w-9 items-center justify-center rounded-lg text-gray-400 hover:bg-white/5 hover:text-white"
-          aria-label="Open menu"
-        >
-          <Menu className="h-5 w-5" />
-        </button>
+        <div className="flex items-center gap-1">
+          <ThemeToggle />
+          <button
+            onClick={() => setOpen(true)}
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-th-muted hover:bg-th-raised hover:text-th-ink"
+            aria-label="Open menu"
+          >
+            <Menu className="h-5 w-5" />
+          </button>
+        </div>
       </div>
 
       {/* Backdrop (mobile only, while drawer is open) */}
@@ -77,24 +81,24 @@ export function Sidebar({ accountName }: SidebarProps) {
 
       <aside
         className={cn(
-          "fixed left-0 top-0 z-50 flex h-screen w-64 flex-col border-r border-white/10 bg-[#0d1117] transition-transform duration-200 lg:translate-x-0",
+          "fixed left-0 top-0 z-50 flex h-screen w-64 flex-col border-r border-th-line bg-th-surface transition-transform duration-200 lg:translate-x-0",
           open ? "translate-x-0" : "-translate-x-full"
         )}
       >
         {/* Logo */}
-        <div className="flex items-center justify-between gap-3 px-6 py-5 border-b border-white/10">
+        <div className="flex items-center justify-between gap-3 px-6 py-5 border-b border-th-line">
           <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600">
-              <Home className="h-4 w-4 text-white" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-th-brand">
+              <Home className="h-4 w-4 text-th-on-brand" />
             </div>
             <div>
-              <p className="text-sm font-bold text-white">TenantHub</p>
-              {accountName && <p className="text-xs text-gray-500 truncate max-w-[120px]">{accountName}</p>}
+              <p className="text-sm font-bold text-th-ink">TenantHub</p>
+              {accountName && <p className="text-xs text-th-faint truncate max-w-[120px]">{accountName}</p>}
             </div>
           </div>
           <button
             onClick={() => setOpen(false)}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-white/5 hover:text-white lg:hidden"
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-th-muted hover:bg-th-raised hover:text-th-ink lg:hidden"
             aria-label="Close menu"
           >
             <X className="h-4 w-4" />
@@ -113,8 +117,8 @@ export function Sidebar({ accountName }: SidebarProps) {
                 className={cn(
                   "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors group",
                   active
-                    ? "bg-blue-600/20 text-blue-400 font-medium"
-                    : "text-gray-400 hover:bg-white/5 hover:text-white"
+                    ? "bg-th-brand-soft text-th-brand font-medium"
+                    : "text-th-muted hover:bg-th-raised hover:text-th-ink"
                 )}
               >
                 <Icon className="h-4 w-4 shrink-0" />
@@ -126,14 +130,15 @@ export function Sidebar({ accountName }: SidebarProps) {
         </nav>
 
         {/* Sign out */}
-        <div className="p-3 border-t border-white/10">
+        <div className="flex items-center gap-1 p-3 border-t border-th-line">
           <button
             onClick={() => signOut({ callbackUrl: "/login" })}
-            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-gray-400 hover:bg-white/5 hover:text-red-400 transition-colors"
+            className="flex flex-1 items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-th-muted hover:bg-th-raised hover:text-th-danger transition-colors"
           >
             <LogOut className="h-4 w-4" />
             Sign Out
           </button>
+          <ThemeToggle className="hidden lg:inline-flex" />
         </div>
       </aside>
     </>

@@ -25,9 +25,9 @@ const Toast = React.forwardRef<
     ref={ref}
     className={cn(
       "group pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-xl border p-4 pr-8 shadow-lg transition-all",
-      variant === "destructive" ? "border-red-500/50 bg-red-900/50 text-red-100" :
-      variant === "success" ? "border-green-500/50 bg-green-900/50 text-green-100" :
-      "border-white/10 bg-[#1a1f2e] text-white",
+      variant === "destructive" ? "border-th-danger/50 bg-th-danger-soft text-th-danger" :
+      variant === "success" ? "border-th-paid/50 bg-th-paid-soft text-th-paid" :
+      "border-th-line bg-th-surface text-th-ink",
       className
     )}
     {...props}
@@ -41,7 +41,7 @@ const ToastClose = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <ToastPrimitive.Close
     ref={ref}
-    className={cn("absolute right-2 top-2 rounded p-1 text-gray-400 hover:text-white", className)}
+    className={cn("absolute right-2 top-2 rounded p-1 text-th-muted hover:text-th-ink", className)}
     {...props}
   >
     <X className="h-4 w-4" />

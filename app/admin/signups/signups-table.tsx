@@ -26,11 +26,11 @@ export interface SignupRow {
 }
 
 const TONE: Record<SignupRow["trialTone"], string> = {
-  green: "bg-green-500/15 text-green-300",
-  red: "bg-red-500/15 text-red-300",
-  amber: "bg-amber-500/15 text-amber-300",
-  blue: "bg-blue-500/15 text-blue-300",
-  gray: "bg-white/10 text-gray-300",
+  green: "bg-th-paid-soft text-th-paid",
+  red: "bg-th-danger-soft text-th-danger",
+  amber: "bg-th-due-soft text-th-due",
+  blue: "bg-th-brand-soft text-th-accent",
+  gray: "bg-th-raised text-th-ink/80",
 };
 
 function socialHref(v: string): string | null {
@@ -108,13 +108,13 @@ export function SignupsTable({ rows, workflows }: { rows: SignupRow[]; workflows
   }
 
   if (rows.length === 0) {
-    return <div className="rounded-xl border border-dashed border-white/10 p-10 text-center text-sm text-gray-500">No signups match these filters.</div>;
+    return <div className="rounded-xl border border-dashed border-th-line p-10 text-center text-sm text-th-faint">No signups match these filters.</div>;
   }
 
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap items-center gap-3 text-sm">
-        <label className="flex items-center gap-2 text-gray-400">
+        <label className="flex items-center gap-2 text-th-muted">
           <input type="checkbox" checked={allSelected} onChange={() => setSelected(allSelected ? new Set() : new Set(rows.map((r) => r.id)))} />
           Select all ({rows.length})
         </label>
@@ -130,59 +130,59 @@ export function SignupsTable({ rows, workflows }: { rows: SignupRow[]; workflows
           const status = LEAD_STATUSES.find((s) => s.value === r.leadStatus);
           const href = r.socialMedia ? socialHref(r.socialMedia) : null;
           return (
-            <li key={r.id} className={`rounded-xl border p-4 ${selected.has(r.id) ? "border-purple-500/50 bg-purple-500/5" : "border-white/10 bg-white/5"}`}>
+            <li key={r.id} className={`rounded-xl border p-4 ${selected.has(r.id) ? "border-th-violet/50 bg-th-violet-soft" : "border-th-line bg-th-surface"}`}>
               <div className="flex items-start gap-3">
                 <input type="checkbox" className="mt-1.5" checked={selected.has(r.id)} onChange={() => toggle(r.id)} aria-label={`Select ${r.ownerName}`} />
                 <div className="min-w-0 flex-1 space-y-2">
                   <div className="flex flex-wrap items-center gap-2">
-                    <p className="font-semibold text-white">{r.ownerName}</p>
-                    {r.business && <span className="text-sm text-gray-500">· {r.business}</span>}
+                    <p className="font-semibold text-th-ink">{r.ownerName}</p>
+                    {r.business && <span className="text-sm text-th-faint">· {r.business}</span>}
                     <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${TONE[r.trialTone]}`}>{r.trialLabel}</span>
                     {r.wantsOnboardingCall === true && (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[11px] font-medium text-emerald-300">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-th-paid-soft px-2 py-0.5 text-[11px] font-medium text-th-paid">
                         <PhoneCall className="h-3 w-3" /> Wants a call
                       </span>
                     )}
-                    {r.wantsOnboardingCall === false && <span className="rounded-full bg-white/5 px-2 py-0.5 text-[11px] text-gray-500">No call</span>}
+                    {r.wantsOnboardingCall === false && <span className="rounded-full bg-th-surface px-2 py-0.5 text-[11px] text-th-faint">No call</span>}
                     {r.marketingOptOut && (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-white/5 px-2 py-0.5 text-[11px] text-gray-500"><BellOff className="h-3 w-3" />Unsubscribed</span>
+                      <span className="inline-flex items-center gap-1 rounded-full bg-th-surface px-2 py-0.5 text-[11px] text-th-faint"><BellOff className="h-3 w-3" />Unsubscribed</span>
                     )}
                   </div>
 
                   <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
-                    <a href={`mailto:${r.email}`} className="inline-flex items-center gap-1 text-gray-300 hover:text-white"><Mail className="h-3.5 w-3.5 text-gray-500" />{r.email}</a>
-                    {r.phone && <a href={`tel:${r.phone}`} className="inline-flex items-center gap-1 text-gray-300 hover:text-white"><Phone className="h-3.5 w-3.5 text-gray-500" />{r.phone}</a>}
+                    <a href={`mailto:${r.email}`} className="inline-flex items-center gap-1 text-th-ink/80 hover:text-th-ink"><Mail className="h-3.5 w-3.5 text-th-faint" />{r.email}</a>
+                    {r.phone && <a href={`tel:${r.phone}`} className="inline-flex items-center gap-1 text-th-ink/80 hover:text-th-ink"><Phone className="h-3.5 w-3.5 text-th-faint" />{r.phone}</a>}
                     {r.socialMedia && (href ? (
-                      <a href={href} target="_blank" rel="noopener noreferrer nofollow" className="inline-flex items-center gap-1 text-blue-400 hover:text-blue-300">
+                      <a href={href} target="_blank" rel="noopener noreferrer nofollow" className="inline-flex items-center gap-1 text-th-accent hover:text-th-accent">
                         <ExternalLink className="h-3.5 w-3.5" />{r.socialMedia}
                       </a>
                     ) : (
-                      <span className="inline-flex items-center gap-1 text-gray-300"><ExternalLink className="h-3.5 w-3.5 text-gray-500" />{r.socialMedia}</span>
+                      <span className="inline-flex items-center gap-1 text-th-ink/80"><ExternalLink className="h-3.5 w-3.5 text-th-faint" />{r.socialMedia}</span>
                     ))}
                   </div>
 
                   {r.workflows.length > 0 && (
                     <div className="flex flex-wrap gap-1">
                       {r.workflows.map((w) => (
-                        <span key={w} className="inline-flex items-center gap-1 rounded bg-purple-500/10 px-1.5 py-0.5 text-[11px] text-purple-300"><WorkflowIcon className="h-3 w-3" />{w}</span>
+                        <span key={w} className="inline-flex items-center gap-1 rounded bg-th-violet-soft px-1.5 py-0.5 text-[11px] text-th-violet"><WorkflowIcon className="h-3 w-3" />{w}</span>
                       ))}
                     </div>
                   )}
-                  {r.leadNotes && <p className="whitespace-pre-wrap rounded-lg bg-black/20 px-3 py-2 text-xs text-gray-400">{r.leadNotes}</p>}
+                  {r.leadNotes && <p className="whitespace-pre-wrap rounded-lg bg-black/20 px-3 py-2 text-xs text-th-muted">{r.leadNotes}</p>}
                 </div>
 
                 <div className="flex shrink-0 flex-col items-end gap-2">
-                  <span className="text-[11px] text-gray-500">{when(r.createdAt)}</span>
+                  <span className="text-[11px] text-th-faint">{when(r.createdAt)}</span>
                   <select
                     value={r.leadStatus}
                     disabled={savingId === r.id}
                     onChange={(e) => patch(r.id, { leadStatus: e.target.value })}
-                    className={`rounded-lg border border-white/10 px-2 py-1 text-xs focus:outline-none ${status?.color ?? "bg-white/5 text-white"}`}
+                    className={`rounded-lg border border-th-line px-2 py-1 text-xs focus:outline-none ${status?.color ?? "bg-th-surface text-th-ink"}`}
                     aria-label="Lead status"
                   >
-                    {LEAD_STATUSES.map((s) => <option key={s.value} value={s.value} className="bg-[#0f1117] text-white">{s.label}</option>)}
+                    {LEAD_STATUSES.map((s) => <option key={s.value} value={s.value} className="bg-th-surface text-th-ink">{s.label}</option>)}
                   </select>
-                  <button onClick={() => { setNotesFor(r); setNotes(r.leadNotes ?? ""); }} className="inline-flex items-center gap-1 text-xs text-gray-400 hover:text-white">
+                  <button onClick={() => { setNotesFor(r); setNotes(r.leadNotes ?? ""); }} className="inline-flex items-center gap-1 text-xs text-th-muted hover:text-th-ink">
                     <StickyNote className="h-3.5 w-3.5" /> {r.leadNotes ? "Edit note" : "Add note"}
                   </button>
                 </div>
@@ -213,9 +213,9 @@ export function SignupsTable({ rows, workflows }: { rows: SignupRow[]; workflows
             <DialogDescription>The first steps run right away. People already in the workflow are skipped.</DialogDescription>
           </DialogHeader>
           {workflows.length === 0 ? (
-            <p className="text-sm text-gray-400">No active workflows yet. Create one in Workflows first.</p>
+            <p className="text-sm text-th-muted">No active workflows yet. Create one in Workflows first.</p>
           ) : (
-            <select value={workflowId} onChange={(e) => setWorkflowId(e.target.value)} className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white">
+            <select value={workflowId} onChange={(e) => setWorkflowId(e.target.value)} className="w-full rounded-lg border border-th-line bg-th-surface px-3 py-2 text-sm text-th-ink">
               <option value="">Choose a workflow…</option>
               {workflows.map((w) => <option key={w.id} value={w.id}>{w.name}</option>)}
             </select>

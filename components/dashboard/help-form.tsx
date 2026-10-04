@@ -31,10 +31,10 @@ export function HelpForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-xl border border-white/10 bg-white/5 p-6 space-y-4">
+    <form onSubmit={handleSubmit} className="rounded-xl border border-th-line bg-th-surface p-6 space-y-4">
       <div>
-        <h2 className="font-semibold text-white">Submit an Issue</h2>
-        <p className="text-xs text-gray-500 mt-0.5">We&apos;ll reply to your account email as soon as we can.</p>
+        <h2 className="font-semibold text-th-ink">Submit an Issue</h2>
+        <p className="text-xs text-th-faint mt-0.5">We&apos;ll reply to your account email as soon as we can.</p>
       </div>
       <div className="space-y-4 max-w-lg">
         <div className="space-y-2">

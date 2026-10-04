@@ -58,7 +58,7 @@ const WAIT: StepDef = {
   type: "wait",
   label: "Wait",
   icon: Clock,
-  color: "text-gray-300 bg-white/10",
+  color: "text-th-ink/80 bg-th-raised",
   blank: { type: "wait", days: 1 },
   fields: [],
 };
@@ -67,7 +67,7 @@ export const ADMIN_BUILDER: BuilderConfig = {
   apiBase: "/api/admin/workflows",
   listHref: "/admin/workflows",
   detailHref: (id) => `/admin/workflows/${id}`,
-  accent: { button: "bg-purple-600 hover:bg-purple-700", ring: "border-purple-500/40 bg-purple-500/10", soft: "text-purple-200", text: "text-purple-300" },
+  accent: { button: "bg-purple-600 hover:bg-purple-700", ring: "border-th-violet/40 bg-th-violet-soft", soft: "text-th-violet", text: "text-th-violet" },
   triggers: WORKFLOW_TRIGGERS.map((t) => ({
     value: t.value,
     label: t.label,
@@ -77,24 +77,24 @@ export const ADMIN_BUILDER: BuilderConfig = {
   steps: [
     WAIT,
     {
-      type: "email", label: "Send email", icon: Mail, color: "text-blue-300 bg-blue-500/15",
+      type: "email", label: "Send email", icon: Mail, color: "text-th-accent bg-th-brand-soft",
       blank: { type: "email", subject: "", body: "Hi {{first_name}},\n\n" },
       fields: [{ key: "subject", kind: "text", placeholder: "Subject", mergeable: true }, { key: "body", kind: "textarea", rows: 6, mergeable: true }],
       note: "An unsubscribe link is added automatically. Skipped for people who unsubscribed.",
     },
     {
-      type: "sms", label: "Send SMS", icon: MessageSquare, color: "text-emerald-300 bg-emerald-500/15",
+      type: "sms", label: "Send SMS", icon: MessageSquare, color: "text-th-paid bg-th-paid-soft",
       blank: { type: "sms", body: "Hi {{first_name}}, " },
       fields: [{ key: "body", kind: "textarea", rows: 3, maxLength: 450, mergeable: true, counter: true }],
       note: "Sent to the phone number they signed up with.",
     },
     {
-      type: "set_status", label: "Set lead status", icon: Tag, color: "text-orange-300 bg-orange-500/15",
+      type: "set_status", label: "Set lead status", icon: Tag, color: "text-th-due bg-th-due-soft",
       blank: { type: "set_status", status: "contacted" },
       fields: [{ key: "status", kind: "select", options: LEAD_STATUSES.map((s) => ({ value: s.value, label: s.label })) }],
     },
     {
-      type: "notify_admin", label: "Notify me", icon: Bell, color: "text-purple-300 bg-purple-500/15",
+      type: "notify_admin", label: "Notify me", icon: Bell, color: "text-th-violet bg-th-violet-soft",
       blank: { type: "notify_admin", subject: "Follow up with {{name}}", body: "{{name}} · {{phone}} · {{email}}" },
       fields: [{ key: "subject", kind: "text", placeholder: "Subject", mergeable: true }, { key: "body", kind: "textarea", rows: 3, mergeable: true }],
     },
@@ -117,7 +117,7 @@ export const OWNER_BUILDER: BuilderConfig = {
   apiBase: "/api/workflows",
   listHref: "/dashboard/workflows",
   detailHref: (id) => `/dashboard/workflows/${id}`,
-  accent: { button: "bg-blue-600 hover:bg-blue-700", ring: "border-blue-500/40 bg-blue-500/10", soft: "text-blue-200", text: "text-blue-300" },
+  accent: { button: "bg-th-brand hover:bg-th-brand-hover", ring: "border-th-accent/40 bg-th-brand-soft", soft: "text-th-accent", text: "text-th-accent" },
   triggers: OWNER_WORKFLOW_TRIGGERS.map((t) => ({
     value: t.value,
     label: t.label,
@@ -127,29 +127,29 @@ export const OWNER_BUILDER: BuilderConfig = {
   steps: [
     WAIT,
     {
-      type: "email", label: "Email tenant", icon: Mail, color: "text-blue-300 bg-blue-500/15",
+      type: "email", label: "Email tenant", icon: Mail, color: "text-th-accent bg-th-brand-soft",
       blank: { type: "email", subject: "", body: "Hi {{first_name}},\n\n" },
       fields: [{ key: "subject", kind: "text", placeholder: "Subject", mergeable: true }, { key: "body", kind: "textarea", rows: 6, mergeable: true }],
       note: "Skipped if the tenant has no email on file.",
     },
     {
-      type: "sms", label: "SMS tenant", icon: MessageSquare, color: "text-emerald-300 bg-emerald-500/15",
+      type: "sms", label: "SMS tenant", icon: MessageSquare, color: "text-th-paid bg-th-paid-soft",
       blank: { type: "sms", body: "Hi {{first_name}}, " },
       fields: [{ key: "body", kind: "textarea", rows: 3, maxLength: 450, mergeable: true, counter: true }],
     },
     {
-      type: "portal", label: "Tenant portal notice", icon: MonitorSmartphone, color: "text-amber-300 bg-amber-500/15",
+      type: "portal", label: "Tenant portal notice", icon: MonitorSmartphone, color: "text-th-due bg-th-due-soft",
       blank: { type: "portal", title: "", body: "" },
       fields: [{ key: "title", kind: "text", placeholder: "Notice title", mergeable: true }, { key: "body", kind: "textarea", rows: 3, mergeable: true }],
     },
     {
-      type: "send_invoice", label: "Send invoice", icon: FileText, color: "text-sky-300 bg-sky-500/15",
+      type: "send_invoice", label: "Send invoice", icon: FileText, color: "text-th-accent bg-th-brand-soft",
       blank: { type: "send_invoice" },
       fields: [],
       note: "Emails a PDF invoice for whatever is still unpaid on that month's bill tracker.",
     },
     {
-      type: "notify_owner", label: "Notify me", icon: Bell, color: "text-purple-300 bg-purple-500/15",
+      type: "notify_owner", label: "Notify me", icon: Bell, color: "text-th-violet bg-th-violet-soft",
       blank: { type: "notify_owner", subject: "Check on {{tenant_name}}", body: "{{tenant_name}} · Unit {{unit}} · balance {{amount_due}}" },
       fields: [{ key: "subject", kind: "text", placeholder: "Subject", mergeable: true }, { key: "body", kind: "textarea", rows: 3, mergeable: true }],
       note: "Sent to your email and phone (push).",

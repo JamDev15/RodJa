@@ -55,8 +55,8 @@ export default function TenantMaintenancePage() {
     <div className="space-y-5 pb-20">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-white">Maintenance</h1>
-          <p className="text-gray-400 text-sm">Report issues in your unit</p>
+          <h1 className="text-xl font-bold text-th-ink">Maintenance</h1>
+          <p className="text-th-muted text-sm">Report issues in your unit</p>
         </div>
         <Button size="sm" onClick={() => setShowForm(!showForm)}>
           <Plus className="h-4 w-4 mr-1" />New
@@ -64,8 +64,8 @@ export default function TenantMaintenancePage() {
       </div>
 
       {showForm && (
-        <form onSubmit={handleSubmit} className="rounded-xl border border-white/10 bg-white/5 p-5 space-y-4">
-          <h2 className="font-semibold text-white">New Maintenance Request</h2>
+        <form onSubmit={handleSubmit} className="rounded-xl border border-th-line bg-th-surface p-5 space-y-4">
+          <h2 className="font-semibold text-th-ink">New Maintenance Request</h2>
           <div className="space-y-2">
             <Label>Title *</Label>
             <Input placeholder="e.g. Leaking faucet" value={form.title}
@@ -97,18 +97,18 @@ export default function TenantMaintenancePage() {
 
       {requests.length === 0 && !showForm && (
         <div className="flex flex-col items-center py-12 text-center">
-          <Wrench className="h-12 w-12 text-gray-600 mb-3" />
-          <p className="text-gray-400">No maintenance requests</p>
+          <Wrench className="h-12 w-12 text-th-faint mb-3" />
+          <p className="text-th-muted">No maintenance requests</p>
         </div>
       )}
 
       <div className="space-y-2">
         {requests.map((req) => (
-          <div key={req.id} className="rounded-xl border border-white/10 bg-white/5 p-4">
+          <div key={req.id} className="rounded-xl border border-th-line bg-th-surface p-4">
             <div className="flex items-start justify-between gap-2">
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-white">{req.title}</p>
-                <p className="text-xs text-gray-500 mt-0.5">{formatDate(req.createdAt)}</p>
+                <p className="font-medium text-th-ink">{req.title}</p>
+                <p className="text-xs text-th-faint mt-0.5">{formatDate(req.createdAt)}</p>
               </div>
               <div className="flex gap-1.5 shrink-0">
                 <Badge variant={req.priority === "urgent" ? "destructive" : req.priority === "high" ? "warning" : "secondary"} className="text-xs">
@@ -119,7 +119,7 @@ export default function TenantMaintenancePage() {
                 </Badge>
               </div>
             </div>
-            {req.description && <p className="text-xs text-gray-400 mt-2">{req.description}</p>}
+            {req.description && <p className="text-xs text-th-muted mt-2">{req.description}</p>}
           </div>
         ))}
       </div>

@@ -4,8 +4,8 @@
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 :root {
-  --background: #080c14;
-  --foreground: #f1f5f9;
+  --background: var(--th-canvas);
+  --foreground: var(--th-ink);
 }
 
 @theme inline {
@@ -20,14 +20,14 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-jakarta);
   -webkit-font-smoothing: antialiased;
 }
 
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+::-webkit-scrollbar-thumb { background: var(--th-line); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--th-faint); }
 
 @keyframes fade-in {
   from { opacity: 0; transform: translateY(4px); }
@@ -58,10 +58,10 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* ─── Public site theme (landing, pricing, signup, login, listings, renew) ───
-   Scoped to .th-public so the app dashboard keeps its own dark styling.
+/* ─── Theme (every page: public site, landlord dashboard, admin, tenant portal) ───
    Light is the default; dark follows the device or the visitor's toggle
-   (data-theme on <html>, set before paint by the script in app/layout.tsx). */
+   (data-theme on <html>, set before paint by the script in app/layout.tsx).
+   .th-public adds the public site's page background and type on top. */
 
 @theme inline {
   --color-th-page: var(--th-page);
@@ -86,11 +86,16 @@ body {
   --color-th-band-ink: var(--th-band-ink);
   --color-th-band-muted: var(--th-band-muted);
   --color-th-band-line: var(--th-band-line);
+  --color-th-canvas: var(--th-canvas);
+  --color-th-danger-soft: var(--th-danger-soft);
+  --color-th-violet: var(--th-violet);
+  --color-th-violet-soft: var(--th-violet-soft);
   --font-serif: var(--font-serif-latin), var(--font-serif-ext), ui-serif, Georgia, serif;
   --font-jakarta: var(--font-jakarta-latin), var(--font-jakarta-ext), ui-sans-serif, system-ui, sans-serif;
 }
 
-.th-public {
+:root {
+  --th-canvas: #f4f7fb;
   --th-page: #ffffff;
   --th-surface: #ffffff;
   --th-raised: #f2f6fb;
@@ -113,14 +118,15 @@ body {
   --th-due: #a45d06;
   --th-due-soft: #fbf0df;
   --th-danger: #b42318;
+  --th-danger-soft: #fdecea;
+  --th-violet: #6d3fc0;
+  --th-violet-soft: #f1ebfb;
   --th-shadow: 0 1px 2px rgb(15 30 61 / 0.05), 0 18px 40px -18px rgb(15 30 61 / 0.18);
   color-scheme: light;
-  background: var(--th-page);
-  color: var(--th-ink);
-  font-family: var(--font-jakarta);
 }
 
-html[data-theme="dark"] .th-public {
+html[data-theme="dark"] {
+  --th-canvas: #091226;
   --th-page: #091226;
   --th-surface: #0f1b34;
   --th-raised: #142445;
@@ -143,21 +149,29 @@ html[data-theme="dark"] .th-public {
   --th-due: #f0b25a;
   --th-due-soft: #33281a;
   --th-danger: #ff8a7a;
+  --th-danger-soft: #3a1c1f;
+  --th-violet: #c4a8ff;
+  --th-violet-soft: #261d4a;
   --th-shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 18px 44px -18px rgb(0 0 0 / 0.7);
   color-scheme: dark;
 }
 
-/* Page background behind public pages (overscroll, short pages). */
-html:has(.th-public) body { background: #ffffff; color: #0f1e3d; }
-html[data-theme="dark"]:has(.th-public) body { background: #091226; }
+.th-public {
+  background: var(--th-page);
+  color: var(--th-ink);
+  font-family: var(--font-jakarta);
+}
 
-.th-public .tabular { font-variant-numeric: tabular-nums; }
+/* Page background behind public pages (overscroll, short pages). */
+html:has(.th-public) body { background: var(--th-page); }
+
+.tabular { font-variant-numeric: tabular-nums; }
 /* Serif display: upright line, then an italic accent line underneath. */
 .th-public .th-display { font-family: var(--font-serif); font-weight: 400; letter-spacing: -0.02em; font-optical-sizing: auto; }
 .th-public .th-display em { font-style: italic; color: var(--th-accent); }
 .th-public .th-eyebrow { font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--th-muted); }
-.th-public .th-shadow { box-shadow: var(--th-shadow); }
-.th-public ::selection { background: var(--th-brand-soft); }
+.th-shadow { box-shadow: var(--th-shadow); }
+::selection { background: var(--th-brand-soft); }
 .th-public :focus-visible { outline: 2px solid var(--th-brand); outline-offset: 2px; border-radius: 6px; }
 
 /* Shared form controls on public pages */

@@ -57,9 +57,9 @@ export default function TenantPayPage() {
   if (submitted) {
     return (
       <div className="flex flex-col items-center justify-center py-16 space-y-3 pb-20">
-        <CheckCircle className="h-16 w-16 text-green-400" />
-        <h2 className="text-xl font-bold text-white">Payment Submitted!</h2>
-        <p className="text-gray-400 text-center text-sm">Your landlord will review and approve your payment shortly.</p>
+        <CheckCircle className="h-16 w-16 text-th-paid" />
+        <h2 className="text-xl font-bold text-th-ink">Payment Submitted!</h2>
+        <p className="text-th-muted text-center text-sm">Your landlord will review and approve your payment shortly.</p>
       </div>
     );
   }
@@ -67,30 +67,30 @@ export default function TenantPayPage() {
   return (
     <div className="space-y-5 pb-20">
       <div>
-        <h1 className="text-xl font-bold text-white">Upload Payment Proof</h1>
-        <p className="text-gray-400 text-sm">Take a screenshot of your payment and upload it here</p>
+        <h1 className="text-xl font-bold text-th-ink">Upload Payment Proof</h1>
+        <p className="text-th-muted text-sm">Take a screenshot of your payment and upload it here</p>
       </div>
 
       {/* Amount */}
       {info && (
-        <div className="rounded-xl border border-white/10 bg-white/5 p-4 text-center">
-          <p className="text-xs text-gray-500 mb-1">Amount to Pay</p>
-          <p className="text-3xl font-bold text-white">{formatCurrency(info.rentAmount)}</p>
+        <div className="rounded-xl border border-th-line bg-th-surface p-4 text-center">
+          <p className="text-xs text-th-faint mb-1">Amount to Pay</p>
+          <p className="text-3xl font-bold text-th-ink">{formatCurrency(info.rentAmount)}</p>
         </div>
       )}
 
       {/* Payment Details */}
       {info && (
-        <div className="rounded-xl border border-white/10 bg-white/5 p-4 space-y-2">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Send to</p>
+        <div className="rounded-xl border border-th-line bg-th-surface p-4 space-y-2">
+          <p className="text-xs font-semibold text-th-muted uppercase tracking-wide">Send to</p>
           {info.account.gcashNumber && (
-            <div className="flex justify-between text-sm"><span className="text-gray-400">GCash</span><span className="font-mono text-white">{info.account.gcashNumber}</span></div>
+            <div className="flex justify-between text-sm"><span className="text-th-muted">GCash</span><span className="font-mono text-th-ink">{info.account.gcashNumber}</span></div>
           )}
           {info.account.mayaNumber && (
-            <div className="flex justify-between text-sm"><span className="text-gray-400">Maya</span><span className="font-mono text-white">{info.account.mayaNumber}</span></div>
+            <div className="flex justify-between text-sm"><span className="text-th-muted">Maya</span><span className="font-mono text-th-ink">{info.account.mayaNumber}</span></div>
           )}
           {info.account.bankDetails && (
-            <div className="text-sm"><span className="text-gray-400">Bank: </span><span className="text-white">{info.account.bankDetails}</span></div>
+            <div className="text-sm"><span className="text-th-muted">Bank: </span><span className="text-th-ink">{info.account.bankDetails}</span></div>
           )}
         </div>
       )}
@@ -111,13 +111,13 @@ export default function TenantPayPage() {
 
         <div className="space-y-2">
           <Label>Payment Screenshot *</Label>
-          <label className="flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-white/10 p-8 cursor-pointer hover:border-blue-500/50 transition-colors">
+          <label className="flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-th-line p-8 cursor-pointer hover:border-th-accent/50 transition-colors">
             {preview ? (
               <img src={preview} alt="Preview" className="max-h-48 rounded-lg object-contain" />
             ) : (
               <>
-                <Upload className="h-8 w-8 text-gray-500" />
-                <span className="text-sm text-gray-400">Tap to upload screenshot</span>
+                <Upload className="h-8 w-8 text-th-faint" />
+                <span className="text-sm text-th-muted">Tap to upload screenshot</span>
               </>
             )}
             <input type="file" accept="image/*" onChange={handleFile} className="sr-only" capture="environment" />

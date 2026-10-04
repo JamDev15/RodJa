@@ -118,7 +118,7 @@ export function SignaturePad({ onChange, light = false }: { onChange: (dataUrl: 
 
   return (
     <div className="space-y-2">
-      <div className={`relative overflow-hidden rounded-lg border-2 border-dashed ${light ? "border-gray-300" : "border-white/20"} bg-white`}>
+      <div className={`relative overflow-hidden rounded-lg border-2 border-dashed ${light ? "border-gray-300" : "border-th-faint/40"} bg-white`}>
         <canvas
           ref={canvasRef}
           className="block h-40 w-full touch-none cursor-crosshair"
@@ -136,7 +136,7 @@ export function SignaturePad({ onChange, light = false }: { onChange: (dataUrl: 
         )}
         <span className="pointer-events-none absolute bottom-8 left-6 right-6 border-b border-gray-300" />
       </div>
-      <button type="button" onClick={clear} className={`inline-flex items-center gap-1 text-xs ${light ? "text-gray-500 hover:text-gray-800" : "text-gray-400 hover:text-white"}`}>
+      <button type="button" onClick={clear} className={`inline-flex items-center gap-1 text-xs ${light ? "text-gray-500 hover:text-gray-800" : "text-th-muted hover:text-th-ink"}`}>
         <Eraser className="h-3.5 w-3.5" /> Clear
       </button>
     </div>

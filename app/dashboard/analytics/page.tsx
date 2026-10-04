@@ -55,33 +55,33 @@ export default async function AnalyticsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-white">Analytics</h1>
-        <p className="text-gray-400 text-sm mt-1">Collected payments by bill type, last {MONTHS_BACK} months</p>
+        <h1 className="text-2xl font-bold text-th-ink">Analytics</h1>
+        <p className="text-th-muted text-sm mt-1">Collected payments by bill type, last {MONTHS_BACK} months</p>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-          <p className="text-xs text-gray-500">Rent</p>
-          <p className="text-lg font-bold text-white mt-1">{formatCurrency(totals.rent)}</p>
+        <div className="rounded-xl border border-th-line bg-th-surface p-4">
+          <p className="text-xs text-th-faint">Rent</p>
+          <p className="text-lg font-bold text-th-ink mt-1">{formatCurrency(totals.rent)}</p>
         </div>
-        <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-          <p className="text-xs text-gray-500">Electric (Kuryente)</p>
-          <p className="text-lg font-bold text-white mt-1">{formatCurrency(totals.electric)}</p>
+        <div className="rounded-xl border border-th-line bg-th-surface p-4">
+          <p className="text-xs text-th-faint">Electric (Kuryente)</p>
+          <p className="text-lg font-bold text-th-ink mt-1">{formatCurrency(totals.electric)}</p>
         </div>
-        <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-          <p className="text-xs text-gray-500">Water</p>
-          <p className="text-lg font-bold text-white mt-1">{formatCurrency(totals.water)}</p>
+        <div className="rounded-xl border border-th-line bg-th-surface p-4">
+          <p className="text-xs text-th-faint">Water</p>
+          <p className="text-lg font-bold text-th-ink mt-1">{formatCurrency(totals.water)}</p>
         </div>
-        <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-          <p className="text-xs text-gray-500">Other</p>
-          <p className="text-lg font-bold text-white mt-1">{formatCurrency(totals.other)}</p>
+        <div className="rounded-xl border border-th-line bg-th-surface p-4">
+          <p className="text-xs text-th-faint">Other</p>
+          <p className="text-lg font-bold text-th-ink mt-1">{formatCurrency(totals.other)}</p>
         </div>
       </div>
 
       {grandTotal === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-white/10 py-16 text-center">
-          <p className="text-gray-400 font-medium">No approved payments yet in this window</p>
-          <p className="text-gray-600 text-sm mt-1">Once payments are approved, monthly totals will show up here.</p>
+        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-th-line py-16 text-center">
+          <p className="text-th-muted font-medium">No approved payments yet in this window</p>
+          <p className="text-th-faint text-sm mt-1">Once payments are approved, monthly totals will show up here.</p>
         </div>
       ) : (
         <AnalyticsChart data={data} />

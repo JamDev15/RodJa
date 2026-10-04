@@ -28,8 +28,8 @@ export default async function AdminDashboardPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-white">Platform Dashboard</h1>
-        <p className="text-gray-400 text-sm mt-1">Overview of all accounts and activity</p>
+        <h1 className="text-2xl font-bold text-th-ink">Platform Dashboard</h1>
+        <p className="text-th-muted text-sm mt-1">Overview of all accounts and activity</p>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -41,28 +41,28 @@ export default async function AdminDashboardPage() {
 
       <div>
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-lg font-semibold text-white">Recent Accounts</h2>
-          <Link href="/admin/accounts" className="text-sm text-blue-400 hover:text-blue-300">View all →</Link>
+          <h2 className="text-lg font-semibold text-th-ink">Recent Accounts</h2>
+          <Link href="/admin/accounts" className="text-sm text-th-accent hover:text-th-accent">View all →</Link>
         </div>
-        <div className="rounded-xl border border-white/10 overflow-x-auto">
+        <div className="rounded-xl border border-th-line overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-white/10 bg-white/5">
-                <th className="text-left px-4 py-3 text-gray-400 font-medium">Account</th>
-                <th className="text-left px-4 py-3 text-gray-400 font-medium">Plan</th>
-                <th className="text-left px-4 py-3 text-gray-400 font-medium">Status</th>
+              <tr className="border-b border-th-line bg-th-surface">
+                <th className="text-left px-4 py-3 text-th-muted font-medium">Account</th>
+                <th className="text-left px-4 py-3 text-th-muted font-medium">Plan</th>
+                <th className="text-left px-4 py-3 text-th-muted font-medium">Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/10">
+            <tbody className="divide-y divide-th-line">
               {recentAccounts.map((a) => (
-                <tr key={a.id} className="hover:bg-white/5">
+                <tr key={a.id} className="hover:bg-th-raised">
                   <td className="px-4 py-3">
-                    <Link href={`/admin/accounts/${a.id}`} className="font-medium text-white hover:text-purple-400">
+                    <Link href={`/admin/accounts/${a.id}`} className="font-medium text-th-ink hover:text-th-violet">
                       {a.name}
                     </Link>
-                    <p className="text-xs text-gray-500">{a.email}</p>
+                    <p className="text-xs text-th-faint">{a.email}</p>
                   </td>
-                  <td className="px-4 py-3 text-gray-400">{a.plan.name}</td>
+                  <td className="px-4 py-3 text-th-muted">{a.plan.name}</td>
                   <td className="px-4 py-3">
                     <Badge variant={a.isActive ? "success" : "destructive"}>
                       {a.isActive ? "Active" : "Suspended"}

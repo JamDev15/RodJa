@@ -122,22 +122,22 @@ export function AssistantWidget() {
     <>
       <button
         onClick={() => setOpen((o) => !o)}
-        className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg shadow-blue-600/30 hover:bg-blue-700 transition-colors"
+        className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-th-brand text-th-on-brand shadow-lg shadow-th-brand/30 hover:bg-th-brand-hover transition-colors"
         aria-label="Open assistant"
       >
         {open ? <X className="h-6 w-6" /> : <MessageCircle className="h-6 w-6" />}
       </button>
 
       {open && (
-        <div className="fixed right-6 top-24 bottom-6 z-50 flex w-[440px] max-w-[calc(100vw-3rem)] flex-col rounded-2xl border border-white/10 bg-[#0d1117] shadow-2xl animate-in">
-          <div className="flex items-center gap-2 border-b border-white/10 px-4 py-3">
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-600">
-              <MessageCircle className="h-3.5 w-3.5 text-white" />
+        <div className="fixed right-6 top-24 bottom-6 z-50 flex w-[440px] max-w-[calc(100vw-3rem)] flex-col rounded-2xl border border-th-line bg-th-surface shadow-2xl animate-in">
+          <div className="flex items-center gap-2 border-b border-th-line px-4 py-3">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-th-brand">
+              <MessageCircle className="h-3.5 w-3.5 text-th-on-brand" />
             </div>
-            <p className="text-sm font-semibold text-white">Assistant</p>
+            <p className="text-sm font-semibold text-th-ink">Assistant</p>
             <button
               onClick={() => setOpen(false)}
-              className="ml-auto flex h-7 w-7 items-center justify-center rounded-lg text-gray-400 hover:bg-white/5 hover:text-white"
+              className="ml-auto flex h-7 w-7 items-center justify-center rounded-lg text-th-muted hover:bg-th-raised hover:text-th-ink"
               aria-label="Close assistant"
             >
               <X className="h-4 w-4" />
@@ -150,7 +150,7 @@ export function AssistantWidget() {
                 <div
                   className={cn(
                     "max-w-[85%] rounded-lg px-3 py-2 text-sm",
-                    msg.role === "user" ? "bg-blue-600 text-white" : "bg-white/5 text-gray-200"
+                    msg.role === "user" ? "bg-th-brand text-th-on-brand" : "bg-th-surface text-th-ink"
                   )}
                 >
                   <p className="whitespace-pre-wrap">{renderBold(msg.text)}</p>
@@ -167,17 +167,17 @@ export function AssistantWidget() {
                       <button
                         onClick={() => cancel(msg.id)}
                         disabled={busy}
-                        className="rounded-md bg-white/10 px-2.5 py-1 text-xs font-medium text-white hover:bg-white/20 disabled:opacity-50"
+                        className="rounded-md bg-th-raised px-2.5 py-1 text-xs font-medium text-th-ink hover:bg-th-line disabled:opacity-50"
                       >
                         Cancel
                       </button>
                     </div>
                   )}
                   {msg.action && msg.actionState === "confirmed" && (
-                    <p className="mt-1 text-xs text-green-400">Confirmed</p>
+                    <p className="mt-1 text-xs text-th-paid">Confirmed</p>
                   )}
                   {msg.action && msg.actionState === "cancelled" && (
-                    <p className="mt-1 text-xs text-gray-500">Cancelled</p>
+                    <p className="mt-1 text-xs text-th-faint">Cancelled</p>
                   )}
 
                   {msg.candidates && msg.candidates.length > 0 && (
@@ -187,7 +187,7 @@ export function AssistantWidget() {
                           key={c.id}
                           onClick={() => send(msg.sourceText ?? "", c.id)}
                           disabled={busy}
-                          className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-xs text-gray-200 hover:bg-white/10 disabled:opacity-50"
+                          className="rounded-full border border-th-line bg-th-surface px-2.5 py-1 text-xs text-th-ink hover:bg-th-raised disabled:opacity-50"
                         >
                           {c.name}
                         </button>
@@ -200,13 +200,13 @@ export function AssistantWidget() {
 
             {messages.length === 1 && !busy && (
               <div className="pl-1">
-                <p className="text-xs text-gray-500 mb-2 opacity-0 animate-[rise-in_0.4s_ease_both]">Try asking:</p>
+                <p className="text-xs text-th-faint mb-2 opacity-0 animate-[rise-in_0.4s_ease_both]">Try asking:</p>
                 <div className="flex flex-col items-start gap-2">
                   {EXAMPLES.map((example, i) => (
                     <button
                       key={example}
                       onClick={() => send(example)}
-                      className="max-w-[90%] rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-left text-xs text-gray-300 opacity-0 animate-[rise-in_0.4s_ease_both] hover:border-blue-500/50 hover:bg-blue-500/10 hover:text-white transition-colors"
+                      className="max-w-[90%] rounded-lg border border-th-line bg-th-surface px-3 py-2 text-left text-xs text-th-ink/80 opacity-0 animate-[rise-in_0.4s_ease_both] hover:border-th-accent/50 hover:bg-th-brand-soft hover:text-th-ink transition-colors"
                       style={{ animationDelay: `${0.15 + i * 0.12}s` }}
                     >
                       &ldquo;{example}&rdquo;
@@ -218,8 +218,8 @@ export function AssistantWidget() {
 
             {busy && (
               <div className="flex justify-start">
-                <div className="flex items-center gap-1 rounded-lg bg-white/5 px-3 py-2">
-                  <Loader2 className="h-3.5 w-3.5 animate-spin text-gray-400" />
+                <div className="flex items-center gap-1 rounded-lg bg-th-surface px-3 py-2">
+                  <Loader2 className="h-3.5 w-3.5 animate-spin text-th-muted" />
                 </div>
               </div>
             )}
@@ -230,19 +230,19 @@ export function AssistantWidget() {
               e.preventDefault();
               send(input);
             }}
-            className="flex items-center gap-2 border-t border-white/10 p-3"
+            className="flex items-center gap-2 border-t border-th-line p-3"
           >
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Type a message..."
               disabled={busy}
-              className="flex-1 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-base sm:text-sm text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:opacity-50"
+              className="flex-1 rounded-lg border border-th-line bg-th-surface px-3 py-2 text-base sm:text-sm text-th-ink placeholder:text-th-faint focus:outline-none focus:ring-2 focus:ring-th-accent disabled:opacity-50"
             />
             <button
               type="submit"
               disabled={busy || !input.trim()}
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-th-brand text-th-on-brand hover:bg-th-brand-hover disabled:opacity-50"
               aria-label="Send"
             >
               <Send className="h-4 w-4" />

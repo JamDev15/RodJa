@@ -28,13 +28,13 @@ function MagicLoginInner() {
     <div className="text-center space-y-3">
       {error ? (
         <>
-          <p className="text-red-400 text-sm">{error}</p>
-          <Link href="/login" className="text-blue-400 hover:text-blue-300 text-sm">
+          <p className="text-th-danger text-sm">{error}</p>
+          <Link href="/login" className="text-th-accent hover:text-th-accent text-sm">
             Go to login →
           </Link>
         </>
       ) : (
-        <p className="text-gray-400 text-sm">Logging you in...</p>
+        <p className="text-th-muted text-sm">Logging you in...</p>
       )}
     </div>
   );
@@ -42,8 +42,8 @@ function MagicLoginInner() {
 
 export default function MagicLoginPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#080c14] px-4">
-      <Suspense fallback={<p className="text-gray-400 text-sm">Logging you in...</p>}>
+    <div className="min-h-screen flex items-center justify-center bg-th-canvas px-4">
+      <Suspense fallback={<p className="text-th-muted text-sm">Logging you in...</p>}>
         <MagicLoginInner />
       </Suspense>
     </div>

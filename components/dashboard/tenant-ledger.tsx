@@ -72,26 +72,26 @@ function BillCell({ billed, paid, isPaid, onToggle }: {
   isPaid: boolean;
   onToggle: () => void;
 }) {
-  if (!billed) return <span className="text-gray-600 text-xs">—</span>;
+  if (!billed) return <span className="text-th-faint text-xs">—</span>;
   const bal = billBalance(billed, paid, isPaid);
   const partial = paid != null && paid < billed && paid > 0;
 
   return (
     <div className="flex flex-col gap-0.5">
-      <span className="text-white text-xs">{formatCurrency(billed)}</span>
-      {partial && <span className="text-green-400 text-[10px]">paid {formatCurrency(paid!)}</span>}
+      <span className="text-th-ink text-xs">{formatCurrency(billed)}</span>
+      {partial && <span className="text-th-paid text-[10px]">paid {formatCurrency(paid!)}</span>}
       {bal > 0
-        ? <span className="inline-flex items-center gap-0.5 text-orange-400 text-[10px] font-medium">
+        ? <span className="inline-flex items-center gap-0.5 text-th-due text-[10px] font-medium">
             <AlertCircle className="h-2.5 w-2.5" />bal {formatCurrency(bal)}
           </span>
-        : <span className="inline-flex items-center gap-1 text-green-400 text-[10px]">
+        : <span className="inline-flex items-center gap-1 text-th-paid text-[10px]">
             <Check className="h-2.5 w-2.5" />Paid
           </span>
       }
       {bal > 0 && (
         <button
           onClick={onToggle}
-          className="mt-0.5 text-[10px] text-gray-500 hover:text-white underline underline-offset-2 text-left"
+          className="mt-0.5 text-[10px] text-th-faint hover:text-th-ink underline underline-offset-2 text-left"
         >
           mark paid
         </button>
@@ -112,11 +112,11 @@ function BillSection({ icon, label, optional, billed, onBilled, paid, onPaid }: 
   const full      = billedNum > 0 && paidNum >= billedNum;
 
   return (
-    <div className="rounded-lg border border-white/10 bg-white/5 p-4 space-y-3">
+    <div className="rounded-lg border border-th-line bg-th-surface p-4 space-y-3">
       <div className="flex items-center gap-2">
         {icon}
-        <span className="text-sm font-semibold text-white">{label}</span>
-        {optional && <span className="text-xs text-gray-500">(optional)</span>}
+        <span className="text-sm font-semibold text-th-ink">{label}</span>
+        {optional && <span className="text-xs text-th-faint">(optional)</span>}
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div className="space-y-1">
@@ -132,7 +132,7 @@ function BillSection({ icon, label, optional, billed, onBilled, paid, onPaid }: 
       </div>
       {billedNum > 0 && (
         <div className={`flex items-center justify-between rounded-md px-3 py-1.5 text-xs font-medium ${
-          full ? "bg-green-500/10 text-green-400" : paidNum > 0 ? "bg-orange-500/10 text-orange-400" : "bg-red-500/10 text-red-400"
+          full ? "bg-th-paid-soft text-th-paid" : paidNum > 0 ? "bg-th-due-soft text-th-due" : "bg-th-danger-soft text-th-danger"
         }`}>
           {full ? (
             <span className="flex items-center gap-1"><Check className="h-3 w-3" />Fully paid</span>
@@ -335,7 +335,7 @@ export function TenantLedger({ tenantId, moveInDate, defaultRent }: {
   }
 
   if (loading) {
-    return <div className="space-y-2">{[1,2,3].map(i => <div key={i} className="h-14 rounded-lg bg-white/5 animate-pulse" />)}</div>;
+    return <div className="space-y-2">{[1,2,3].map(i => <div key={i} className="h-14 rounded-lg bg-th-surface animate-pulse" />)}</div>;
   }
 
   const totalOutstanding = allMonths.reduce((sum, { month }) => {
@@ -366,32 +366,32 @@ export function TenantLedger({ tenantId, moveInDate, defaultRent }: {
   return (
     <div className="space-y-4">
       {/* Summary */}
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-400">
-        <span><span className="text-green-400 font-semibold">{paidCount}</span> fully settled</span>
-        <span><span className="text-red-400 font-semibold">{allMonths.length - paidCount}</span> with balance</span>
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-th-muted">
+        <span><span className="text-th-paid font-semibold">{paidCount}</span> fully settled</span>
+        <span><span className="text-th-danger font-semibold">{allMonths.length - paidCount}</span> with balance</span>
         {totalOutstanding > 0 && (
-          <span className="text-orange-400 font-semibold">
+          <span className="text-th-due font-semibold">
             Total outstanding: {formatCurrency(totalOutstanding)}
           </span>
         )}
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto rounded-xl border border-white/10">
+      <div className="overflow-x-auto rounded-xl border border-th-line">
         <table className="w-full text-sm min-w-[820px]">
           <thead>
-            <tr className="border-b border-white/10 bg-white/5 text-gray-400 font-medium text-xs">
+            <tr className="border-b border-th-line bg-th-surface text-th-muted font-medium text-xs">
               <th className="text-left px-4 py-3 w-32">Month</th>
               <th className="text-left px-4 py-3"><span className="flex items-center gap-1"><Home className="h-3.5 w-3.5" />Rent</span></th>
               <th className="text-left px-4 py-3"><span className="flex items-center gap-1"><Zap className="h-3.5 w-3.5" />Electric</span></th>
               <th className="text-left px-4 py-3"><span className="flex items-center gap-1"><Droplets className="h-3.5 w-3.5" />Water</span></th>
               <th className="text-left px-4 py-3">Other</th>
-              <th className="text-left px-4 py-3 text-orange-400/80">Carry-over</th>
+              <th className="text-left px-4 py-3 text-th-due/80">Carry-over</th>
               <th className="text-left px-4 py-3">Outstanding</th>
               <th className="text-right px-4 py-3">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-white/10">
+          <tbody className="divide-y divide-th-line">
             {allMonths.map(({ month, label }) => {
               const e = entries.get(month);
               const isCurrent = month === new Date().toISOString().slice(0, 7);
@@ -400,14 +400,14 @@ export function TenantLedger({ tenantId, moveInDate, defaultRent }: {
 
               return (
                 <tr key={month} className={`transition-colors ${
-                  settled ? "bg-green-500/5 hover:bg-green-500/10"
-                  : isCurrent ? "bg-blue-500/5 hover:bg-blue-500/10"
-                  : "hover:bg-white/5"
+                  settled ? "bg-th-paid-soft hover:bg-th-paid-soft"
+                  : isCurrent ? "bg-th-brand-soft hover:bg-th-brand-soft"
+                  : "hover:bg-th-raised"
                 }`}>
                   <td className="px-4 py-3">
                     <div className="flex flex-col">
-                      <span className="text-white font-medium text-xs">{label}</span>
-                      {isCurrent && <span className="text-[10px] text-blue-400">Current</span>}
+                      <span className="text-th-ink font-medium text-xs">{label}</span>
+                      {isCurrent && <span className="text-[10px] text-th-accent">Current</span>}
                     </div>
                   </td>
                   <td className="px-4 py-3">
@@ -437,7 +437,7 @@ export function TenantLedger({ tenantId, moveInDate, defaultRent }: {
                   <td className="px-4 py-3">
                     {e?.otherAmount ? (
                       <div className="flex flex-col gap-0.5">
-                        <span className="text-[10px] text-gray-500">{e.otherLabel ?? "Other"}</span>
+                        <span className="text-[10px] text-th-faint">{e.otherLabel ?? "Other"}</span>
                         <BillCell
                           billed={e.otherAmount}
                           paid={e.otherPaidAmount}
@@ -445,57 +445,57 @@ export function TenantLedger({ tenantId, moveInDate, defaultRent }: {
                           onToggle={() => patchEntry(month, { otherPaidAmount: e.otherAmount, otherPaid: true })}
                         />
                       </div>
-                    ) : <span className="text-gray-600 text-xs">—</span>}
+                    ) : <span className="text-th-faint text-xs">—</span>}
                   </td>
                   {/* Carry-over balance */}
                   <td className="px-4 py-3">
                     {e && e.balance > 0 ? (
                       <div className="flex flex-col gap-0.5">
-                        <span className={`text-xs font-medium ${e.balancePaid ? "text-green-400 line-through" : "text-orange-400"}`}>
+                        <span className={`text-xs font-medium ${e.balancePaid ? "text-th-paid line-through" : "text-th-due"}`}>
                           {formatCurrency(e.balance)}
                         </span>
                         {e.balancePaid
-                          ? <span className="text-[10px] text-green-400">Cleared</span>
+                          ? <span className="text-[10px] text-th-paid">Cleared</span>
                           : <button
                               onClick={() => patchEntry(month, { balancePaid: true })}
-                              className="text-[10px] text-gray-500 hover:text-green-400 underline underline-offset-2 text-left"
+                              className="text-[10px] text-th-faint hover:text-th-paid underline underline-offset-2 text-left"
                             >mark paid</button>
                         }
                       </div>
-                    ) : <span className="text-gray-600 text-xs">—</span>}
+                    ) : <span className="text-th-faint text-xs">—</span>}
                   </td>
                   {/* Outstanding */}
                   <td className="px-4 py-3">
                     {e ? (
                       outstanding! > 0
-                        ? <span className="text-orange-400 font-semibold text-xs">{formatCurrency(outstanding!)}</span>
-                        : <span className="text-green-400 text-xs flex items-center gap-1"><Check className="h-3 w-3" />Settled</span>
-                    ) : <span className="text-gray-600 text-xs">—</span>}
+                        ? <span className="text-th-due font-semibold text-xs">{formatCurrency(outstanding!)}</span>
+                        : <span className="text-th-paid text-xs flex items-center gap-1"><Check className="h-3 w-3" />Settled</span>
+                    ) : <span className="text-th-faint text-xs">—</span>}
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-1.5">
                       <button
                         onClick={() => openDialog(month)}
-                        className="flex items-center gap-1 rounded-md bg-white/10 hover:bg-white/20 px-2 py-1 text-xs text-gray-400 hover:text-white transition-colors"
+                        className="flex items-center gap-1 rounded-md bg-th-raised hover:bg-th-line px-2 py-1 text-xs text-th-muted hover:text-th-ink transition-colors"
                       >
                         {e ? <Pencil className="h-3 w-3" /> : <Plus className="h-3 w-3" />}
                         {e ? "Edit" : "Add"}
                       </button>
                       {e && outstanding! > 0 && (
                         <button onClick={() => sendDoc(month, "invoice")} disabled={sendingDoc !== null} title="Send invoice"
-                          className="flex items-center gap-1 rounded-md bg-blue-500/10 hover:bg-blue-500/20 px-2 py-1 text-xs text-blue-300 transition-colors disabled:opacity-50">
+                          className="flex items-center gap-1 rounded-md bg-th-brand-soft hover:bg-th-brand-soft px-2 py-1 text-xs text-th-accent transition-colors disabled:opacity-50">
                           <FileText className="h-3 w-3" />{sendingDoc === `${month}:invoice` ? "…" : "Invoice"}
                         </button>
                       )}
                       {e && outstanding! < entryTotalBilled(e) && (
                         <button onClick={() => sendDoc(month, "receipt")} disabled={sendingDoc !== null} title="Send receipt"
-                          className="flex items-center gap-1 rounded-md bg-green-500/10 hover:bg-green-500/20 px-2 py-1 text-xs text-green-300 transition-colors disabled:opacity-50">
+                          className="flex items-center gap-1 rounded-md bg-th-paid-soft hover:bg-th-paid-soft px-2 py-1 text-xs text-th-paid transition-colors disabled:opacity-50">
                           <ReceiptText className="h-3 w-3" />{sendingDoc === `${month}:receipt` ? "…" : "Receipt"}
                         </button>
                       )}
                       {e && (
                         <button onClick={() => deleteEntry(month)}
-                          className="flex h-6 w-6 items-center justify-center rounded-md bg-white/10 hover:bg-red-500/20 text-gray-500 hover:text-red-400 transition-colors">
+                          className="flex h-6 w-6 items-center justify-center rounded-md bg-th-raised hover:bg-th-danger-soft text-th-faint hover:text-th-danger transition-colors">
                           <Trash2 className="h-3 w-3" />
                         </button>
                       )}
@@ -519,27 +519,27 @@ export function TenantLedger({ tenantId, moveInDate, defaultRent }: {
 
           <div className="space-y-4">
             <BillSection
-              icon={<Home className="h-4 w-4 text-blue-400" />} label="Rent"
+              icon={<Home className="h-4 w-4 text-th-accent" />} label="Rent"
               billed={form.rentAmount} onBilled={(v) => setForm({ ...form, rentAmount: v })}
               paid={form.rentPaidAmount} onPaid={(v) => setForm({ ...form, rentPaidAmount: v })}
             />
             <BillSection
-              icon={<Zap className="h-4 w-4 text-yellow-400" />} label="Electric Bill" optional
+              icon={<Zap className="h-4 w-4 text-th-due" />} label="Electric Bill" optional
               billed={form.electricAmount} onBilled={(v) => setForm({ ...form, electricAmount: v })}
               paid={form.electricPaidAmount} onPaid={(v) => setForm({ ...form, electricPaidAmount: v })}
             />
             <BillSection
-              icon={<Droplets className="h-4 w-4 text-cyan-400" />} label="Water Bill" optional
+              icon={<Droplets className="h-4 w-4 text-th-accent" />} label="Water Bill" optional
               billed={form.waterAmount} onBilled={(v) => setForm({ ...form, waterAmount: v })}
               paid={form.waterPaidAmount} onPaid={(v) => setForm({ ...form, waterPaidAmount: v })}
             />
 
             {/* Other */}
-            <div className="rounded-lg border border-white/10 bg-white/5 p-4 space-y-3">
+            <div className="rounded-lg border border-th-line bg-th-surface p-4 space-y-3">
               <div className="flex items-center gap-2">
-                <MoreHorizontal className="h-4 w-4 text-purple-400" />
-                <span className="text-sm font-semibold text-white">Other</span>
-                <span className="text-xs text-gray-500">(optional)</span>
+                <MoreHorizontal className="h-4 w-4 text-th-violet" />
+                <span className="text-sm font-semibold text-th-ink">Other</span>
+                <span className="text-xs text-th-faint">(optional)</span>
               </div>
               <Input placeholder="Label (parking, dues...)" value={form.otherLabel}
                 onChange={(e) => setForm({ ...form, otherLabel: e.target.value })} />
@@ -558,17 +558,17 @@ export function TenantLedger({ tenantId, moveInDate, defaultRent }: {
             </div>
 
             {/* Carry-over balance */}
-            <div className="rounded-lg border border-orange-500/20 bg-orange-500/5 p-4 space-y-3">
+            <div className="rounded-lg border border-th-due/20 bg-th-due-soft p-4 space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <RefreshCw className="h-4 w-4 text-orange-400" />
-                  <span className="text-sm font-semibold text-white">Carry-over Balance</span>
+                  <RefreshCw className="h-4 w-4 text-th-due" />
+                  <span className="text-sm font-semibold text-th-ink">Carry-over Balance</span>
                 </div>
                 <button
                   type="button"
                   onClick={() => dialogMonth && autoLoadCarry(dialogMonth)}
                   disabled={loadingCarry}
-                  className="flex items-center gap-1 rounded-md bg-orange-500/20 hover:bg-orange-500/30 px-2.5 py-1 text-xs text-orange-400 font-medium transition-colors disabled:opacity-50"
+                  className="flex items-center gap-1 rounded-md bg-th-due-soft hover:bg-th-due-soft px-2.5 py-1 text-xs text-th-due font-medium transition-colors disabled:opacity-50"
                 >
                   <RefreshCw className={`h-3 w-3 ${loadingCarry ? "animate-spin" : ""}`} />
                   Load from last month
@@ -579,7 +579,7 @@ export function TenantLedger({ tenantId, moveInDate, defaultRent }: {
               {carryBreakdown.length > 0 && (
                 <div className="flex flex-wrap gap-1.5">
                   {carryBreakdown.map((b) => (
-                    <span key={b.label} className="rounded-full bg-orange-500/20 px-2.5 py-0.5 text-xs text-orange-300">
+                    <span key={b.label} className="rounded-full bg-th-due-soft px-2.5 py-0.5 text-xs text-th-due">
                       {b.label}: {formatCurrency(b.amount)}
                     </span>
                   ))}
@@ -588,19 +588,19 @@ export function TenantLedger({ tenantId, moveInDate, defaultRent }: {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <Label className="text-xs text-gray-400">Balance Amount (₱)</Label>
+                  <Label className="text-xs text-th-muted">Balance Amount (₱)</Label>
                   <Input type="number" placeholder="0" min="0" value={form.balance}
                     onChange={(e) => setForm({ ...form, balance: e.target.value })} />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs text-gray-400">Status</Label>
+                  <Label className="text-xs text-th-muted">Status</Label>
                   <button
                     type="button"
                     onClick={() => setForm((f) => ({ ...f, balancePaid: !f.balancePaid }))}
                     className={`w-full rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${
                       form.balancePaid
-                        ? "border-green-500/40 bg-green-500/20 text-green-400"
-                        : "border-orange-500/30 bg-orange-500/10 text-orange-400"
+                        ? "border-th-paid/40 bg-th-paid-soft text-th-paid"
+                        : "border-th-due/30 bg-th-due-soft text-th-due"
                     }`}
                   >
                     {form.balancePaid ? "✓ Balance Paid" : "⚠ Balance Owed"}
@@ -617,14 +617,14 @@ export function TenantLedger({ tenantId, moveInDate, defaultRent }: {
             </div>
 
             {/* Grand total */}
-            <div className="rounded-lg border border-white/10 bg-white/5 px-4 py-3 space-y-1.5 text-sm">
-              <div className="flex justify-between text-gray-400">
+            <div className="rounded-lg border border-th-line bg-th-surface px-4 py-3 space-y-1.5 text-sm">
+              <div className="flex justify-between text-th-muted">
                 <span>Total billed</span><span>{formatCurrency(dTotal)}</span>
               </div>
-              <div className="flex justify-between text-green-400">
+              <div className="flex justify-between text-th-paid">
                 <span>Total paid</span><span>{formatCurrency(dPaid)}</span>
               </div>
-              <div className={`flex justify-between font-bold border-t border-white/10 pt-1.5 ${dRemaining > 0 ? "text-orange-400" : "text-green-400"}`}>
+              <div className={`flex justify-between font-bold border-t border-th-line pt-1.5 ${dRemaining > 0 ? "text-th-due" : "text-th-paid"}`}>
                 <span>{dRemaining > 0 ? "Outstanding balance" : "Fully settled"}</span>
                 <span>{dRemaining > 0 ? formatCurrency(dRemaining) : "✓"}</span>
               </div>

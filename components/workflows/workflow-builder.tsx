@@ -13,21 +13,21 @@ import { ADMIN_BUILDER, OWNER_BUILDER, type BuilderConfig, type BuilderDraft, ty
 export type { BuilderDraft } from "./builder-config";
 
 const CONFIGS: Record<"admin" | "owner", BuilderConfig> = { admin: ADMIN_BUILDER, owner: OWNER_BUILDER };
-const selectClass = "w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-base sm:text-sm text-white focus:border-blue-500 focus:outline-none";
+const selectClass = "w-full rounded-lg border border-th-line bg-th-surface px-3 py-2 text-base sm:text-sm text-th-ink focus:border-th-accent focus:outline-none";
 
 function AddStep({ steps, onAdd }: { steps: StepDef[]; onAdd: (s: StepDef) => void }) {
   const [open, setOpen] = useState(false);
   return (
     <div className="relative flex justify-center py-1">
-      <button type="button" onClick={() => setOpen(!open)} className="flex h-7 w-7 items-center justify-center rounded-full border border-white/15 bg-[#0d1117] text-gray-400 hover:border-white/40 hover:text-white" aria-label="Add step">
+      <button type="button" onClick={() => setOpen(!open)} className="flex h-7 w-7 items-center justify-center rounded-full border border-th-line bg-th-surface text-th-muted hover:border-th-faint/40 hover:text-th-ink" aria-label="Add step">
         <Plus className="h-3.5 w-3.5" />
       </button>
       {open && (
-        <div className="absolute top-9 z-10 grid w-60 gap-1 rounded-xl border border-white/10 bg-[#0f1117] p-1.5 shadow-xl">
+        <div className="absolute top-9 z-10 grid w-60 gap-1 rounded-xl border border-th-line bg-th-surface p-1.5 shadow-xl">
           {steps.map((s) => {
             const Icon = s.icon;
             return (
-              <button key={s.type} type="button" onClick={() => { onAdd(s); setOpen(false); }} className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-left text-sm text-gray-300 hover:bg-white/5">
+              <button key={s.type} type="button" onClick={() => { onAdd(s); setOpen(false); }} className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-left text-sm text-th-ink/80 hover:bg-th-raised">
                 <span className={`flex h-6 w-6 items-center justify-center rounded-md ${s.color}`}><Icon className="h-3.5 w-3.5" /></span>{s.label}
               </button>
             );
@@ -117,13 +117,13 @@ export function WorkflowBuilder({ kind, initial }: { kind: "admin" | "owner"; in
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_260px]">
       <div className="space-y-5">
-        <div className="rounded-xl border border-white/10 bg-white/5 p-5 space-y-4">
+        <div className="rounded-xl border border-th-line bg-th-surface p-5 space-y-4">
           <div className="space-y-2">
             <Label htmlFor="w-name">Workflow name</Label>
             <Input id="w-name" value={w.name} onChange={(e) => update({ ...w, name: e.target.value })} placeholder="e.g. Monthly collection sequence" />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="w-desc">Description <span className="text-gray-500">(optional)</span></Label>
+            <Label htmlFor="w-desc">Description <span className="text-th-faint">(optional)</span></Label>
             <Input id="w-desc" value={w.description} onChange={(e) => update({ ...w, description: e.target.value })} />
           </div>
         </div>
@@ -153,7 +153,7 @@ export function WorkflowBuilder({ kind, initial }: { kind: "admin" | "owner"; in
                 <div className="flex items-center gap-2">
                   <Input type="number" min={trigger.param.min} max={trigger.param.max} className="w-24" value={w.triggerParam}
                     onChange={(e) => update({ ...w, triggerParam: e.target.value })} aria-label={trigger.param.label} />
-                  <span className="text-sm text-gray-400">{trigger.param.label.toLowerCase()}</span>
+                  <span className="text-sm text-th-muted">{trigger.param.label.toLowerCase()}</span>
                 </div>
               )}
             </div>
@@ -168,19 +168,19 @@ export function WorkflowBuilder({ kind, initial }: { kind: "admin" | "owner"; in
             const Icon = def.icon;
             return (
               <div key={i}>
-                <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+                <div className="rounded-xl border border-th-line bg-th-surface p-4">
                   <div className="mb-3 flex items-center gap-2">
                     <span className={`flex h-7 w-7 items-center justify-center rounded-lg ${def.color}`}><Icon className="h-4 w-4" /></span>
-                    <span className="text-sm font-medium text-white">{i + 1}. {def.label}</span>
+                    <span className="text-sm font-medium text-th-ink">{i + 1}. {def.label}</span>
                     <div className="ml-auto flex gap-1">
-                      <button type="button" onClick={() => moveStep(i, -1)} disabled={i === 0} className="rounded p-1 text-gray-500 hover:bg-white/10 hover:text-white disabled:opacity-30" aria-label="Move up"><ArrowUp className="h-3.5 w-3.5" /></button>
-                      <button type="button" onClick={() => moveStep(i, 1)} disabled={i === w.steps.length - 1} className="rounded p-1 text-gray-500 hover:bg-white/10 hover:text-white disabled:opacity-30" aria-label="Move down"><ArrowDown className="h-3.5 w-3.5" /></button>
-                      <button type="button" onClick={() => removeStep(i)} className="rounded p-1 text-gray-500 hover:bg-red-500/20 hover:text-red-400" aria-label="Delete step"><Trash2 className="h-3.5 w-3.5" /></button>
+                      <button type="button" onClick={() => moveStep(i, -1)} disabled={i === 0} className="rounded p-1 text-th-faint hover:bg-th-raised hover:text-th-ink disabled:opacity-30" aria-label="Move up"><ArrowUp className="h-3.5 w-3.5" /></button>
+                      <button type="button" onClick={() => moveStep(i, 1)} disabled={i === w.steps.length - 1} className="rounded p-1 text-th-faint hover:bg-th-raised hover:text-th-ink disabled:opacity-30" aria-label="Move down"><ArrowDown className="h-3.5 w-3.5" /></button>
+                      <button type="button" onClick={() => removeStep(i)} className="rounded p-1 text-th-faint hover:bg-th-danger-soft hover:text-th-danger" aria-label="Delete step"><Trash2 className="h-3.5 w-3.5" /></button>
                     </div>
                   </div>
 
                   {step.type === "wait" ? (
-                    <div className="flex items-center gap-2 text-sm text-gray-300">
+                    <div className="flex items-center gap-2 text-sm text-th-ink/80">
                       Wait
                       <Input type="number" min={0} max={365} className="w-20" value={Number(step.days) || 0}
                         onChange={(e) => setStep(i, { ...step, days: Math.max(0, Number(e.target.value) || 0) })} />
@@ -207,11 +207,11 @@ export function WorkflowBuilder({ kind, initial }: { kind: "admin" | "owner"; in
                           <div key={f.key}>
                             <Textarea rows={f.rows} maxLength={f.maxLength} className="resize-y" value={value} onFocus={track}
                               onChange={(e) => setStep(i, { ...step, [f.key]: e.target.value })} />
-                            {f.counter && f.maxLength && <p className="mt-1 text-[11px] text-gray-500">{value.length}/{f.maxLength}</p>}
+                            {f.counter && f.maxLength && <p className="mt-1 text-[11px] text-th-faint">{value.length}/{f.maxLength}</p>}
                           </div>
                         );
                       })}
-                      {def.note && <p className="text-[11px] text-gray-500">{def.note}</p>}
+                      {def.note && <p className="text-[11px] text-th-faint">{def.note}</p>}
                     </div>
                   )}
                 </div>
@@ -219,20 +219,20 @@ export function WorkflowBuilder({ kind, initial }: { kind: "admin" | "owner"; in
               </div>
             );
           })}
-          <div className="rounded-xl border border-dashed border-white/10 p-3 text-center text-xs text-gray-500">
+          <div className="rounded-xl border border-dashed border-th-line p-3 text-center text-xs text-th-faint">
             End of workflow · {w.steps.length} step{w.steps.length === 1 ? "" : "s"} · {totalDays} day{totalDays === 1 ? "" : "s"} total
           </div>
         </div>
       </div>
 
       <aside className="space-y-4 lg:sticky lg:top-6 lg:self-start">
-        <div className="rounded-xl border border-white/10 bg-white/5 p-4 space-y-3">
-          <label className="flex items-center justify-between gap-3 text-sm text-gray-300">
+        <div className="rounded-xl border border-th-line bg-th-surface p-4 space-y-3">
+          <label className="flex items-center justify-between gap-3 text-sm text-th-ink/80">
             Active
             <ToggleSwitch checked={w.isActive} onChange={(v) => update({ ...w, isActive: v })} />
           </label>
           {(cfg.stopAppliesTo?.(w.trigger) ?? true) && (
-            <label className="flex items-center justify-between gap-3 text-sm text-gray-300" title={cfg.stopHelp}>
+            <label className="flex items-center justify-between gap-3 text-sm text-th-ink/80" title={cfg.stopHelp}>
               <span>{cfg.stopLabel}</span>
               <ToggleSwitch checked={w.stopFlag} onChange={(v) => update({ ...w, stopFlag: v })} />
             </label>
@@ -240,19 +240,19 @@ export function WorkflowBuilder({ kind, initial }: { kind: "admin" | "owner"; in
           <Button className={`w-full ${cfg.accent.button}`} onClick={save} disabled={saving}>
             <Save className="h-4 w-4" />{saving ? "Saving…" : w.id ? (dirty ? "Save changes" : "Saved") : "Create workflow"}
           </Button>
-          {w.id && dirty && <p className="text-center text-[11px] text-yellow-400">You have unsaved changes</p>}
+          {w.id && dirty && <p className="text-center text-[11px] text-th-due">You have unsaved changes</p>}
           {w.id && (
             <div className="flex gap-1">
               <Button variant="ghost" className="flex-1" onClick={duplicate}><Copy className="h-4 w-4" />Duplicate</Button>
-              <Button variant="ghost" className="flex-1 text-red-400 hover:text-red-300" onClick={remove}><Trash2 className="h-4 w-4" />Delete</Button>
+              <Button variant="ghost" className="flex-1 text-th-danger hover:text-th-danger" onClick={remove}><Trash2 className="h-4 w-4" />Delete</Button>
             </div>
           )}
         </div>
-        <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-          <p className="mb-2 text-xs font-semibold text-gray-400">Personalize — click a field, then a tag</p>
+        <div className="rounded-xl border border-th-line bg-th-surface p-4">
+          <p className="mb-2 text-xs font-semibold text-th-muted">Personalize — click a field, then a tag</p>
           <div className="flex flex-wrap gap-1">
             {cfg.mergeTags.map((m) => (
-              <button key={m.tag} type="button" title={m.desc} onClick={() => insertTag(m.tag)} className={`rounded bg-white/5 px-1.5 py-0.5 font-mono text-[11px] hover:bg-white/15 ${cfg.accent.text}`}>{m.tag}</button>
+              <button key={m.tag} type="button" title={m.desc} onClick={() => insertTag(m.tag)} className={`rounded bg-th-surface px-1.5 py-0.5 font-mono text-[11px] hover:bg-th-raised ${cfg.accent.text}`}>{m.tag}</button>
             ))}
           </div>
         </div>

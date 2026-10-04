@@ -27,8 +27,8 @@ export default async function WorkflowPage({ params }: { params: Promise<{ id: s
   return (
     <div className="space-y-6 max-w-5xl">
       <div className="flex items-center gap-3">
-        <Link href="/admin/workflows" className="rounded-lg p-1.5 hover:bg-white/10 text-gray-400 hover:text-white"><ArrowLeft className="h-5 w-5" /></Link>
-        <h1 className="text-2xl font-bold text-white">{workflow.name}</h1>
+        <Link href="/admin/workflows" className="rounded-lg p-1.5 hover:bg-th-raised text-th-muted hover:text-th-ink"><ArrowLeft className="h-5 w-5" /></Link>
+        <h1 className="text-2xl font-bold text-th-ink">{workflow.name}</h1>
       </div>
 
       <WorkflowBuilder
@@ -47,16 +47,16 @@ export default async function WorkflowPage({ params }: { params: Promise<{ id: s
 
       <section className="space-y-3">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-white">People in this workflow</h2>
-          <Link href="/admin/signups" className="text-sm text-purple-300 hover:text-purple-200">Add from Signups →</Link>
+          <h2 className="text-lg font-semibold text-th-ink">People in this workflow</h2>
+          <Link href="/admin/signups" className="text-sm text-th-violet hover:text-th-violet">Add from Signups →</Link>
         </div>
         {workflow.enrollments.length === 0 ? (
-          <p className="text-sm text-gray-500">Nobody yet. They&apos;ll appear here when the trigger fires, or when you add them from Signups.</p>
+          <p className="text-sm text-th-faint">Nobody yet. They&apos;ll appear here when the trigger fires, or when you add them from Signups.</p>
         ) : (
-          <div className="overflow-x-auto rounded-xl border border-white/10">
+          <div className="overflow-x-auto rounded-xl border border-th-line">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-white/10 bg-white/5 text-left text-xs text-gray-400">
+                <tr className="border-b border-th-line bg-th-surface text-left text-xs text-th-muted">
                   <th className="px-4 py-2">Signup</th>
                   <th className="px-4 py-2">Status</th>
                   <th className="px-4 py-2">Next step</th>
@@ -64,28 +64,28 @@ export default async function WorkflowPage({ params }: { params: Promise<{ id: s
                   <th className="px-4 py-2" />
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/10">
+              <tbody className="divide-y divide-th-line">
                 {workflow.enrollments.map((e) => (
                   <tr key={e.id}>
                     <td className="px-4 py-2">
-                      <p className="text-white">{e.account.ownerName}</p>
-                      <p className="text-xs text-gray-500">{e.account.email}</p>
+                      <p className="text-th-ink">{e.account.ownerName}</p>
+                      <p className="text-xs text-th-faint">{e.account.email}</p>
                     </td>
                     <td className="px-4 py-2">
-                      <span className={e.status === "active" ? "text-green-400" : e.status === "completed" ? "text-gray-300" : "text-orange-300"}>{e.status}</span>
-                      {e.exitReason && <p className="text-xs text-gray-500">{e.exitReason}</p>}
-                      {e.lastError && <p className="text-xs text-red-400">{e.lastError}</p>}
+                      <span className={e.status === "active" ? "text-th-paid" : e.status === "completed" ? "text-th-ink/80" : "text-th-due"}>{e.status}</span>
+                      {e.exitReason && <p className="text-xs text-th-faint">{e.exitReason}</p>}
+                      {e.lastError && <p className="text-xs text-th-danger">{e.lastError}</p>}
                     </td>
-                    <td className="px-4 py-2 text-xs text-gray-400">
+                    <td className="px-4 py-2 text-xs text-th-muted">
                       {e.status === "active" && steps[e.stepIndex] ? (
                         <>
                           {describeStep(steps[e.stepIndex])}
                           <br />
-                          <span className="text-gray-500">{when(e.nextRunAt)}</span>
+                          <span className="text-th-faint">{when(e.nextRunAt)}</span>
                         </>
                       ) : "—"}
                     </td>
-                    <td className="px-4 py-2 text-xs text-gray-400">{when(e.enrolledAt)}</td>
+                    <td className="px-4 py-2 text-xs text-th-muted">{when(e.enrolledAt)}</td>
                     <td className="px-4 py-2 text-right">{e.status === "active" && <RemoveEnrollmentButton id={e.id} />}</td>
                   </tr>
                 ))}

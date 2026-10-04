@@ -59,20 +59,20 @@ export function ReminderConfig({ config, accountId }: Props) {
 
   return (
     <div className="space-y-4">
-      <div className="rounded-xl border border-white/10 bg-white/5 p-6 space-y-4">
-        <h2 className="font-semibold text-white flex items-center gap-2"><Bell className="h-4 w-4 text-blue-400" />Reminder Channels</h2>
+      <div className="rounded-xl border border-th-line bg-th-surface p-6 space-y-4">
+        <h2 className="font-semibold text-th-ink flex items-center gap-2"><Bell className="h-4 w-4 text-th-accent" />Reminder Channels</h2>
 
         {[
           { key: "inAppEnabled" as const, icon: Bell, label: "In-App Notifications", desc: "Tenants see reminders in their portal" },
           { key: "emailEnabled" as const, icon: Mail, label: "Email Reminders", desc: "Send email reminders to tenants with email addresses" },
           { key: "smsEnabled" as const, icon: Smartphone, label: "SMS Reminders (Semaphore PH)", desc: "Send SMS via Semaphore. Requires API key in settings." },
         ].map(({ key, icon: Icon, label, desc }) => (
-          <div key={key} className="flex items-center justify-between py-3 border-b border-white/10 last:border-0">
+          <div key={key} className="flex items-center justify-between py-3 border-b border-th-line last:border-0">
             <div className="flex items-center gap-3">
-              <Icon className="h-4 w-4 text-gray-400" />
+              <Icon className="h-4 w-4 text-th-muted" />
               <div>
-                <p className="text-sm font-medium text-white">{label}</p>
-                <p className="text-xs text-gray-500">{desc}</p>
+                <p className="text-sm font-medium text-th-ink">{label}</p>
+                <p className="text-xs text-th-faint">{desc}</p>
               </div>
             </div>
             <button
@@ -80,18 +80,18 @@ export function ReminderConfig({ config, accountId }: Props) {
               role="switch"
               aria-checked={form[key]}
               onClick={() => toggleItem(key)}
-              className={`relative h-6 w-11 rounded-full transition-colors focus:outline-none ${form[key] ? "bg-blue-600" : "bg-white/10"}`}
+              className={`relative h-6 w-11 rounded-full transition-colors focus:outline-none ${form[key] ? "bg-th-brand" : "bg-th-faint"}`}
             >
-              <span className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white transition-transform ${form[key] ? "translate-x-5" : "translate-x-0"}`} />
+              <span className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full transition-transform ${form[key] ? "translate-x-5 bg-th-on-brand" : "translate-x-0 bg-white"}`} />
             </button>
           </div>
         ))}
       </div>
 
-      <div className="rounded-xl border border-white/10 bg-white/5 p-6 space-y-4">
+      <div className="rounded-xl border border-th-line bg-th-surface p-6 space-y-4">
         <div>
-          <h2 className="font-semibold text-white">Reminder Schedule</h2>
-          <p className="text-sm text-gray-400 mt-1">
+          <h2 className="font-semibold text-th-ink">Reminder Schedule</h2>
+          <p className="text-sm text-th-muted mt-1">
             A reminder always goes out on the due date itself. Add extra days below (comma-separated) for
             reminders before it&apos;s due and follow-ups after it&apos;s overdue.
           </p>

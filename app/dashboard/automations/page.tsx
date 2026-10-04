@@ -32,13 +32,13 @@ export default async function AutomationsPage() {
   return (
     <div className="space-y-6 max-w-3xl">
       <div>
-        <h1 className="text-2xl font-bold text-white">Automations</h1>
-        <p className="text-gray-400 text-sm mt-1">
+        <h1 className="text-2xl font-bold text-th-ink">Automations</h1>
+        <p className="text-th-muted text-sm mt-1">
           Build your own reminder rules for tenants and yourself — by email, SMS, tenant portal, or push.
           Everything sent is recorded in{" "}
-          <Link href="/dashboard/messages" className="text-blue-400 hover:text-blue-300">Message History</Link>.
+          <Link href="/dashboard/messages" className="text-th-accent hover:text-th-accent">Message History</Link>.
           For multi-step sequences (wait, follow up, stop when paid), use{" "}
-          <Link href="/dashboard/workflows" className="text-blue-400 hover:text-blue-300">Workflows</Link>.
+          <Link href="/dashboard/workflows" className="text-th-accent hover:text-th-accent">Workflows</Link>.
         </p>
       </div>
       <AutomationsManager automations={rows} smsConfigured={isSmsConfigured()} />

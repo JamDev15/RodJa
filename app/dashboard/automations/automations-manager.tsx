@@ -62,7 +62,7 @@ const CHANNEL_OPTIONS: { key: AutomationChannel; label: string; icon: typeof Mai
 ];
 
 const selectClass =
-  "w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-base sm:text-sm text-white focus:border-blue-500 focus:outline-none";
+  "w-full rounded-lg border border-th-line bg-th-surface px-3 py-2 text-base sm:text-sm text-th-ink focus:border-th-accent focus:outline-none";
 
 export function AutomationsManager({ automations, smsConfigured }: { automations: AutomationRow[]; smsConfigured: boolean }) {
   const router = useRouter();
@@ -198,7 +198,7 @@ export function AutomationsManager({ automations, smsConfigured }: { automations
       </div>
 
       {!smsConfigured && (
-        <p className="rounded-lg border border-yellow-500/20 bg-yellow-500/5 px-3 py-2 text-xs text-yellow-300">
+        <p className="rounded-lg border border-th-due/20 bg-th-due-soft px-3 py-2 text-xs text-th-due">
           SMS sending isn&apos;t switched on for this server yet, so SMS steps will show as failed in Message History.
           Email, portal, and push work now.
         </p>
@@ -206,16 +206,16 @@ export function AutomationsManager({ automations, smsConfigured }: { automations
 
       {automations.length === 0 ? (
         <div className="space-y-3">
-          <p className="text-sm text-gray-400">Start from a ready-made automation:</p>
+          <p className="text-sm text-th-muted">Start from a ready-made automation:</p>
           <div className="grid gap-3 sm:grid-cols-2">
             {AUTOMATION_TEMPLATES.map((t) => (
               <button
                 key={t.key}
                 onClick={() => openNew(t.key)}
-                className="rounded-xl border border-white/10 bg-white/5 p-4 text-left transition-colors hover:border-blue-500/40 hover:bg-blue-500/10"
+                className="rounded-xl border border-th-line bg-th-surface p-4 text-left transition-colors hover:border-th-accent/40 hover:bg-th-brand-soft"
               >
-                <p className="text-sm font-semibold text-white">{t.name}</p>
-                <p className="mt-1 text-xs text-gray-500">
+                <p className="text-sm font-semibold text-th-ink">{t.name}</p>
+                <p className="mt-1 text-xs text-th-faint">
                   {describeTrigger(t.trigger, t.offsetDays)} · to {t.audience === "both" ? "tenant + you" : t.audience === "owner" ? "you" : "tenant"}
                 </p>
               </button>
@@ -225,34 +225,34 @@ export function AutomationsManager({ automations, smsConfigured }: { automations
       ) : (
         <ul className="space-y-3">
           {automations.map((a) => (
-            <li key={a.id} className={`rounded-xl border p-4 transition-colors ${a.isActive ? "border-white/10 bg-white/5" : "border-white/5 bg-white/[0.02] opacity-70"}`}>
+            <li key={a.id} className={`rounded-xl border p-4 transition-colors ${a.isActive ? "border-th-line bg-th-surface" : "border-th-line bg-th-surface opacity-70"}`}>
               <div className="flex items-start gap-3">
-                <span className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${a.isActive ? "bg-blue-600/20 text-blue-400" : "bg-white/5 text-gray-500"}`}>
+                <span className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${a.isActive ? "bg-th-brand-soft text-th-accent" : "bg-th-surface text-th-faint"}`}>
                   <Zap className="h-4 w-4" />
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="font-semibold text-white">{a.name}</p>
-                  <p className="mt-0.5 text-xs text-gray-400">{describeTrigger(a.trigger, a.offsetDays)}</p>
+                  <p className="font-semibold text-th-ink">{a.name}</p>
+                  <p className="mt-0.5 text-xs text-th-muted">{describeTrigger(a.trigger, a.offsetDays)}</p>
                   <div className="mt-2 flex flex-wrap items-center gap-1.5 text-xs">
-                    <span className="inline-flex items-center gap-1 rounded bg-white/5 px-1.5 py-0.5 text-gray-300">
+                    <span className="inline-flex items-center gap-1 rounded bg-th-surface px-1.5 py-0.5 text-th-ink/80">
                       {a.audience === "owner" ? <User className="h-3 w-3" /> : <Users className="h-3 w-3" />}
                       {a.audience === "both" ? "Tenant + me" : a.audience === "owner" ? "Me" : "Tenant"}
                     </span>
                     {a.channels.map((c) => (
-                      <span key={c} className="rounded bg-white/5 px-1.5 py-0.5 text-gray-400">
+                      <span key={c} className="rounded bg-th-surface px-1.5 py-0.5 text-th-muted">
                         {CHANNEL_OPTIONS.find((o) => o.key === c)?.label ?? c}
                       </span>
                     ))}
-                    {a.onlyUnpaid && <span className="rounded bg-orange-500/10 px-1.5 py-0.5 text-orange-300">unpaid only</span>}
-                    <span className="text-gray-500">· {a.sentCount} sent</span>
+                    {a.onlyUnpaid && <span className="rounded bg-th-due-soft px-1.5 py-0.5 text-th-due">unpaid only</span>}
+                    <span className="text-th-faint">· {a.sentCount} sent</span>
                   </div>
                 </div>
                 <ToggleSwitch checked={a.isActive} disabled={busy === a.id} onChange={(v) => toggleActive(a, v)} label={`Turn ${a.name} ${a.isActive ? "off" : "on"}`} />
               </div>
-              <div className="mt-3 flex flex-wrap gap-1 border-t border-white/5 pt-3">
+              <div className="mt-3 flex flex-wrap gap-1 border-t border-th-line pt-3">
                 <Button size="sm" variant="ghost" onClick={() => openEdit(a)}><Pencil className="h-3.5 w-3.5" />Edit</Button>
                 <Button size="sm" variant="ghost" onClick={() => sendTest(a)} disabled={busy === a.id}><Send className="h-3.5 w-3.5" />Send me a test</Button>
-                <Button size="sm" variant="ghost" className="text-red-400 hover:text-red-300" onClick={() => remove(a)} disabled={busy === a.id}><Trash2 className="h-3.5 w-3.5" />Delete</Button>
+                <Button size="sm" variant="ghost" className="text-th-danger hover:text-th-danger" onClick={() => remove(a)} disabled={busy === a.id}><Trash2 className="h-3.5 w-3.5" />Delete</Button>
               </div>
             </li>
           ))}
@@ -268,7 +268,7 @@ export function AutomationsManager({ automations, smsConfigured }: { automations
 
           {!editingId && (
             <div className="mb-4">
-              <Label className="text-xs text-gray-500">Start from a template (optional)</Label>
+              <Label className="text-xs text-th-faint">Start from a template (optional)</Label>
               <select className={`${selectClass} mt-1`} defaultValue="" onChange={(e) => e.target.value && openNew(e.target.value)}>
                 <option value="">— Blank —</option>
                 {AUTOMATION_TEMPLATES.map((t) => <option key={t.key} value={t.key}>{t.name}</option>)}
@@ -306,7 +306,7 @@ export function AutomationsManager({ automations, smsConfigured }: { automations
               )}
             </div>
             {form.trigger === "lease_end" && (
-              <p className="text-xs text-gray-500">Uses the tenant&apos;s move-out date, or the end date of their latest signed contract.</p>
+              <p className="text-xs text-th-faint">Uses the tenant&apos;s move-out date, or the end date of their latest signed contract.</p>
             )}
 
             <div className="space-y-2">
@@ -314,7 +314,7 @@ export function AutomationsManager({ automations, smsConfigured }: { automations
               <div className="grid grid-cols-3 gap-2">
                 {(["tenant", "owner", "both"] as const).map((v) => (
                   <button key={v} type="button" onClick={() => setForm({ ...form, audience: v })}
-                    className={`rounded-lg border px-3 py-2 text-sm transition-colors ${form.audience === v ? "border-blue-500 bg-blue-500/15 text-white" : "border-white/10 bg-white/5 text-gray-400 hover:text-white"}`}>
+                    className={`rounded-lg border px-3 py-2 text-sm transition-colors ${form.audience === v ? "border-th-accent bg-th-brand-soft text-th-ink" : "border-th-line bg-th-surface text-th-muted hover:text-th-ink"}`}>
                     {v === "tenant" ? "Tenant" : v === "owner" ? "Me (owner)" : "Both"}
                   </button>
                 ))}
@@ -328,10 +328,10 @@ export function AutomationsManager({ automations, smsConfigured }: { automations
                   const on = form.channels.includes(key);
                   return (
                     <button key={key} type="button" onClick={() => toggleChannel(key)}
-                      className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-left text-sm transition-colors ${on ? "border-blue-500 bg-blue-500/15 text-white" : "border-white/10 bg-white/5 text-gray-400 hover:text-white"}`}>
+                      className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-left text-sm transition-colors ${on ? "border-th-accent bg-th-brand-soft text-th-ink" : "border-th-line bg-th-surface text-th-muted hover:text-th-ink"}`}>
                       <Icon className="h-4 w-4 shrink-0" />
                       <span className="flex-1">{label}</span>
-                      {note && <span className="text-[10px] text-gray-500">{note}</span>}
+                      {note && <span className="text-[10px] text-th-faint">{note}</span>}
                     </button>
                   );
                 })}
@@ -349,17 +349,17 @@ export function AutomationsManager({ automations, smsConfigured }: { automations
               <div className="flex flex-wrap gap-1">
                 {MERGE_TAGS.map((m) => (
                   <button key={m.tag} type="button" title={m.desc} onClick={() => insertTag(m.tag)}
-                    className="rounded bg-white/5 px-1.5 py-0.5 font-mono text-[11px] text-blue-300 hover:bg-blue-500/20">
+                    className="rounded bg-th-surface px-1.5 py-0.5 font-mono text-[11px] text-th-accent hover:bg-th-brand-soft">
                     {m.tag}
                   </button>
                 ))}
               </div>
-              <p className="text-xs text-gray-500">Tap a tag to insert it. SMS uses the message only (max ~450 characters).</p>
+              <p className="text-xs text-th-faint">Tap a tag to insert it. SMS uses the message only (max ~450 characters).</p>
             </div>
 
             {form.trigger !== "after_due" && form.trigger !== "lease_end" && (
-              <label className="flex items-center justify-between gap-3 rounded-lg border border-white/10 bg-white/5 px-3 py-2">
-                <span className="text-sm text-gray-300">Only send if the tenant still has an unpaid balance</span>
+              <label className="flex items-center justify-between gap-3 rounded-lg border border-th-line bg-th-surface px-3 py-2">
+                <span className="text-sm text-th-ink/80">Only send if the tenant still has an unpaid balance</span>
                 <ToggleSwitch checked={form.onlyUnpaid} onChange={(v) => setForm({ ...form, onlyUnpaid: v })} />
               </label>
             )}

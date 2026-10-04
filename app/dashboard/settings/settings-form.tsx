@@ -48,8 +48,8 @@ export function SettingsForm({ account }: { account: Account | null }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Account Info */}
-      <div className="rounded-xl border border-white/10 bg-white/5 p-6 space-y-4">
-        <h2 className="font-semibold text-white">Account Information</h2>
+      <div className="rounded-xl border border-th-line bg-th-surface p-6 space-y-4">
+        <h2 className="font-semibold text-th-ink">Account Information</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label>Business/Property Name</Label>
@@ -67,10 +67,10 @@ export function SettingsForm({ account }: { account: Account | null }) {
       </div>
 
       {/* Payment Methods */}
-      <div className="rounded-xl border border-white/10 bg-white/5 p-6 space-y-4">
+      <div className="rounded-xl border border-th-line bg-th-surface p-6 space-y-4">
         <div>
-          <h2 className="font-semibold text-white">Payment Methods</h2>
-          <p className="text-xs text-gray-500 mt-0.5">These details will be shown to your tenants in their portal</p>
+          <h2 className="font-semibold text-th-ink">Payment Methods</h2>
+          <p className="text-xs text-th-faint mt-0.5">These details will be shown to your tenants in their portal</p>
         </div>
         <div className="space-y-4">
           <div className="space-y-2">

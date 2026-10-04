@@ -102,7 +102,10 @@ const newsreaderExt = localFont({
 const themeScript = `(function(){try{var t=localStorage.getItem("th-theme");if(t!=="light"&&t!=="dark"){t=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}document.documentElement.dataset.theme=t}catch(e){}})();`;
 
 export const viewport: Viewport = {
-  themeColor: "#2563eb",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f4f7fb" },
+    { media: "(prefers-color-scheme: dark)", color: "#091226" },
+  ],
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -111,7 +114,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body className="min-h-full bg-[#080c14] text-white antialiased" suppressHydrationWarning>
+      <body className="min-h-full bg-th-canvas text-th-ink antialiased" suppressHydrationWarning>
         {children}
         <Toaster />
         <RegisterServiceWorker />

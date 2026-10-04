@@ -41,7 +41,7 @@ export function ContractActions({ id, status, signLink, tenantHasEmail }: { id: 
     <>
       <Button variant="outline" onClick={copy}><Copy className="h-4 w-4" />Copy signing link</Button>
       {tenantHasEmail && <Button variant="outline" onClick={resend} disabled={busy}><Mail className="h-4 w-4" />Resend email</Button>}
-      <Button variant="ghost" className="text-red-400 hover:text-red-300" onClick={voidIt} disabled={busy}><Ban className="h-4 w-4" />Void</Button>
+      <Button variant="ghost" className="text-th-danger hover:text-th-danger" onClick={voidIt} disabled={busy}><Ban className="h-4 w-4" />Void</Button>
     </>
   );
 }

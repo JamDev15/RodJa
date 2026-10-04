@@ -6,7 +6,7 @@ import { LEAD_STATUSES } from "@/lib/workflow-meta";
 import { SignupsTable, type SignupRow } from "./signups-table";
 
 const selectClass =
-  "min-w-0 flex-1 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-base sm:text-sm text-white focus:border-purple-500 focus:outline-none sm:flex-none";
+  "min-w-0 flex-1 rounded-lg border border-th-line bg-th-surface px-3 py-2 text-base sm:text-sm text-th-ink focus:border-th-violet focus:outline-none sm:flex-none";
 
 function trialState(a: { lifetimeAccess: boolean; isActive: boolean; trialEndsAt: Date | null; paid: boolean }, now: Date) {
   if (a.lifetimeAccess) return { label: "Lifetime", tone: "green" as const };
@@ -96,16 +96,16 @@ export default async function AdminSignupsPage({
     <div className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Signups</h1>
-          <p className="text-gray-400 text-sm mt-1">Everyone who signed up, with their contact details and onboarding preference.</p>
+          <h1 className="text-2xl font-bold text-th-ink">Signups</h1>
+          <p className="text-th-muted text-sm mt-1">Everyone who signed up, with their contact details and onboarding preference.</p>
         </div>
         <div className="flex gap-2">
-          <Link href="/admin/workflows" className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-gray-300 hover:bg-white/10">
+          <Link href="/admin/workflows" className="inline-flex items-center gap-2 rounded-lg border border-th-line bg-th-surface px-3 py-2 text-sm text-th-ink/80 hover:bg-th-raised">
             <Workflow className="h-4 w-4" /> Workflows
           </Link>
           {/* Plain <a>: this is a file download from an API route, not a page navigation. */}
           {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
-          <a href="/api/admin/signups/export" download className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-gray-300 hover:bg-white/10">
+          <a href="/api/admin/signups/export" download className="inline-flex items-center gap-2 rounded-lg border border-th-line bg-th-surface px-3 py-2 text-sm text-th-ink/80 hover:bg-th-raised">
             <Download className="h-4 w-4" /> Export CSV
           </a>
         </div>
@@ -114,14 +114,14 @@ export default async function AdminSignupsPage({
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {stats.map((s) =>
           s.href ? (
-            <Link key={s.label} href={s.href} className="rounded-xl border border-white/10 bg-white/5 p-4 hover:bg-white/[0.08]">
-              <p className="text-xs text-gray-500">{s.label}</p>
-              <p className="text-2xl font-bold text-white">{s.value}</p>
+            <Link key={s.label} href={s.href} className="rounded-xl border border-th-line bg-th-surface p-4 hover:bg-th-raised">
+              <p className="text-xs text-th-faint">{s.label}</p>
+              <p className="text-2xl font-bold text-th-ink">{s.value}</p>
             </Link>
           ) : (
-            <div key={s.label} className="rounded-xl border border-white/10 bg-white/5 p-4">
-              <p className="text-xs text-gray-500">{s.label}</p>
-              <p className="text-2xl font-bold text-white">{s.value}</p>
+            <div key={s.label} className="rounded-xl border border-th-line bg-th-surface p-4">
+              <p className="text-xs text-th-faint">{s.label}</p>
+              <p className="text-2xl font-bold text-th-ink">{s.value}</p>
             </div>
           )
         )}

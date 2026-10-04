@@ -28,10 +28,10 @@ function PreferenceRow({ prefKey, initial, icon: Icon, title, desc }: { prefKey:
   return (
     <div className="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0">
       <div className="flex items-start gap-3">
-        <Icon className="mt-0.5 h-4 w-4 text-green-400" />
+        <Icon className="mt-0.5 h-4 w-4 text-th-paid" />
         <div>
-          <p className="text-sm font-medium text-white">{title}</p>
-          <p className="text-xs text-gray-500">{desc}</p>
+          <p className="text-sm font-medium text-th-ink">{title}</p>
+          <p className="text-xs text-th-faint">{desc}</p>
         </div>
       </div>
       <ToggleSwitch checked={on} onChange={change} disabled={saving} label={title} />
@@ -42,7 +42,7 @@ function PreferenceRow({ prefKey, initial, icon: Icon, title, desc }: { prefKey:
 /** Invoice/receipt preferences shown on the Reminders page. */
 export function AutoReceiptToggle({ initial, initialOwnerCopies = true }: { initial: boolean; initialOwnerCopies?: boolean }) {
   return (
-    <div className="divide-y divide-white/10 rounded-xl border border-white/10 bg-white/5 p-5">
+    <div className="divide-y divide-th-line rounded-xl border border-th-line bg-th-surface p-5">
       <PreferenceRow prefKey="autoSendReceipts" initial={initial} icon={ReceiptText} title="Automatic receipts"
         desc="Email the tenant a PDF receipt whenever you approve a payment or mark a bill paid." />
       <PreferenceRow prefKey="emailOwnerCopies" initial={initialOwnerCopies} icon={Copy} title="Owner copies"

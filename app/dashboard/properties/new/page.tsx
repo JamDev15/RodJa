@@ -40,16 +40,16 @@ export default function NewPropertyPage() {
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <div className="flex items-center gap-3">
-        <Link href="/dashboard/properties" className="rounded-lg p-1.5 hover:bg-white/10 text-gray-400 hover:text-white transition-colors">
+        <Link href="/dashboard/properties" className="rounded-lg p-1.5 hover:bg-th-raised text-th-muted hover:text-th-ink transition-colors">
           <ArrowLeft className="h-5 w-5" />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-white">Add Property</h1>
-          <p className="text-gray-400 text-sm">Create a new rental property</p>
+          <h1 className="text-2xl font-bold text-th-ink">Add Property</h1>
+          <p className="text-th-muted text-sm">Create a new rental property</p>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="rounded-xl border border-white/10 bg-white/5 p-6 space-y-5">
+      <form onSubmit={handleSubmit} className="rounded-xl border border-th-line bg-th-surface p-6 space-y-5">
         <div className="space-y-2">
           <Label htmlFor="name">Property Name *</Label>
           <Input

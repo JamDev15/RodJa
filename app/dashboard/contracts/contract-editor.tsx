@@ -35,7 +35,7 @@ export interface DraftValues {
 }
 
 const selectClass =
-  "w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-base sm:text-sm text-white focus:border-blue-500 focus:outline-none";
+  "w-full rounded-lg border border-th-line bg-th-surface px-3 py-2 text-base sm:text-sm text-th-ink focus:border-th-accent focus:outline-none";
 
 function addYear(iso: string): string {
   if (!iso) return "";
@@ -197,7 +197,7 @@ export function ContractEditor({
 
   return (
     <div className="space-y-6">
-      <div className="rounded-xl border border-white/10 bg-white/5 p-5 space-y-4">
+      <div className="rounded-xl border border-th-line bg-th-surface p-5 space-y-4">
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2 sm:col-span-2">
             <Label htmlFor="c-tenant">Tenant</Label>
@@ -209,10 +209,10 @@ export function ContractEditor({
                 ))}
               </select>
             ) : (
-              <p className="text-sm text-white">{tenant ? `${tenant.name} — ${tenant.propertyName} Unit ${tenant.unitNumber}` : "—"}</p>
+              <p className="text-sm text-th-ink">{tenant ? `${tenant.name} — ${tenant.propertyName} Unit ${tenant.unitNumber}` : "—"}</p>
             )}
             {tenant && !tenant.email && (
-              <p className="text-xs text-yellow-400">This tenant has no email on file — they&apos;ll sign from their portal or a link you send them.</p>
+              <p className="text-xs text-th-due">This tenant has no email on file — they&apos;ll sign from their portal or a link you send them.</p>
             )}
           </div>
           <div className="space-y-2 sm:col-span-2">
@@ -240,27 +240,27 @@ export function ContractEditor({
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <Label htmlFor="c-body">Contract text</Label>
-            <button type="button" onClick={resetTemplate} disabled={!tenant} className="inline-flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300 disabled:opacity-40">
+            <button type="button" onClick={resetTemplate} disabled={!tenant} className="inline-flex items-center gap-1 text-xs text-th-accent hover:text-th-accent disabled:opacity-40">
               <RotateCcw className="h-3 w-3" /> Use template
             </button>
           </div>
           <Textarea id="c-body" rows={18} className="font-mono text-[13px] leading-relaxed resize-y" value={v.body} onChange={(e) => setV({ ...v, body: e.target.value })}
             placeholder={tenant ? "" : "Choose a tenant to start from a ready-made lease template."} />
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-th-faint">
             The template is a starting point, not legal advice — fill in the blanks (____) and adjust to your house rules.
           </p>
         </div>
 
         <div className="flex flex-wrap gap-2">
           <Button variant="secondary" onClick={() => saveDraft()} disabled={saving}><Save className="h-4 w-4" />{saving ? "Saving…" : "Save draft"}</Button>
-          {!isNew && <Button variant="ghost" className="text-red-400 hover:text-red-300" onClick={deleteDraft}><Trash2 className="h-4 w-4" />Delete draft</Button>}
+          {!isNew && <Button variant="ghost" className="text-th-danger hover:text-th-danger" onClick={deleteDraft}><Trash2 className="h-4 w-4" />Delete draft</Button>}
         </div>
       </div>
 
-      <div className="rounded-xl border border-blue-500/30 bg-blue-500/5 p-5 space-y-4">
+      <div className="rounded-xl border border-th-accent/30 bg-th-brand-soft p-5 space-y-4">
         <div>
-          <h2 className="font-semibold text-white">Sign &amp; send to tenant</h2>
-          <p className="text-sm text-gray-400 mt-1">You sign first. The tenant then gets a private link to review and sign — no account needed. Both of you get the signed PDF.</p>
+          <h2 className="font-semibold text-th-ink">Sign &amp; send to tenant</h2>
+          <p className="text-sm text-th-muted mt-1">You sign first. The tenant then gets a private link to review and sign — no account needed. Both of you get the signed PDF.</p>
         </div>
         <SignaturePad onChange={setSignature} />
         <div className="grid gap-3 sm:grid-cols-2">
@@ -269,7 +269,7 @@ export function ContractEditor({
             <Input id="c-name" value={signedName} onChange={(e) => setSignedName(e.target.value)} />
           </div>
         </div>
-        <label className="flex items-start gap-2 text-sm text-gray-300">
+        <label className="flex items-start gap-2 text-sm text-th-ink/80">
           <input type="checkbox" className="mt-1" checked={agree} onChange={(e) => setAgree(e.target.checked)} />
           I agree that my electronic signature is the legal equivalent of my handwritten signature on this contract.
         </label>

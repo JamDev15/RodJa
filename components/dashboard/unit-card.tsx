@@ -62,13 +62,13 @@ export function UnitCard({ unit, tenantName }: UnitCardProps) {
   }
 
   return (
-    <div className="group relative rounded-xl border border-white/10 bg-white/5 p-4 hover:bg-white/[0.07] hover:border-white/20 transition-all">
+    <div className="group relative rounded-xl border border-th-line bg-th-surface p-4 hover:bg-th-raised hover:border-th-faint/40 transition-all">
       {/* Action buttons */}
       <div className="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
         <Link
           href={`/dashboard/units/${unit.id}/edit`}
           onClick={(e) => e.stopPropagation()}
-          className="flex h-7 w-7 items-center justify-center rounded-md bg-white/10 hover:bg-white/20 text-gray-400 hover:text-white transition-colors"
+          className="flex h-7 w-7 items-center justify-center rounded-md bg-th-raised hover:bg-th-line text-th-muted hover:text-th-ink transition-colors"
           title="Edit unit"
         >
           <Pencil className="h-3.5 w-3.5" />
@@ -76,7 +76,7 @@ export function UnitCard({ unit, tenantName }: UnitCardProps) {
         <button
           onClick={handleDuplicate}
           disabled={duplicating}
-          className="flex h-7 w-7 items-center justify-center rounded-md bg-white/10 hover:bg-blue-500/30 text-gray-400 hover:text-blue-400 transition-colors disabled:opacity-50"
+          className="flex h-7 w-7 items-center justify-center rounded-md bg-th-raised hover:bg-th-brand-soft text-th-muted hover:text-th-accent transition-colors disabled:opacity-50"
           title="Duplicate unit"
         >
           <Copy className="h-3.5 w-3.5" />
@@ -85,7 +85,7 @@ export function UnitCard({ unit, tenantName }: UnitCardProps) {
           <button
             onClick={handleDelete}
             disabled={deleting}
-            className="flex h-7 w-7 items-center justify-center rounded-md bg-white/10 hover:bg-red-500/30 text-gray-400 hover:text-red-400 transition-colors disabled:opacity-50"
+            className="flex h-7 w-7 items-center justify-center rounded-md bg-th-raised hover:bg-th-danger-soft text-th-muted hover:text-th-danger transition-colors disabled:opacity-50"
             title="Delete unit"
           >
             <Trash2 className="h-3.5 w-3.5" />
@@ -96,16 +96,16 @@ export function UnitCard({ unit, tenantName }: UnitCardProps) {
       {/* Card content — clicking navigates to detail */}
       <Link href={`/dashboard/units/${unit.id}`} className="block">
         <div className="flex items-center justify-between mb-2 pr-20">
-          <span className="font-semibold text-white">Unit {unit.unitNumber}</span>
+          <span className="font-semibold text-th-ink">Unit {unit.unitNumber}</span>
           <UnitStatusBadge status={unit.status} />
         </div>
-        <p className="text-sm font-medium text-blue-400">{formatCurrency(unit.rentAmount)}/mo</p>
+        <p className="text-sm font-medium text-th-accent">{formatCurrency(unit.rentAmount)}/mo</p>
         {tenantName ? (
-          <p className="text-xs text-gray-400 mt-1">Tenant: {tenantName}</p>
+          <p className="text-xs text-th-muted mt-1">Tenant: {tenantName}</p>
         ) : (
-          <p className="text-xs text-gray-500 mt-1">No tenant</p>
+          <p className="text-xs text-th-faint mt-1">No tenant</p>
         )}
-        {unit.floor && <p className="text-xs text-gray-600 mt-0.5">{unit.floor}</p>}
+        {unit.floor && <p className="text-xs text-th-faint mt-0.5">{unit.floor}</p>}
       </Link>
     </div>
   );

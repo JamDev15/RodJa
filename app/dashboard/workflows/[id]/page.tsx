@@ -39,10 +39,10 @@ export default async function OwnerWorkflowPage({ params }: { params: Promise<{ 
   return (
     <div className="space-y-6 max-w-5xl">
       <div className="flex items-center gap-3">
-        <Link href="/dashboard/workflows" className="rounded-lg p-1.5 hover:bg-white/10 text-gray-400 hover:text-white"><ArrowLeft className="h-5 w-5" /></Link>
+        <Link href="/dashboard/workflows" className="rounded-lg p-1.5 hover:bg-th-raised text-th-muted hover:text-th-ink"><ArrowLeft className="h-5 w-5" /></Link>
         <div>
-          <h1 className="text-2xl font-bold text-white">{workflow.name}</h1>
-          <p className="text-sm text-gray-400">Edit any step, then save. Tenants already in progress continue from where they are.</p>
+          <h1 className="text-2xl font-bold text-th-ink">{workflow.name}</h1>
+          <p className="text-sm text-th-muted">Edit any step, then save. Tenants already in progress continue from where they are.</p>
         </div>
       </div>
 
@@ -62,7 +62,7 @@ export default async function OwnerWorkflowPage({ params }: { params: Promise<{ 
 
       <section className="space-y-3">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <h2 className="text-lg font-semibold text-white">Tenants in this workflow</h2>
+          <h2 className="text-lg font-semibold text-th-ink">Tenants in this workflow</h2>
           <EnrollTenants
             workflowId={workflow.id}
             disabled={!workflow.isActive}
@@ -70,12 +70,12 @@ export default async function OwnerWorkflowPage({ params }: { params: Promise<{ 
           />
         </div>
         {workflow.enrollments.length === 0 ? (
-          <p className="text-sm text-gray-500">Nobody yet. Tenants appear here when the trigger fires, or when you add them.</p>
+          <p className="text-sm text-th-faint">Nobody yet. Tenants appear here when the trigger fires, or when you add them.</p>
         ) : (
-          <div className="overflow-x-auto rounded-xl border border-white/10">
+          <div className="overflow-x-auto rounded-xl border border-th-line">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-white/10 bg-white/5 text-left text-xs text-gray-400">
+                <tr className="border-b border-th-line bg-th-surface text-left text-xs text-th-muted">
                   <th className="px-4 py-2">Tenant</th>
                   <th className="px-4 py-2">Bill month</th>
                   <th className="px-4 py-2">Status</th>
@@ -83,24 +83,24 @@ export default async function OwnerWorkflowPage({ params }: { params: Promise<{ 
                   <th className="px-4 py-2" />
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/10">
+              <tbody className="divide-y divide-th-line">
                 {workflow.enrollments.map((e) => (
                   <tr key={e.id}>
                     <td className="px-4 py-2">
-                      <Link href={`/dashboard/tenants/${e.tenant.id}`} className="text-white hover:text-blue-300">{e.tenant.name}</Link>
-                      <p className="text-xs text-gray-500">Unit {e.tenant.unit.unitNumber} · started {when(e.enrolledAt)}</p>
+                      <Link href={`/dashboard/tenants/${e.tenant.id}`} className="text-th-ink hover:text-th-accent">{e.tenant.name}</Link>
+                      <p className="text-xs text-th-faint">Unit {e.tenant.unit.unitNumber} · started {when(e.enrolledAt)}</p>
                     </td>
-                    <td className="px-4 py-2 text-xs text-gray-400">{getMonthLabel(e.monthKey)}</td>
+                    <td className="px-4 py-2 text-xs text-th-muted">{getMonthLabel(e.monthKey)}</td>
                     <td className="px-4 py-2">
-                      <span className={e.status === "active" ? "text-green-400" : e.status === "completed" ? "text-gray-300" : "text-orange-300"}>
+                      <span className={e.status === "active" ? "text-th-paid" : e.status === "completed" ? "text-th-ink/80" : "text-th-due"}>
                         {e.status === "active" ? "in progress" : e.status === "completed" ? "finished" : "stopped"}
                       </span>
-                      {e.exitReason && e.status !== "completed" && <p className="text-xs text-gray-500">{e.exitReason}</p>}
-                      {e.lastError && <p className="text-xs text-yellow-400">{e.lastError}</p>}
+                      {e.exitReason && e.status !== "completed" && <p className="text-xs text-th-faint">{e.exitReason}</p>}
+                      {e.lastError && <p className="text-xs text-th-due">{e.lastError}</p>}
                     </td>
-                    <td className="px-4 py-2 text-xs text-gray-400">
+                    <td className="px-4 py-2 text-xs text-th-muted">
                       {e.status === "active" && steps[e.stepIndex] ? (
-                        <>{describeOwnerStep(steps[e.stepIndex])}<br /><span className="text-gray-500">{when(e.nextRunAt)}</span></>
+                        <>{describeOwnerStep(steps[e.stepIndex])}<br /><span className="text-th-faint">{when(e.nextRunAt)}</span></>
                       ) : "—"}
                     </td>
                     <td className="px-4 py-2 text-right">{e.status === "active" && <RemoveEnrollmentButton id={e.id} apiBase="/api/workflows/enrollments" />}</td>

@@ -86,12 +86,12 @@ export function AddPaymentButton({ tenantId, rentAmount }: { tenantId: string; r
           </div>
 
           {/* Bill Breakdown */}
-          <div className="rounded-lg border border-white/10 bg-white/5 p-4 space-y-3">
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Bill Breakdown</p>
+          <div className="rounded-lg border border-th-line bg-th-surface p-4 space-y-3">
+            <p className="text-xs font-semibold text-th-muted uppercase tracking-wide">Bill Breakdown</p>
 
             <div className="space-y-1.5">
               <Label className="flex items-center gap-1.5 text-sm">
-                <Home className="h-3.5 w-3.5 text-blue-400" /> Rent (₱)
+                <Home className="h-3.5 w-3.5 text-th-accent" /> Rent (₱)
               </Label>
               <Input
                 type="number"
@@ -104,7 +104,7 @@ export function AddPaymentButton({ tenantId, rentAmount }: { tenantId: string; r
 
             <div className="space-y-1.5">
               <Label className="flex items-center gap-1.5 text-sm">
-                <Zap className="h-3.5 w-3.5 text-yellow-400" /> Electric Bill (₱)
+                <Zap className="h-3.5 w-3.5 text-th-due" /> Electric Bill (₱)
               </Label>
               <Input
                 type="number"
@@ -117,7 +117,7 @@ export function AddPaymentButton({ tenantId, rentAmount }: { tenantId: string; r
 
             <div className="space-y-1.5">
               <Label className="flex items-center gap-1.5 text-sm">
-                <Droplets className="h-3.5 w-3.5 text-cyan-400" /> Water Bill (₱)
+                <Droplets className="h-3.5 w-3.5 text-th-accent" /> Water Bill (₱)
               </Label>
               <Input
                 type="number"
@@ -129,9 +129,9 @@ export function AddPaymentButton({ tenantId, rentAmount }: { tenantId: string; r
             </div>
 
             {/* Total */}
-            <div className="flex items-center justify-between border-t border-white/10 pt-3 mt-1">
-              <span className="text-sm text-gray-400">Total Amount</span>
-              <span className="text-lg font-bold text-white">{formatCurrency(total)}</span>
+            <div className="flex items-center justify-between border-t border-th-line pt-3 mt-1">
+              <span className="text-sm text-th-muted">Total Amount</span>
+              <span className="text-lg font-bold text-th-ink">{formatCurrency(total)}</span>
             </div>
           </div>
 

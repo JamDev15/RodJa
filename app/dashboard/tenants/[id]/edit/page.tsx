@@ -92,9 +92,9 @@ export default function EditTenantPage() {
   if (fetching) {
     return (
       <div className="max-w-2xl mx-auto">
-        <div className="h-8 w-48 rounded bg-white/10 animate-pulse mb-6" />
-        <div className="rounded-xl border border-white/10 bg-white/5 p-6 space-y-5">
-          {[1, 2, 3, 4].map((i) => <div key={i} className="h-10 rounded bg-white/10 animate-pulse" />)}
+        <div className="h-8 w-48 rounded bg-th-raised animate-pulse mb-6" />
+        <div className="rounded-xl border border-th-line bg-th-surface p-6 space-y-5">
+          {[1, 2, 3, 4].map((i) => <div key={i} className="h-10 rounded bg-th-raised animate-pulse" />)}
         </div>
       </div>
     );
@@ -103,29 +103,29 @@ export default function EditTenantPage() {
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <div className="flex items-center gap-3">
-        <Link href={`/dashboard/tenants/${tenantId}`} className="rounded-lg p-1.5 hover:bg-white/10 text-gray-400 hover:text-white transition-colors">
+        <Link href={`/dashboard/tenants/${tenantId}`} className="rounded-lg p-1.5 hover:bg-th-raised text-th-muted hover:text-th-ink transition-colors">
           <ArrowLeft className="h-5 w-5" />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-white">Edit Tenant</h1>
-          <p className="text-gray-400 text-sm">{unitLabel}</p>
+          <h1 className="text-2xl font-bold text-th-ink">Edit Tenant</h1>
+          <p className="text-th-muted text-sm">{unitLabel}</p>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="rounded-xl border border-white/10 bg-white/5 p-6 space-y-5">
+      <form onSubmit={handleSubmit} className="rounded-xl border border-th-line bg-th-surface p-6 space-y-5">
 
         {/* Status toggle */}
-        <div className="flex items-center justify-between rounded-lg border border-white/10 bg-white/5 px-4 py-3">
+        <div className="flex items-center justify-between rounded-lg border border-th-line bg-th-surface px-4 py-3">
           <div>
-            <p className="text-sm font-medium text-white">Tenant Status</p>
-            <p className="text-xs text-gray-500">Inactive tenants cannot log in to the portal</p>
+            <p className="text-sm font-medium text-th-ink">Tenant Status</p>
+            <p className="text-xs text-th-faint">Inactive tenants cannot log in to the portal</p>
           </div>
           <button
             type="button"
             onClick={() => setForm((f) => ({ ...f, isActive: !f.isActive }))}
-            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${form.isActive ? "bg-green-600" : "bg-gray-600"}`}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${form.isActive ? "bg-th-brand" : "bg-th-faint"}`}
           >
-            <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${form.isActive ? "translate-x-6" : "translate-x-1"}`} />
+            <span className={`inline-block h-4 w-4 transform rounded-full shadow transition-transform ${form.isActive ? "translate-x-6 bg-th-on-brand" : "translate-x-1 bg-white"}`} />
           </button>
         </div>
 
@@ -157,7 +157,7 @@ export default function EditTenantPage() {
                 onChange={(e) => setForm({ ...form, portalPin: e.target.value })} maxLength={6} />
               <Button type="button" variant="secondary" onClick={generatePin} className="shrink-0">New PIN</Button>
             </div>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-th-faint">
               For security, the current PIN can&apos;t be displayed. Only fill this in to set a new one.
             </p>
           </div>
@@ -183,7 +183,7 @@ export default function EditTenantPage() {
             <Label htmlFor="dueDay">Rent Due Day *</Label>
             <Input id="dueDay" type="number" placeholder="5" value={form.dueDay}
               onChange={(e) => setForm({ ...form, dueDay: e.target.value })} min="1" max="28" required />
-            <p className="text-xs text-gray-500">Day of the month rent is due (1–28)</p>
+            <p className="text-xs text-th-faint">Day of the month rent is due (1–28)</p>
           </div>
         </div>
 
@@ -201,8 +201,8 @@ export default function EditTenantPage() {
               onClick={() => setForm((f) => ({ ...f, depositPaid: !f.depositPaid }))}
               className={`flex w-full items-center justify-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${
                 form.depositPaid
-                  ? "border-green-500/40 bg-green-500/20 text-green-400"
-                  : "border-white/10 bg-white/5 text-gray-400"
+                  ? "border-th-paid/40 bg-th-paid-soft text-th-paid"
+                  : "border-th-line bg-th-surface text-th-muted"
               }`}
             >
               {form.depositPaid ? "✓ Deposit Paid" : "✗ Deposit Not Paid"}

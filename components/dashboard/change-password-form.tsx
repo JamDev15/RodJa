@@ -38,10 +38,10 @@ export function ChangePasswordForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-xl border border-white/10 bg-white/5 p-6 space-y-4">
+    <form onSubmit={handleSubmit} className="rounded-xl border border-th-line bg-th-surface p-6 space-y-4">
       <div>
-        <h2 className="font-semibold text-white">Change Password</h2>
-        <p className="text-xs text-gray-500 mt-0.5">Update the password you use to sign in</p>
+        <h2 className="font-semibold text-th-ink">Change Password</h2>
+        <p className="text-xs text-th-faint mt-0.5">Update the password you use to sign in</p>
       </div>
       <div className="space-y-4 max-w-sm">
         <div className="space-y-2">

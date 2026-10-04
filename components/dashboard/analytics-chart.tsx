@@ -40,12 +40,12 @@ export function AnalyticsChart({ data }: { data: MonthlyBillTotals[] }) {
   const ticks = [0, 0.25, 0.5, 0.75, 1].map((f) => Math.round(axisMax * f));
 
   return (
-    <div className="rounded-xl border border-white/10 bg-white/5 p-5">
+    <div className="rounded-xl border border-th-line bg-th-surface p-5">
       <div className="flex items-center justify-between mb-6">
         {/* Legend — always present for >= 2 series */}
         <div className="flex flex-wrap gap-x-4 gap-y-2">
           {SERIES.map((s) => (
-            <div key={s.key} className="flex items-center gap-1.5 text-xs text-gray-400">
+            <div key={s.key} className="flex items-center gap-1.5 text-xs text-th-muted">
               <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: s.color }} />
               {s.label}
             </div>
@@ -53,7 +53,7 @@ export function AnalyticsChart({ data }: { data: MonthlyBillTotals[] }) {
         </div>
         <button
           onClick={() => setTableView((v) => !v)}
-          className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs text-gray-300 hover:bg-white/10 transition-colors shrink-0"
+          className="flex items-center gap-1.5 rounded-lg border border-th-line bg-th-surface px-2.5 py-1.5 text-xs text-th-ink/80 hover:bg-th-raised transition-colors shrink-0"
         >
           {tableView ? <BarChart3 className="h-3.5 w-3.5" /> : <Table2 className="h-3.5 w-3.5" />}
           {tableView ? "Chart view" : "Table view"}
@@ -64,7 +64,7 @@ export function AnalyticsChart({ data }: { data: MonthlyBillTotals[] }) {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-white/10 text-left text-gray-400">
+              <tr className="border-b border-th-line text-left text-th-muted">
                 <th className="py-2 pr-4 font-medium">Month</th>
                 {SERIES.map((s) => (
                   <th key={s.key} className="py-2 pr-4 font-medium">{s.label}</th>
@@ -72,14 +72,14 @@ export function AnalyticsChart({ data }: { data: MonthlyBillTotals[] }) {
                 <th className="py-2 font-medium">Total</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/10">
+            <tbody className="divide-y divide-th-line">
               {data.map((d) => (
                 <tr key={d.month}>
-                  <td className="py-2 pr-4 text-white">{d.label}</td>
+                  <td className="py-2 pr-4 text-th-ink">{d.label}</td>
                   {SERIES.map((s) => (
-                    <td key={s.key} className="py-2 pr-4 text-gray-300">{formatCurrency(d[s.key])}</td>
+                    <td key={s.key} className="py-2 pr-4 text-th-ink/80">{formatCurrency(d[s.key])}</td>
                   ))}
-                  <td className="py-2 text-white font-medium">{formatCurrency(d.total)}</td>
+                  <td className="py-2 text-th-ink font-medium">{formatCurrency(d.total)}</td>
                 </tr>
               ))}
             </tbody>
@@ -88,7 +88,7 @@ export function AnalyticsChart({ data }: { data: MonthlyBillTotals[] }) {
       ) : (
         <div className="flex gap-3">
           {/* Y-axis ticks */}
-          <div className="flex flex-col justify-between text-right text-[10px] text-gray-500 h-64 pb-6 shrink-0">
+          <div className="flex flex-col justify-between text-right text-[10px] text-th-faint h-64 pb-6 shrink-0">
             {[...ticks].reverse().map((t) => (
               <span key={t}>{formatCurrency(t)}</span>
             ))}
@@ -98,7 +98,7 @@ export function AnalyticsChart({ data }: { data: MonthlyBillTotals[] }) {
             {/* Gridlines */}
             <div className="absolute inset-x-0 top-0 h-64 flex flex-col justify-between pb-6">
               {ticks.map((t) => (
-                <div key={t} className="border-t border-white/[0.06]" />
+                <div key={t} className="border-t border-th-line" />
               ))}
             </div>
 
@@ -114,7 +114,7 @@ export function AnalyticsChart({ data }: { data: MonthlyBillTotals[] }) {
                     onMouseLeave={() => setHovered((h) => (h === i ? null : h))}
                   >
                     {d.total > 0 && (
-                      <p className="text-[10px] text-gray-400 mb-1 whitespace-nowrap">{formatCurrency(d.total)}</p>
+                      <p className="text-[10px] text-th-muted mb-1 whitespace-nowrap">{formatCurrency(d.total)}</p>
                     )}
                     <div className="w-full flex flex-col-reverse gap-[2px]" style={{ height: `${(d.total / axisMax) * 100}%` }}>
                       {SERIES.map((s) => {
@@ -133,16 +133,16 @@ export function AnalyticsChart({ data }: { data: MonthlyBillTotals[] }) {
 
                     {/* Hover tooltip */}
                     {hovered === i && (
-                      <div className="absolute bottom-full mb-2 z-10 w-40 rounded-lg border border-white/10 bg-[#0f1117] p-3 shadow-xl text-left">
-                        <p className="text-xs font-semibold text-white mb-1.5">{d.label}</p>
+                      <div className="absolute bottom-full mb-2 z-10 w-40 rounded-lg border border-th-line bg-th-surface p-3 shadow-xl text-left">
+                        <p className="text-xs font-semibold text-th-ink mb-1.5">{d.label}</p>
                         <div className="space-y-1">
                           {SERIES.map((s) => (
                             <div key={s.key} className="flex items-center justify-between gap-2 text-[11px]">
-                              <span className="flex items-center gap-1 text-gray-400">
+                              <span className="flex items-center gap-1 text-th-muted">
                                 <span className="h-1.5 w-1.5 rounded-full shrink-0" style={{ backgroundColor: s.color }} />
                                 {s.label}
                               </span>
-                              <span className="text-gray-200">{formatCurrency(d[s.key])}</span>
+                              <span className="text-th-ink">{formatCurrency(d[s.key])}</span>
                             </div>
                           ))}
                         </div>
@@ -156,7 +156,7 @@ export function AnalyticsChart({ data }: { data: MonthlyBillTotals[] }) {
             {/* X-axis labels */}
             <div className="flex items-center justify-between gap-2">
               {data.map((d) => (
-                <span key={d.month} className="flex-1 max-w-[64px] text-center text-[10px] text-gray-500 truncate">
+                <span key={d.month} className="flex-1 max-w-[64px] text-center text-[10px] text-th-faint truncate">
                   {d.label.split(" ")[0]}
                 </span>
               ))}

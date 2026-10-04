@@ -13,8 +13,8 @@ export default async function SettingsPage() {
   return (
     <div className="space-y-6 max-w-2xl">
       <div>
-        <h1 className="text-2xl font-bold text-white">Account Settings</h1>
-        <p className="text-gray-400 text-sm mt-1">Manage your account and payment details</p>
+        <h1 className="text-2xl font-bold text-th-ink">Account Settings</h1>
+        <p className="text-th-muted text-sm mt-1">Manage your account and payment details</p>
       </div>
       <SettingsForm account={account} />
       {user?.role === "LANDLORD" && <ChangePasswordForm />}

@@ -30,7 +30,7 @@ export function AdminSettingsForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-xl border border-white/10 bg-white/5 p-6 space-y-4 max-w-md">
+    <form onSubmit={handleSubmit} className="rounded-xl border border-th-line bg-th-surface p-6 space-y-4 max-w-md">
       <div className="space-y-2">
         <Label htmlFor="currentPassword">Current Password</Label>
         <Input id="currentPassword" type="password" value={form.currentPassword}

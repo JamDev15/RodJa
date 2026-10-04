@@ -56,27 +56,27 @@ export function ApprovePaymentButton({ paymentId, proofUrl, tenantName, amount }
         </DialogHeader>
         <div className="space-y-4">
           <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-400">Tenant:</span>
-            <span className="text-white font-medium">{tenantName}</span>
+            <span className="text-th-muted">Tenant:</span>
+            <span className="text-th-ink font-medium">{tenantName}</span>
           </div>
           <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-400">Amount:</span>
-            <span className="text-white font-bold text-lg">{formatCurrency(amount)}</span>
+            <span className="text-th-muted">Amount:</span>
+            <span className="text-th-ink font-bold text-lg">{formatCurrency(amount)}</span>
           </div>
 
           {proofUrl ? (
             <div className="space-y-2">
-              <p className="text-sm text-gray-400">Payment Proof:</p>
+              <p className="text-sm text-th-muted">Payment Proof:</p>
               <a href={proofUrl} target="_blank" rel="noopener noreferrer">
                 <img
                   src={proofUrl}
                   alt="Payment proof"
-                  className="w-full rounded-lg border border-white/10 max-h-64 object-contain bg-black/20"
+                  className="w-full rounded-lg border border-th-line max-h-64 object-contain bg-black/20"
                 />
               </a>
             </div>
           ) : (
-            <div className="rounded-lg border border-white/10 bg-white/5 p-6 text-center text-gray-500 text-sm">
+            <div className="rounded-lg border border-th-line bg-th-surface p-6 text-center text-th-faint text-sm">
               No proof image uploaded
             </div>
           )}

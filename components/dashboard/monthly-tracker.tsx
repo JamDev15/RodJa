@@ -36,32 +36,32 @@ function MonthCell({ month, payment, rentAmount }: { month: string; payment?: Pa
 
   const config: Record<string, { bg: string; border: string; icon: React.ReactNode; label: string; text: string }> = {
     approved: {
-      bg: "bg-green-500/10",
-      border: "border-green-500/30",
-      icon: <CheckCircle2 className="h-4 w-4 text-green-400" />,
+      bg: "bg-th-paid-soft",
+      border: "border-th-paid/30",
+      icon: <CheckCircle2 className="h-4 w-4 text-th-paid" />,
       label: "Paid",
-      text: "text-green-400",
+      text: "text-th-paid",
     },
     submitted: {
-      bg: "bg-blue-500/10",
-      border: "border-blue-500/30",
-      icon: <Upload className="h-4 w-4 text-blue-400" />,
+      bg: "bg-th-brand-soft",
+      border: "border-th-accent/30",
+      icon: <Upload className="h-4 w-4 text-th-accent" />,
       label: "Submitted",
-      text: "text-blue-400",
+      text: "text-th-accent",
     },
     pending: {
-      bg: "bg-yellow-500/10",
-      border: "border-yellow-500/30",
-      icon: <Clock className="h-4 w-4 text-yellow-400" />,
+      bg: "bg-th-due-soft",
+      border: "border-th-due/30",
+      icon: <Clock className="h-4 w-4 text-th-due" />,
       label: "Pending",
-      text: "text-yellow-400",
+      text: "text-th-due",
     },
     unpaid: {
-      bg: "bg-red-500/10",
-      border: "border-red-500/30",
-      icon: <XCircle className="h-4 w-4 text-red-400" />,
+      bg: "bg-th-danger-soft",
+      border: "border-th-danger/30",
+      icon: <XCircle className="h-4 w-4 text-th-danger" />,
       label: "Unpaid",
-      text: "text-red-400",
+      text: "text-th-danger",
     },
   };
 
@@ -70,13 +70,13 @@ function MonthCell({ month, payment, rentAmount }: { month: string; payment?: Pa
   return (
     <div className={`rounded-lg border ${c.border} ${c.bg} p-3 flex flex-col gap-1.5`}>
       <div className="flex items-center justify-between">
-        <span className="text-xs font-semibold text-white">{label}</span>
+        <span className="text-xs font-semibold text-th-ink">{label}</span>
         {c.icon}
       </div>
-      <span className="text-xs text-gray-400">{formatCurrency(payment?.amount ?? rentAmount)}</span>
+      <span className="text-xs text-th-muted">{formatCurrency(payment?.amount ?? rentAmount)}</span>
       <span className={`text-[10px] font-medium ${c.text}`}>{c.label}</span>
       {payment?.paidDate && (
-        <span className="text-[10px] text-gray-600">
+        <span className="text-[10px] text-th-faint">
           {new Date(payment.paidDate).toLocaleDateString("en-PH", { month: "short", day: "numeric" })}
         </span>
       )}
@@ -103,24 +103,24 @@ export function MonthlyTracker({ moveInDate, rentAmount, payments }: MonthlyTrac
       {/* Summary bar */}
       <div className="flex items-center gap-4 text-sm">
         <div className="flex items-center gap-1.5">
-          <span className="h-2.5 w-2.5 rounded-full bg-green-400" />
-          <span className="text-gray-400">{paidCount} paid</span>
+          <span className="h-2.5 w-2.5 rounded-full bg-th-paid" />
+          <span className="text-th-muted">{paidCount} paid</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="h-2.5 w-2.5 rounded-full bg-red-400" />
-          <span className="text-gray-400">{unpaidCount} unpaid</span>
+          <span className="h-2.5 w-2.5 rounded-full bg-th-danger" />
+          <span className="text-th-muted">{unpaidCount} unpaid</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="h-2.5 w-2.5 rounded-full bg-yellow-400" />
-          <span className="text-gray-400">{payments.filter(p => p.status === "pending" || p.status === "submitted").length} pending</span>
+          <span className="h-2.5 w-2.5 rounded-full bg-th-due" />
+          <span className="text-th-muted">{payments.filter(p => p.status === "pending" || p.status === "submitted").length} pending</span>
         </div>
-        <span className="ml-auto text-xs text-gray-500">{paidPct}% paid</span>
+        <span className="ml-auto text-xs text-th-faint">{paidPct}% paid</span>
       </div>
 
       {/* Progress bar */}
-      <div className="h-1.5 w-full rounded-full bg-white/10 overflow-hidden">
+      <div className="h-1.5 w-full rounded-full bg-th-raised overflow-hidden">
         <div
-          className="h-full rounded-full bg-green-500 transition-all"
+          className="h-full rounded-full bg-th-paid transition-all"
           style={{ width: `${paidPct}%` }}
         />
       </div>
@@ -138,12 +138,12 @@ export function MonthlyTracker({ moveInDate, rentAmount, payments }: MonthlyTrac
       </div>
 
       {/* Legend */}
-      <div className="flex flex-wrap gap-3 text-[11px] text-gray-500 pt-1">
+      <div className="flex flex-wrap gap-3 text-[11px] text-th-faint pt-1">
         {[
-          { color: "bg-green-400", label: "Approved" },
-          { color: "bg-blue-400", label: "Proof uploaded" },
-          { color: "bg-yellow-400", label: "Pending" },
-          { color: "bg-red-400", label: "No payment" },
+          { color: "bg-th-paid", label: "Approved" },
+          { color: "bg-th-accent", label: "Proof uploaded" },
+          { color: "bg-th-due", label: "Pending" },
+          { color: "bg-th-danger", label: "No payment" },
         ].map((l) => (
           <span key={l.label} className="flex items-center gap-1">
             <span className={`h-2 w-2 rounded-full ${l.color}`} />

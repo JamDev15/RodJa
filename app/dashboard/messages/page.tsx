@@ -11,7 +11,7 @@ function daysAgo(days: number): Date {
 }
 
 const selectClass =
-  "min-w-0 flex-1 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-base sm:text-sm text-white focus:border-blue-500 focus:outline-none sm:flex-none";
+  "min-w-0 flex-1 rounded-lg border border-th-line bg-th-surface px-3 py-2 text-base sm:text-sm text-th-ink focus:border-th-accent focus:outline-none sm:flex-none";
 
 export default async function MessageHistoryPage({
   searchParams,
@@ -68,27 +68,27 @@ export default async function MessageHistoryPage({
   return (
     <div className="space-y-6 max-w-5xl">
       <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-bold text-white">Message History</h1>
-        <p className="text-gray-400 text-sm">
+        <h1 className="text-2xl font-bold text-th-ink">Message History</h1>
+        <p className="text-th-muted text-sm">
           Every reminder, invoice, receipt, contract, and automation sent to your tenants and to you.
         </p>
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-        <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-          <p className="text-xs text-gray-500">Sent (30 days)</p>
-          <p className="text-2xl font-bold text-white">{sent30}</p>
+        <div className="rounded-xl border border-th-line bg-th-surface p-4">
+          <p className="text-xs text-th-faint">Sent (30 days)</p>
+          <p className="text-2xl font-bold text-th-ink">{sent30}</p>
         </div>
-        <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-          <p className="text-xs text-gray-500">Failed (30 days)</p>
-          <p className={`text-2xl font-bold ${failed30 > 0 ? "text-red-400" : "text-white"}`}>{failed30}</p>
+        <div className="rounded-xl border border-th-line bg-th-surface p-4">
+          <p className="text-xs text-th-faint">Failed (30 days)</p>
+          <p className={`text-2xl font-bold ${failed30 > 0 ? "text-th-danger" : "text-th-ink"}`}>{failed30}</p>
         </div>
         <Link
           href="/dashboard/automations"
-          className="col-span-2 sm:col-span-1 rounded-xl border border-blue-500/30 bg-blue-500/10 p-4 hover:bg-blue-500/15 transition-colors"
+          className="col-span-2 sm:col-span-1 rounded-xl border border-th-accent/30 bg-th-brand-soft p-4 hover:bg-th-brand-soft transition-colors"
         >
-          <p className="text-xs text-blue-300">Want more reminders?</p>
-          <p className="text-sm font-semibold text-white mt-1">Set up automations →</p>
+          <p className="text-xs text-th-accent">Want more reminders?</p>
+          <p className="text-sm font-semibold text-th-ink mt-1">Set up automations →</p>
         </Link>
       </div>
 
@@ -122,17 +122,17 @@ export default async function MessageHistoryPage({
           <option value="sent">Sent</option>
           <option value="failed">Failed</option>
         </select>
-        <button type="submit" className="rounded-lg bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700">Filter</button>
+        <button type="submit" className="rounded-lg bg-th-brand px-4 py-2 text-sm text-th-on-brand hover:bg-th-brand-hover">Filter</button>
       </form>
 
-      <p className="text-xs text-gray-500">{total} message{total === 1 ? "" : "s"}</p>
+      <p className="text-xs text-th-faint">{total} message{total === 1 ? "" : "s"}</p>
       <MessageHistoryList messages={messages} />
 
       {pages > 1 && (
         <div className="flex items-center justify-between text-sm">
-          {page > 1 ? <Link href={qs(page - 1)} className="text-blue-400 hover:text-blue-300">← Newer</Link> : <span />}
-          <span className="text-gray-500">Page {page} of {pages}</span>
-          {page < pages ? <Link href={qs(page + 1)} className="text-blue-400 hover:text-blue-300">Older →</Link> : <span />}
+          {page > 1 ? <Link href={qs(page - 1)} className="text-th-accent hover:text-th-accent">← Newer</Link> : <span />}
+          <span className="text-th-faint">Page {page} of {pages}</span>
+          {page < pages ? <Link href={qs(page + 1)} className="text-th-accent hover:text-th-accent">Older →</Link> : <span />}
         </div>
       )}
     </div>

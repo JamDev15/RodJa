@@ -48,12 +48,12 @@ export default async function BillingPage() {
   return (
     <div className="space-y-6 max-w-3xl">
       <div>
-        <h1 className="text-2xl font-bold text-white">Billing & Plan</h1>
-        <p className="text-gray-400 text-sm mt-1">Manage your subscription</p>
+        <h1 className="text-2xl font-bold text-th-ink">Billing & Plan</h1>
+        <p className="text-th-muted text-sm mt-1">Manage your subscription</p>
       </div>
 
       {trialDaysLeft !== null && (
-        <div className={`rounded-xl border p-4 text-sm ${trialDaysLeft <= 0 ? "border-red-500/30 bg-red-500/10 text-red-400" : "border-yellow-500/30 bg-yellow-500/10 text-yellow-400"}`}>
+        <div className={`rounded-xl border p-4 text-sm ${trialDaysLeft <= 0 ? "border-th-danger/30 bg-th-danger-soft text-th-danger" : "border-th-due/30 bg-th-due-soft text-th-due"}`}>
           {trialDaysLeft <= 0
             ? "Your free trial has ended. Subscribe for ₱499/month below to keep using TenantHub."
             : `Your free trial ends in ${trialDaysLeft} day${trialDaysLeft === 1 ? "" : "s"} (${formatDate(account!.trialEndsAt!)}). Subscribe anytime for ₱499/month — no interruption, nothing to set up again.`}
@@ -61,11 +61,11 @@ export default async function BillingPage() {
       )}
 
       {/* Current Plan */}
-      <div className="rounded-xl border border-blue-500/30 bg-blue-500/10 p-6">
+      <div className="rounded-xl border border-th-accent/30 bg-th-brand-soft p-6">
         <div className="flex items-center justify-between mb-3">
           <div>
-            <p className="text-xs text-blue-400 font-medium uppercase tracking-wide">Current Plan</p>
-            <h2 className="text-2xl font-bold text-white mt-1">{account?.plan.name}{inTrial ? " — Free trial" : ""}</h2>
+            <p className="text-xs text-th-accent font-medium uppercase tracking-wide">Current Plan</p>
+            <h2 className="text-2xl font-bold text-th-ink mt-1">{account?.plan.name}{inTrial ? " — Free trial" : ""}</h2>
           </div>
           <Badge variant="default" className="text-sm px-3 py-1">
             {account?.plan.price === 0 ? "Free" : `₱${account?.plan.price}/mo`}
@@ -79,11 +79,11 @@ export default async function BillingPage() {
             { label: "Units", used: unitCount, max: account?.plan.maxUnits },
             { label: "Tenants", used: tenantCount, max: account?.plan.maxTenants },
           ].map(({ label, used, max }) => (
-            <div key={label} className="rounded-lg bg-white/5 p-3">
-              <p className="text-xs text-gray-500">{label}</p>
-              <p className="text-lg font-bold text-white">
+            <div key={label} className="rounded-lg bg-th-surface p-3">
+              <p className="text-xs text-th-faint">{label}</p>
+              <p className="text-lg font-bold text-th-ink">
                 {used}
-                <span className="text-sm font-normal text-gray-400">/{max === -1 ? "∞" : max}</span>
+                <span className="text-sm font-normal text-th-muted">/{max === -1 ? "∞" : max}</span>
               </p>
             </div>
           ))}
@@ -92,10 +92,10 @@ export default async function BillingPage() {
 
       {/* Pay Now */}
       {currentBill && (
-        <div className={`rounded-xl border p-6 ${currentBill.status === "overdue" || currentBill.status === "rejected" ? "border-red-500/30 bg-red-500/10" : "border-yellow-500/30 bg-yellow-500/10"}`}>
+        <div className={`rounded-xl border p-6 ${currentBill.status === "overdue" || currentBill.status === "rejected" ? "border-th-danger/30 bg-th-danger-soft" : "border-th-due/30 bg-th-due-soft"}`}>
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="text-lg font-semibold text-white">
+              <h2 className="text-lg font-semibold text-th-ink">
                 {inTrial && currentBill.status === "pending"
                   ? "Subscribe to keep TenantHub after your trial"
                   : currentBill.status === "overdue"
@@ -104,14 +104,14 @@ export default async function BillingPage() {
                   ? "Payment Rejected — Please Resubmit"
                   : "Subscription Payment Due"}
               </h2>
-              <p className="text-sm text-gray-400 mt-1">
+              <p className="text-sm text-th-muted mt-1">
                 {currentBill.period} · {formatCurrency(currentBill.amount)} · Due {formatDate(currentBill.dueDate)}
               </p>
               {currentBill.status === "submitted" && (
-                <p className="text-sm text-blue-400 mt-1">Submitted — awaiting approval.</p>
+                <p className="text-sm text-th-accent mt-1">Submitted — awaiting approval.</p>
               )}
               {currentBill.status === "rejected" && (
-                <p className="text-sm text-red-400 mt-1">
+                <p className="text-sm text-th-danger mt-1">
                   We couldn&apos;t verify your last submission (ref: {currentBill.referenceNumber ?? "—"}). Please double-check and resubmit below.
                 </p>
               )}
@@ -124,24 +124,24 @@ export default async function BillingPage() {
               <div className="space-y-3">
                 {platformSettings?.gcashNumber && (
                   <div>
-                    <p className="text-xs text-gray-500">GCash</p>
-                    <p className="text-white font-medium">{platformSettings.gcashNumber}</p>
+                    <p className="text-xs text-th-faint">GCash</p>
+                    <p className="text-th-ink font-medium">{platformSettings.gcashNumber}</p>
                     {platformSettings.gcashQrUrl && (
-                      <img src={platformSettings.gcashQrUrl} alt="GCash QR" className="mt-2 h-40 w-40 rounded-lg border border-white/10 object-contain bg-white" />
+                      <img src={platformSettings.gcashQrUrl} alt="GCash QR" className="mt-2 h-40 w-40 rounded-lg border border-th-line object-contain bg-white" />
                     )}
                   </div>
                 )}
                 {platformSettings?.mayaNumber && (
                   <div>
-                    <p className="text-xs text-gray-500">Maya</p>
-                    <p className="text-white font-medium">{platformSettings.mayaNumber}</p>
+                    <p className="text-xs text-th-faint">Maya</p>
+                    <p className="text-th-ink font-medium">{platformSettings.mayaNumber}</p>
                     {platformSettings.mayaQrUrl && (
-                      <img src={platformSettings.mayaQrUrl} alt="Maya QR" className="mt-2 h-40 w-40 rounded-lg border border-white/10 object-contain bg-white" />
+                      <img src={platformSettings.mayaQrUrl} alt="Maya QR" className="mt-2 h-40 w-40 rounded-lg border border-th-line object-contain bg-white" />
                     )}
                   </div>
                 )}
                 {!platformSettings?.gcashNumber && !platformSettings?.mayaNumber && (
-                  <p className="text-sm text-gray-500">Payment details haven&apos;t been set up yet — contact support.</p>
+                  <p className="text-sm text-th-faint">Payment details haven&apos;t been set up yet — contact support.</p>
                 )}
               </div>
               <BillingPayForm />
@@ -153,26 +153,26 @@ export default async function BillingPage() {
       {/* Upgrade */}
       {!currentBill && account?.plan.name !== "Pro" && plans.some((p) => p.name === "Pro") && (
         <div>
-          <h2 className="text-lg font-semibold text-white mb-3">Upgrade Plan</h2>
-          <p className="text-sm text-gray-400 mb-3">
+          <h2 className="text-lg font-semibold text-th-ink mb-3">Upgrade Plan</h2>
+          <p className="text-sm text-th-muted mb-3">
             One simple plan with every feature. It&apos;s active as soon as we approve your GCash or Maya payment.
           </p>
           <div className="grid md:grid-cols-2 gap-3">
             {plans.filter((p) => p.name === "Pro").map((plan) => {
               const isCurrent = plan.name === account?.plan.name;
               return (
-                <div key={plan.id} className={`rounded-xl border p-5 ${isCurrent ? "border-blue-500/50 bg-blue-500/10" : "border-white/10 bg-white/5 hover:bg-white/[0.07]"} transition-colors`}>
+                <div key={plan.id} className={`rounded-xl border p-5 ${isCurrent ? "border-th-accent/50 bg-th-brand-soft" : "border-th-line bg-th-surface hover:bg-th-raised"} transition-colors`}>
                   <div className="flex items-center justify-between mb-1">
-                    <h3 className="font-semibold text-white">{plan.name}</h3>
+                    <h3 className="font-semibold text-th-ink">{plan.name}</h3>
                     {isCurrent && <Badge variant="default">Current</Badge>}
                   </div>
-                  <p className="text-2xl font-bold text-white mb-3">
-                    ₱{plan.price}<span className="text-sm font-normal text-gray-400">/mo</span>
+                  <p className="text-2xl font-bold text-th-ink mb-3">
+                    ₱{plan.price}<span className="text-sm font-normal text-th-muted">/mo</span>
                   </p>
                   <ul className="space-y-1 mb-4">
                     {(PLAN_FEATURES[plan.name] ?? []).map((f) => (
-                      <li key={f} className="flex items-center gap-1.5 text-xs text-gray-400">
-                        <CheckCircle className="h-3 w-3 text-green-400 shrink-0" />
+                      <li key={f} className="flex items-center gap-1.5 text-xs text-th-muted">
+                        <CheckCircle className="h-3 w-3 text-th-paid shrink-0" />
                         {f}
                       </li>
                     ))}
@@ -188,33 +188,33 @@ export default async function BillingPage() {
       {/* Billing History */}
       {account?.billingRecords && account.billingRecords.length > 0 && (
         <div>
-          <h2 className="text-lg font-semibold text-white mb-3">Billing History</h2>
-          <div className="rounded-xl border border-white/10 overflow-x-auto">
+          <h2 className="text-lg font-semibold text-th-ink mb-3">Billing History</h2>
+          <div className="rounded-xl border border-th-line overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-white/10 bg-white/5">
-                  <th className="text-left px-4 py-3 text-gray-400 font-medium">Period</th>
-                  <th className="text-left px-4 py-3 text-gray-400 font-medium">Amount</th>
-                  <th className="text-left px-4 py-3 text-gray-400 font-medium">Status</th>
-                  <th className="text-left px-4 py-3 text-gray-400 font-medium">Paid At</th>
-                  <th className="text-left px-4 py-3 text-gray-400 font-medium">Documents</th>
+                <tr className="border-b border-th-line bg-th-surface">
+                  <th className="text-left px-4 py-3 text-th-muted font-medium">Period</th>
+                  <th className="text-left px-4 py-3 text-th-muted font-medium">Amount</th>
+                  <th className="text-left px-4 py-3 text-th-muted font-medium">Status</th>
+                  <th className="text-left px-4 py-3 text-th-muted font-medium">Paid At</th>
+                  <th className="text-left px-4 py-3 text-th-muted font-medium">Documents</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/10">
+              <tbody className="divide-y divide-th-line">
                 {account.billingRecords.map((b) => (
-                  <tr key={b.id} className="hover:bg-white/5">
-                    <td className="px-4 py-3 text-white">{b.period}</td>
-                    <td className="px-4 py-3 text-white">{formatCurrency(b.amount)}</td>
+                  <tr key={b.id} className="hover:bg-th-raised">
+                    <td className="px-4 py-3 text-th-ink">{b.period}</td>
+                    <td className="px-4 py-3 text-th-ink">{formatCurrency(b.amount)}</td>
                     <td className="px-4 py-3">
                       <Badge variant={b.status === "paid" ? "success" : b.status === "overdue" || b.status === "rejected" ? "destructive" : "warning"}>
                         {b.status}
                       </Badge>
                     </td>
-                    <td className="px-4 py-3 text-gray-400">{b.paidAt ? formatDate(b.paidAt) : "—"}</td>
+                    <td className="px-4 py-3 text-th-muted">{b.paidAt ? formatDate(b.paidAt) : "—"}</td>
                     <td className="px-4 py-3">
                       <div className="flex gap-3 text-xs">
-                        <a href={`/api/billing/${b.id}/pdf?type=invoice`} className="text-blue-400 hover:text-blue-300">Invoice</a>
-                        {b.status === "paid" && <a href={`/api/billing/${b.id}/pdf?type=receipt`} className="text-green-400 hover:text-green-300">Receipt</a>}
+                        <a href={`/api/billing/${b.id}/pdf?type=invoice`} className="text-th-accent hover:text-th-accent">Invoice</a>
+                        {b.status === "paid" && <a href={`/api/billing/${b.id}/pdf?type=receipt`} className="text-th-paid hover:text-th-paid">Receipt</a>}
                       </div>
                     </td>
                   </tr>

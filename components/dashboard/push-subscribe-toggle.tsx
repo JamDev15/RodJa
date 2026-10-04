@@ -92,23 +92,23 @@ export function PushSubscribeToggle() {
   }
 
   return (
-    <div className="rounded-xl border border-white/10 bg-white/5 p-6 space-y-3">
+    <div className="rounded-xl border border-th-line bg-th-surface p-6 space-y-3">
       <div>
-        <h2 className="font-semibold text-white">Push Notifications</h2>
-        <p className="text-xs text-gray-500 mt-0.5">
+        <h2 className="font-semibold text-th-ink">Push Notifications</h2>
+        <p className="text-xs text-th-faint mt-0.5">
           Get a real notification on this device when a tenant&apos;s bill is due in 2 days, 1 day, or today —
           in addition to the email reminders above.
         </p>
       </div>
 
-      {status === "checking" && <p className="text-sm text-gray-500">Checking this device...</p>}
+      {status === "checking" && <p className="text-sm text-th-faint">Checking this device...</p>}
 
       {status === "unsupported" && (
-        <p className="text-sm text-gray-500">Push notifications aren&apos;t supported in this browser.</p>
+        <p className="text-sm text-th-faint">Push notifications aren&apos;t supported in this browser.</p>
       )}
 
       {status === "denied" && (
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-th-faint">
           Notifications are blocked for this site in your browser settings. Allow them there to enable this.
         </p>
       )}
@@ -121,7 +121,7 @@ export function PushSubscribeToggle() {
 
       {status === "subscribed" && (
         <div className="flex items-center gap-3">
-          <span className="flex items-center gap-1.5 text-sm text-green-400">
+          <span className="flex items-center gap-1.5 text-sm text-th-paid">
             <Bell className="h-4 w-4" /> Enabled on this device
           </span>
           <Button onClick={disable} disabled={loading} size="sm" variant="outline">

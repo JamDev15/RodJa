@@ -89,8 +89,8 @@ export default async function DashboardPage() {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-white">Dashboard</h1>
-        <p className="text-gray-400 text-sm mt-1">{getMonthLabel(currentMonth)} Overview</p>
+        <h1 className="text-2xl font-bold text-th-ink">Dashboard</h1>
+        <p className="text-th-muted text-sm mt-1">{getMonthLabel(currentMonth)} Overview</p>
       </div>
 
       <GettingStarted steps={gettingStartedSteps} />
@@ -108,33 +108,33 @@ export default async function DashboardPage() {
       {/* Recent Payments */}
       <div>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-white">Recent Payments</h2>
-          <Link href="/dashboard/payments" className="text-sm text-blue-400 hover:text-blue-300">View all →</Link>
+          <h2 className="text-lg font-semibold text-th-ink">Recent Payments</h2>
+          <Link href="/dashboard/payments" className="text-sm text-th-accent hover:text-th-accent">View all →</Link>
         </div>
-        <div className="rounded-xl border border-white/10 overflow-x-auto">
+        <div className="rounded-xl border border-th-line overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-white/10 bg-white/5">
-                <th className="text-left px-4 py-3 text-gray-400 font-medium">Tenant</th>
-                <th className="text-left px-4 py-3 text-gray-400 font-medium hidden md:table-cell">Unit</th>
-                <th className="text-left px-4 py-3 text-gray-400 font-medium">Amount</th>
-                <th className="text-left px-4 py-3 text-gray-400 font-medium">Status</th>
-                <th className="text-left px-4 py-3 text-gray-400 font-medium hidden lg:table-cell">Method</th>
+              <tr className="border-b border-th-line bg-th-surface">
+                <th className="text-left px-4 py-3 text-th-muted font-medium">Tenant</th>
+                <th className="text-left px-4 py-3 text-th-muted font-medium hidden md:table-cell">Unit</th>
+                <th className="text-left px-4 py-3 text-th-muted font-medium">Amount</th>
+                <th className="text-left px-4 py-3 text-th-muted font-medium">Status</th>
+                <th className="text-left px-4 py-3 text-th-muted font-medium hidden lg:table-cell">Method</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/10">
+            <tbody className="divide-y divide-th-line">
               {recentPayments.length === 0 && (
-                <tr><td colSpan={5} className="text-center text-gray-500 py-8">No payments this month</td></tr>
+                <tr><td colSpan={5} className="text-center text-th-faint py-8">No payments this month</td></tr>
               )}
               {recentPayments.map((p) => (
-                <tr key={p.id} className="hover:bg-white/5 transition-colors">
-                  <td className="px-4 py-3 text-white font-medium">{p.tenant.name}</td>
-                  <td className="px-4 py-3 text-gray-400 hidden md:table-cell">
+                <tr key={p.id} className="hover:bg-th-raised transition-colors">
+                  <td className="px-4 py-3 text-th-ink font-medium">{p.tenant.name}</td>
+                  <td className="px-4 py-3 text-th-muted hidden md:table-cell">
                     {p.tenant.unit.property.name} – {p.tenant.unit.unitNumber}
                   </td>
-                  <td className="px-4 py-3 text-white">{formatCurrency(p.amount)}</td>
+                  <td className="px-4 py-3 text-th-ink">{formatCurrency(p.amount)}</td>
                   <td className="px-4 py-3"><PaymentBadge status={p.status} /></td>
-                  <td className="px-4 py-3 text-gray-400 hidden lg:table-cell capitalize">{p.method ?? "—"}</td>
+                  <td className="px-4 py-3 text-th-muted hidden lg:table-cell capitalize">{p.method ?? "—"}</td>
                 </tr>
               ))}
             </tbody>
@@ -145,35 +145,35 @@ export default async function DashboardPage() {
       {/* Unpaid / Pending / Overdue Tenants */}
       <div>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-white">Who Hasn&apos;t Paid</h2>
-          <span className="text-sm text-gray-500">{unpaidRows.length} tenant{unpaidRows.length === 1 ? "" : "s"}</span>
+          <h2 className="text-lg font-semibold text-th-ink">Who Hasn&apos;t Paid</h2>
+          <span className="text-sm text-th-faint">{unpaidRows.length} tenant{unpaidRows.length === 1 ? "" : "s"}</span>
         </div>
-        <div className="rounded-xl border border-white/10 overflow-x-auto">
+        <div className="rounded-xl border border-th-line overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-white/10 bg-white/5">
-                <th className="text-left px-4 py-3 text-gray-400 font-medium">Tenant</th>
-                <th className="text-left px-4 py-3 text-gray-400 font-medium hidden md:table-cell">Unit</th>
-                <th className="text-left px-4 py-3 text-gray-400 font-medium">Amount</th>
-                <th className="text-left px-4 py-3 text-gray-400 font-medium">Due Date</th>
-                <th className="text-left px-4 py-3 text-gray-400 font-medium">Status</th>
+              <tr className="border-b border-th-line bg-th-surface">
+                <th className="text-left px-4 py-3 text-th-muted font-medium">Tenant</th>
+                <th className="text-left px-4 py-3 text-th-muted font-medium hidden md:table-cell">Unit</th>
+                <th className="text-left px-4 py-3 text-th-muted font-medium">Amount</th>
+                <th className="text-left px-4 py-3 text-th-muted font-medium">Due Date</th>
+                <th className="text-left px-4 py-3 text-th-muted font-medium">Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/10">
+            <tbody className="divide-y divide-th-line">
               {unpaidRows.length === 0 && (
-                <tr><td colSpan={5} className="text-center text-gray-500 py-8">Everyone&apos;s paid up 🎉</td></tr>
+                <tr><td colSpan={5} className="text-center text-th-faint py-8">Everyone&apos;s paid up 🎉</td></tr>
               )}
               {unpaidRows.map((r) => (
-                <tr key={r.tenantId} className="hover:bg-white/5 transition-colors">
-                  <td className="px-4 py-3 text-white font-medium">
-                    <Link href={`/dashboard/tenants/${r.tenantId}`} className="hover:text-blue-400">{r.tenantName}</Link>
+                <tr key={r.tenantId} className="hover:bg-th-raised transition-colors">
+                  <td className="px-4 py-3 text-th-ink font-medium">
+                    <Link href={`/dashboard/tenants/${r.tenantId}`} className="hover:text-th-accent">{r.tenantName}</Link>
                   </td>
-                  <td className="px-4 py-3 text-gray-400 hidden md:table-cell">{r.unitLabel}</td>
-                  <td className="px-4 py-3 text-white">{formatCurrency(r.amount)}</td>
-                  <td className="px-4 py-3 text-gray-400">
+                  <td className="px-4 py-3 text-th-muted hidden md:table-cell">{r.unitLabel}</td>
+                  <td className="px-4 py-3 text-th-ink">{formatCurrency(r.amount)}</td>
+                  <td className="px-4 py-3 text-th-muted">
                     {formatDate(r.dueDate)}
                     {r.daysOverdue > 0 && (
-                      <span className="text-red-400 text-xs ml-1">({r.daysOverdue}d overdue)</span>
+                      <span className="text-th-danger text-xs ml-1">({r.daysOverdue}d overdue)</span>
                     )}
                   </td>
                   <td className="px-4 py-3"><PaymentBadge status={r.status} /></td>
@@ -195,10 +195,10 @@ export default async function DashboardPage() {
           <Link
             key={href}
             href={href}
-            className="flex flex-col items-center gap-2 rounded-xl border border-white/10 bg-white/5 p-4 hover:bg-white/10 transition-colors text-center"
+            className="flex flex-col items-center gap-2 rounded-xl border border-th-line bg-th-surface p-4 hover:bg-th-raised transition-colors text-center"
           >
-            <Icon className="h-5 w-5 text-blue-400" />
-            <span className="text-sm text-gray-300">{label}</span>
+            <Icon className="h-5 w-5 text-th-accent" />
+            <span className="text-sm text-th-ink/80">{label}</span>
           </Link>
         ))}
       </div>

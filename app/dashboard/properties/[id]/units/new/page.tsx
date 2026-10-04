@@ -40,16 +40,16 @@ export default function NewUnitPage() {
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <div className="flex items-center gap-3">
-        <Link href={`/dashboard/properties/${propertyId}`} className="rounded-lg p-1.5 hover:bg-white/10 text-gray-400 hover:text-white transition-colors">
+        <Link href={`/dashboard/properties/${propertyId}`} className="rounded-lg p-1.5 hover:bg-th-raised text-th-muted hover:text-th-ink transition-colors">
           <ArrowLeft className="h-5 w-5" />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-white">Add Unit</h1>
-          <p className="text-gray-400 text-sm">Add a new unit to this property</p>
+          <h1 className="text-2xl font-bold text-th-ink">Add Unit</h1>
+          <p className="text-th-muted text-sm">Add a new unit to this property</p>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="rounded-xl border border-white/10 bg-white/5 p-6 space-y-5">
+      <form onSubmit={handleSubmit} className="rounded-xl border border-th-line bg-th-surface p-6 space-y-5">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="unitNumber">Unit Number *</Label>

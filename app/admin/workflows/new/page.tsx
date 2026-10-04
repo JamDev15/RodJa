@@ -10,8 +10,8 @@ export default async function NewWorkflowPage({ searchParams }: { searchParams: 
   return (
     <div className="space-y-6 max-w-5xl">
       <div className="flex items-center gap-3">
-        <Link href="/admin/workflows" className="rounded-lg p-1.5 hover:bg-white/10 text-gray-400 hover:text-white"><ArrowLeft className="h-5 w-5" /></Link>
-        <h1 className="text-2xl font-bold text-white">{t ? t.name : "New workflow"}</h1>
+        <Link href="/admin/workflows" className="rounded-lg p-1.5 hover:bg-th-raised text-th-muted hover:text-th-ink"><ArrowLeft className="h-5 w-5" /></Link>
+        <h1 className="text-2xl font-bold text-th-ink">{t ? t.name : "New workflow"}</h1>
       </div>
       <WorkflowBuilder
         kind="admin"

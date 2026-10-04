@@ -64,16 +64,16 @@ export default function NewTenantPage() {
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <div className="flex items-center gap-3">
-        <Link href="/dashboard/tenants" className="rounded-lg p-1.5 hover:bg-white/10 text-gray-400 hover:text-white transition-colors">
+        <Link href="/dashboard/tenants" className="rounded-lg p-1.5 hover:bg-th-raised text-th-muted hover:text-th-ink transition-colors">
           <ArrowLeft className="h-5 w-5" />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-white">Add Tenant</h1>
-          <p className="text-gray-400 text-sm">Create a new tenant and assign to a unit</p>
+          <h1 className="text-2xl font-bold text-th-ink">Add Tenant</h1>
+          <p className="text-th-muted text-sm">Create a new tenant and assign to a unit</p>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="rounded-xl border border-white/10 bg-white/5 p-6 space-y-5">
+      <form onSubmit={handleSubmit} className="rounded-xl border border-th-line bg-th-surface p-6 space-y-5">
         <div className="space-y-2">
           <Label>Assign to Unit *</Label>
           <Select value={form.unitId} onValueChange={(v) => setForm({ ...form, unitId: v })}>
@@ -119,7 +119,7 @@ export default function NewTenantPage() {
             <Label htmlFor="dueDay">Rent Due Day *</Label>
             <Input id="dueDay" type="number" placeholder="5" value={form.dueDay}
               onChange={(e) => setForm({ ...form, dueDay: e.target.value })} min="1" max="28" required />
-            <p className="text-xs text-gray-500">Day of the month rent is due (1–28)</p>
+            <p className="text-xs text-th-faint">Day of the month rent is due (1–28)</p>
           </div>
         </div>
 

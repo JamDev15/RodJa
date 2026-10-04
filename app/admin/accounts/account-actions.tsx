@@ -96,7 +96,7 @@ export function AccountActions({ accountId, accountName, isActive, lifetimeAcces
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-2">
-            <Label htmlFor="confirmName">Type <span className="font-semibold text-white">{accountName}</span> to confirm</Label>
+            <Label htmlFor="confirmName">Type <span className="font-semibold text-th-ink">{accountName}</span> to confirm</Label>
             <Input id="confirmName" value={confirmName} onChange={(e) => setConfirmName(e.target.value)} autoComplete="off" />
           </div>
           <div className="flex justify-end gap-2 pt-4">
