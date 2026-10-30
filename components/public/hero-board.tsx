@@ -40,9 +40,9 @@ export function HeroBoard() {
               <BrandMark className="h-5 w-5" />
               <span className="text-[13px] font-semibold text-th-ink">TenantHub</span>
             </div>
-            <span className="rounded-full bg-th-raised px-2.5 py-1 text-[11px] text-th-muted">Santos Apartments</span>
+            <span className="truncate rounded-full bg-th-raised px-2.5 py-1 text-[11px] text-th-muted">Santos Apartments</span>
           </div>
-          <div className="flex gap-5 border-b border-th-line px-4 text-[12px]">
+          <div className="flex gap-4 overflow-hidden border-b border-th-line px-4 text-[12px] sm:gap-5">
             <span className="border-b-2 border-th-ink py-2.5 font-semibold text-th-ink">Rent overview</span>
             <span className="py-2.5 text-th-muted">Messages</span>
             <span className="py-2.5 text-th-muted">Contracts</span>
@@ -54,18 +54,18 @@ export function HeroBoard() {
               <span className="rounded-md border border-th-line px-2 py-1 text-[11px] text-th-muted">Oct 2026</span>
             </div>
 
-            <div className="mt-4 grid grid-cols-2 gap-4">
+            <div className="mt-4 grid grid-cols-2 gap-3 sm:gap-4">
               <div>
                 <p className="text-[12px] text-th-muted">Collected</p>
-                <p className="tabular font-serif text-[32px] leading-none tracking-[-0.02em] text-th-ink sm:text-[40px]">
-                  ₱7,500<span className="text-[18px] text-th-faint">.00</span>
+                <p className="tabular font-serif text-[26px] leading-none tracking-[-0.02em] text-th-ink min-[400px]:text-[32px] sm:text-[40px]">
+                  ₱7,500<span className="text-[15px] text-th-faint min-[400px]:text-[18px]">.00</span>
                 </p>
                 <p className="mt-1.5 text-[11px] text-th-muted">1 of 3 tenants paid</p>
               </div>
               <div>
                 <p className="text-[12px] text-th-muted">Still expected</p>
-                <p className="tabular font-serif text-[32px] leading-none tracking-[-0.02em] text-th-ink sm:text-[40px]">
-                  ₱13,350<span className="text-[18px] text-th-faint">.00</span>
+                <p className="tabular font-serif text-[26px] leading-none tracking-[-0.02em] text-th-ink min-[400px]:text-[32px] sm:text-[40px]">
+                  ₱13,350<span className="text-[15px] text-th-faint min-[400px]:text-[18px]">.00</span>
                 </p>
                 <p className="mt-1.5 text-[11px] text-th-muted">Reminders already scheduled</p>
               </div>
@@ -82,14 +82,14 @@ export function HeroBoard() {
               {ROWS.map((r) => {
                 const animated = r.name.startsWith("Maria");
                 return (
-                  <li key={r.name} className="flex items-center gap-3 px-3 py-2.5">
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-th-raised text-[11px] font-semibold text-th-muted">{initials(r.name)}</span>
+                  <li key={r.name} className="flex items-center gap-2.5 px-3 py-2.5 min-[400px]:gap-3">
+                    <span className="hidden h-8 w-8 shrink-0 items-center justify-center rounded-full bg-th-raised text-[11px] font-semibold text-th-muted min-[400px]:flex">{initials(r.name)}</span>
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-[13px] font-semibold text-th-ink">{r.name}</p>
                       <p className="truncate text-[11px] text-th-muted">{r.place}</p>
                     </div>
-                    <p className="tabular text-[13px] font-semibold text-th-ink">{r.amount}</p>
-                    <div className="w-[84px] text-right">
+                    <p className="tabular shrink-0 text-[13px] font-semibold text-th-ink">{r.amount}</p>
+                    <div className="w-[78px] shrink-0 text-right min-[400px]:w-[84px]">
                       {animated ? (
                         <span className="inline-grid">
                           <span className="th-anim-due col-start-1 row-start-1"><Pill status="due">{r.label}</Pill></span>
@@ -104,8 +104,8 @@ export function HeroBoard() {
               })}
             </ul>
 
-            <div className="mt-4 flex items-center justify-between gap-3 rounded-xl border border-th-paid/25 bg-th-paid-soft px-3.5 py-2.5">
-              <div>
+            <div className="mt-4 flex items-center justify-between gap-3 rounded-xl min-w-0 border border-th-paid/25 bg-th-paid-soft px-3.5 py-2.5">
+              <div className="min-w-0">
                 <p className="text-[12px] font-semibold text-th-paid">Paid through GCash</p>
                 <p className="text-[11px] text-th-muted">Maria uploaded her proof. One tap to approve.</p>
               </div>

@@ -36,11 +36,11 @@ export default async function TenantDetailPage({ params }: { params: Promise<{ i
 
   return (
     <div className="space-y-6 max-w-4xl">
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         <Link href="/dashboard/tenants" className="rounded-lg p-1.5 hover:bg-th-raised text-th-muted hover:text-th-ink transition-colors">
           <ArrowLeft className="h-5 w-5" />
         </Link>
-        <div className="flex-1">
+        <div className="min-w-0 flex-1 basis-48">
           <h1 className="text-2xl font-bold text-th-ink">{tenant.name}</h1>
           <p className="text-th-muted text-sm">{tenant.unit.property.name} – Unit {tenant.unit.unitNumber}</p>
         </div>
@@ -64,7 +64,7 @@ export default async function TenantDetailPage({ params }: { params: Promise<{ i
       </div>
 
       {/* Info Cards */}
-      <div className="grid md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="rounded-xl border border-th-line bg-th-surface p-5 space-y-3">
           <h3 className="font-semibold text-th-ink">Contact Info</h3>
           <div className="space-y-2 text-sm">
@@ -115,7 +115,7 @@ export default async function TenantDetailPage({ params }: { params: Promise<{ i
       </div>
 
       {/* Contracts + invoices/receipts */}
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="rounded-xl border border-th-line bg-th-surface p-5">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="font-semibold text-th-ink">Contracts</h2>

@@ -22,7 +22,7 @@ export default async function PropertiesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-th-ink">Properties</h1>
           <p className="text-th-muted text-sm mt-1">{properties.length} properties</p>
@@ -47,7 +47,7 @@ export default async function PropertiesPage() {
         </div>
       )}
 
-      <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {properties.map((property) => {
           const totalUnits = property.units.length;
           const occupiedUnits = property.units.filter((u) => u.status === "occupied").length;

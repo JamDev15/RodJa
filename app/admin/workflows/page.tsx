@@ -52,7 +52,7 @@ export default async function AdminWorkflowsPage() {
 
       <div className="space-y-3">
         <h2 className="text-sm font-semibold text-th-ink/80">{workflows.length ? "Add from a template" : "Start from a template"}</h2>
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {WORKFLOW_TEMPLATES.map((t) => (
             <Link key={t.key} href={`/admin/workflows/new?template=${t.key}`} className="rounded-xl border border-th-line bg-th-surface p-4 transition-colors hover:border-th-violet/40 hover:bg-th-violet-soft">
               <p className="text-sm font-semibold text-th-ink">{t.name}</p>

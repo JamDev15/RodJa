@@ -40,7 +40,8 @@ export function Sidebar({ accountName }: SidebarProps) {
   return (
     <>
       {/* Mobile top bar */}
-      <div className="fixed top-0 left-0 right-0 z-30 flex h-14 items-center justify-between border-b border-th-line bg-th-surface px-4 lg:hidden">
+      <div className="fixed top-0 left-0 right-0 z-30 border-b border-th-line bg-th-surface pt-safe lg:hidden">
+        <div className="flex h-14 items-center justify-between px-4">
         <div className="flex items-center gap-2">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center">
             {!isHome && (
@@ -68,6 +69,7 @@ export function Sidebar({ accountName }: SidebarProps) {
             <Menu className="h-5 w-5" />
           </button>
         </div>
+        </div>
       </div>
 
       {/* Backdrop (mobile only, while drawer is open) */}
@@ -81,7 +83,7 @@ export function Sidebar({ accountName }: SidebarProps) {
 
       <aside
         className={cn(
-          "fixed left-0 top-0 z-50 flex h-screen w-64 flex-col border-r border-th-line bg-th-surface transition-transform duration-200 lg:translate-x-0",
+          "fixed left-0 top-0 z-50 flex h-dvh w-64 max-w-[85vw] flex-col border-r border-th-line bg-th-surface pt-safe pb-safe transition-transform duration-200 lg:translate-x-0",
           open ? "translate-x-0" : "-translate-x-full"
         )}
       >

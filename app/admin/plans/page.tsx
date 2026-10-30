@@ -30,7 +30,7 @@ export default async function AdminPlansPage() {
         <p className="text-th-muted text-sm mt-1">Subscription tiers and how many accounts are on each</p>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {plans.map((plan) => {
           const features = (plan.features && typeof plan.features === "object" ? plan.features : {}) as Record<string, boolean>;
           return (

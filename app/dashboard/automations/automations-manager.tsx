@@ -207,7 +207,7 @@ export function AutomationsManager({ automations, smsConfigured }: { automations
       {automations.length === 0 ? (
         <div className="space-y-3">
           <p className="text-sm text-th-muted">Start from a ready-made automation:</p>
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {AUTOMATION_TEMPLATES.map((t) => (
               <button
                 key={t.key}
@@ -282,7 +282,7 @@ export function AutomationsManager({ automations, smsConfigured }: { automations
               <Input id="a-name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g. 3-day rent reminder" />
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="a-trigger">When</Label>
                 <select id="a-trigger" className={selectClass} value={form.trigger}

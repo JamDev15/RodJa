@@ -115,7 +115,7 @@ export function WorkflowBuilder({ kind, initial }: { kind: "admin" | "owner"; in
   const totalDays = w.steps.reduce((s, st) => s + (st.type === "wait" ? Number(st.days) || 0 : 0), 0);
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[1fr_260px]">
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_260px]">
       <div className="space-y-5">
         <div className="rounded-xl border border-th-line bg-th-surface p-5 space-y-4">
           <div className="space-y-2">
@@ -131,7 +131,7 @@ export function WorkflowBuilder({ kind, initial }: { kind: "admin" | "owner"; in
         <div>
           <div className={`rounded-xl border p-4 ${cfg.accent.ring}`}>
             <div className={`flex items-center gap-2 text-sm font-semibold ${cfg.accent.soft}`}><Zap className="h-4 w-4" />Trigger — when does it start?</div>
-            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+            <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
               <select
                 className={selectClass}
                 value={w.trigger}

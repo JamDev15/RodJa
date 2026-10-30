@@ -102,6 +102,9 @@ const newsreaderExt = localFont({
 const themeScript = `(function(){try{var t=localStorage.getItem("th-theme");if(t!=="light"&&t!=="dark"){t=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}document.documentElement.dataset.theme=t}catch(e){}})();`;
 
 export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#f4f7fb" },
     { media: "(prefers-color-scheme: dark)", color: "#091226" },

@@ -17,7 +17,7 @@ export default async function TenantProtectedLayout({ children }: { children: Re
   return (
     <div className="min-h-screen bg-th-canvas">
       <TenantNav tenantName={user?.name} />
-      <main className="max-w-lg mx-auto px-4 py-6">
+      <main className="max-w-lg mx-auto px-4 pt-6 pb-[calc(5.5rem+env(safe-area-inset-bottom))]">
         {children}
       </main>
     </div>

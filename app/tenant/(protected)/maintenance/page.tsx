@@ -52,8 +52,8 @@ export default function TenantMaintenancePage() {
   }
 
   return (
-    <div className="space-y-5 pb-20">
-      <div className="flex items-center justify-between">
+    <div className="space-y-5">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-xl font-bold text-th-ink">Maintenance</h1>
           <p className="text-th-muted text-sm">Report issues in your unit</p>

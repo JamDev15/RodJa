@@ -22,8 +22,8 @@ export function TenantNav({ tenantName }: { tenantName?: string }) {
   return (
     <>
       {/* Top header */}
-      <header className="flex items-center justify-between px-4 py-3 border-b border-th-line bg-th-surface">
-        <div className="flex items-center gap-2">
+      <header className="sticky top-0 z-40 flex items-center justify-between gap-3 px-4 pb-3 pt-[calc(0.75rem+env(safe-area-inset-top))] border-b border-th-line bg-th-surface">
+        <div className="flex min-w-0 items-center gap-2">
           <div className="flex h-7 w-7 shrink-0 items-center justify-center">
             {!isHome && (
               <button
@@ -35,16 +35,16 @@ export function TenantNav({ tenantName }: { tenantName?: string }) {
               </button>
             )}
           </div>
-          <div className="h-7 w-7 rounded-full bg-th-brand flex items-center justify-center text-xs font-bold text-th-on-brand">
+          <div className="h-7 w-7 shrink-0 rounded-full bg-th-brand flex items-center justify-center text-xs font-bold text-th-on-brand">
             {tenantName?.[0] ?? "T"}
           </div>
-          <span className="text-sm font-medium text-th-ink truncate max-w-[120px]">{tenantName}</span>
+          <span className="min-w-0 truncate text-sm font-medium text-th-ink">{tenantName}</span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2">
           <ThemeToggle />
           <button
             onClick={() => signOut({ callbackUrl: "/tenant/login" })}
-            className="flex items-center gap-1.5 text-xs text-th-faint hover:text-th-ink transition-colors"
+            className="flex min-h-9 items-center gap-1.5 px-1 text-xs text-th-faint hover:text-th-ink transition-colors"
           >
             <LogOut className="h-3.5 w-3.5" />
             Sign out
@@ -53,7 +53,7 @@ export function TenantNav({ tenantName }: { tenantName?: string }) {
       </header>
 
       {/* Bottom nav */}
-      <nav className="fixed bottom-0 left-0 right-0 border-t border-th-line bg-th-surface z-50">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-th-line bg-th-surface pb-safe">
         <div className="max-w-lg mx-auto flex">
           {navItems.map(({ href, label, icon: Icon }) => {
             const active = pathname === href;
@@ -62,7 +62,7 @@ export function TenantNav({ tenantName }: { tenantName?: string }) {
                 key={href}
                 href={href}
                 className={cn(
-                  "flex flex-1 flex-col items-center gap-1 py-2.5 text-xs transition-colors",
+                  "flex min-w-0 flex-1 flex-col items-center gap-1 py-2.5 text-[11px] min-[360px]:text-xs transition-colors",
                   active ? "text-th-brand font-medium" : "text-th-faint hover:text-th-ink"
                 )}
               >

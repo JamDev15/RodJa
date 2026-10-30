@@ -13,7 +13,7 @@ const LINKS = [
 
 export function SiteHeader({ minimal = false }: { minimal?: boolean }) {
   return (
-    <header className="sticky top-0 z-40 border-b border-th-line/60 bg-th-page/85 px-4 backdrop-blur-md sm:px-6">
+    <header className="sticky top-0 z-40 border-b border-th-line/60 bg-th-page/85 px-4 pt-safe backdrop-blur-md sm:px-6">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4">
         <BrandLink />
         {!minimal && (
