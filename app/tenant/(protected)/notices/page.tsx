@@ -29,7 +29,7 @@ export default async function TenantNoticesPage() {
   };
 
   return (
-    <div className="space-y-5 pb-20">
+    <div className="space-y-5">
       <div>
         <h1 className="text-xl font-bold text-th-ink">Notices</h1>
         <p className="text-th-muted text-sm">Announcements from your landlord</p>

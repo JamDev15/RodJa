@@ -65,7 +65,7 @@ export default async function OwnerWorkflowsPage() {
 
       <div className="space-y-3">
         <h2 className="text-sm font-semibold text-th-ink/80">{workflows.length ? "Add from a template" : "Start from a template — you can edit every step"}</h2>
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {OWNER_WORKFLOW_TEMPLATES.map((t) => (
             <Link key={t.key} href={`/dashboard/workflows/new?template=${t.key}`} className="rounded-xl border border-th-line bg-th-surface p-4 transition-colors hover:border-th-accent/40 hover:bg-th-brand-soft">
               <p className="text-sm font-semibold text-th-ink">{t.name}</p>

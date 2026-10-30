@@ -31,14 +31,14 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         <Link href="/dashboard/properties" className="rounded-lg p-1.5 hover:bg-th-raised text-th-muted hover:text-th-ink transition-colors">
           <ArrowLeft className="h-5 w-5" />
         </Link>
-        <div className="flex-1">
+        <div className="min-w-0 flex-1 basis-48">
           <h1 className="text-2xl font-bold text-th-ink">{property.name}</h1>
-          <div className="flex items-center gap-1 text-sm text-th-muted">
-            <MapPin className="h-3.5 w-3.5" />
+          <div className="flex items-start gap-1 text-sm text-th-muted">
+            <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0" />
             {property.address}
           </div>
         </div>
@@ -77,7 +77,7 @@ export default async function PropertyDetailPage({ params }: { params: Promise<{
             </Link>
           </div>
         )}
-        <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
           {property.units.map((unit) => {
             const currentTenant = unit.tenants[0];
             return (

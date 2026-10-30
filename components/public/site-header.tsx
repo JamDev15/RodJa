@@ -13,11 +13,11 @@ const LINKS = [
 
 export function SiteHeader({ minimal = false }: { minimal?: boolean }) {
   return (
-    <header className="sticky top-0 z-40 border-b border-th-line/60 bg-th-page/85 px-4 backdrop-blur-md sm:px-6">
+    <header className="sticky top-0 z-40 border-b border-th-line/60 bg-th-page/85 px-4 pt-safe backdrop-blur-md sm:px-6">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4">
         <BrandLink />
         {!minimal && (
-          <nav className="hidden items-center gap-1 md:flex" aria-label="Main">
+          <nav className="hidden items-center gap-1 lg:flex" aria-label="Main">
             {LINKS.map((l) => (
               <Link key={l.href} href={l.href} className="rounded-full px-3 py-2 text-[13px] font-medium text-th-muted transition-colors hover:text-th-ink">
                 {l.label}

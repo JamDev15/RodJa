@@ -73,7 +73,7 @@ export default async function ContractPage({ params }: { params: Promise<{ id: s
     <div className="space-y-6 max-w-3xl">
       {header}
 
-      <div className="grid gap-4 md:grid-cols-[1fr_auto]">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-[1fr_auto]">
         <ol className="rounded-xl border border-th-line bg-th-surface p-5 space-y-3">
           {steps.map((s) => (
             <li key={s.label} className="flex items-start gap-3 text-sm">
@@ -100,7 +100,7 @@ export default async function ContractPage({ params }: { params: Promise<{ id: s
       </div>
 
       <div className="rounded-xl border border-th-line bg-th-surface p-5 space-y-3">
-        <div className="grid gap-2 text-sm sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
           {contract.startDate && <p className="text-th-muted">Start: <span className="text-th-ink">{formatDate(contract.startDate)}</span></p>}
           {contract.endDate && <p className="text-th-muted">End: <span className="text-th-ink">{formatDate(contract.endDate)}</span></p>}
           {contract.monthlyRent != null && <p className="text-th-muted">Rent: <span className="text-th-ink">{formatCurrency(contract.monthlyRent)}/mo</span></p>}

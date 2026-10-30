@@ -198,7 +198,7 @@ export function ContractEditor({
   return (
     <div className="space-y-6">
       <div className="rounded-xl border border-th-line bg-th-surface p-5 space-y-4">
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="space-y-2 sm:col-span-2">
             <Label htmlFor="c-tenant">Tenant</Label>
             {isNew ? (
@@ -263,7 +263,7 @@ export function ContractEditor({
           <p className="text-sm text-th-muted mt-1">You sign first. The tenant then gets a private link to review and sign — no account needed. Both of you get the signed PDF.</p>
         </div>
         <SignaturePad onChange={setSignature} />
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="c-name">Your full name</Label>
             <Input id="c-name" value={signedName} onChange={(e) => setSignedName(e.target.value)} />

@@ -120,7 +120,7 @@ export default async function BillingPage() {
           </div>
 
           {currentBill.status !== "submitted" && (
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-3">
                 {platformSettings?.gcashNumber && (
                   <div>
@@ -157,7 +157,7 @@ export default async function BillingPage() {
           <p className="text-sm text-th-muted mb-3">
             One simple plan with every feature. It&apos;s active as soon as we approve your GCash or Maya payment.
           </p>
-          <div className="grid md:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {plans.filter((p) => p.name === "Pro").map((plan) => {
               const isCurrent = plan.name === account?.plan.name;
               return (

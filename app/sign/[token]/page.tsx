@@ -54,7 +54,7 @@ export default async function SignContractPage({ params }: { params: Promise<{ t
 
         <article className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm sm:p-8">
           <h1 className="text-xl font-bold sm:text-2xl">{contract.title}</h1>
-          <dl className="mt-4 grid gap-x-6 gap-y-1 text-sm sm:grid-cols-2">
+          <dl className="mt-4 grid grid-cols-1 gap-x-6 gap-y-1 text-sm sm:grid-cols-2">
             <div><dt className="inline text-gray-500">Lessor: </dt><dd className="inline font-medium">{contract.account.ownerName}</dd></div>
             <div><dt className="inline text-gray-500">Lessee: </dt><dd className="inline font-medium">{contract.tenant.name}</dd></div>
             <div className="sm:col-span-2"><dt className="inline text-gray-500">Premises: </dt><dd className="inline font-medium">{contract.tenant.unit.property.name}, Unit {contract.tenant.unit.unitNumber}</dd></div>
@@ -67,7 +67,7 @@ export default async function SignContractPage({ params }: { params: Promise<{ t
           <hr className="my-5 border-gray-200" />
           <div className="whitespace-pre-wrap text-[15px] leading-relaxed text-gray-800">{contract.body}</div>
           <hr className="my-5 border-gray-200" />
-          <div className="grid gap-6 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
             {[
               { label: "Lessor (Owner)", sig: contract.ownerSignature, name: contract.ownerSignedName, at: contract.ownerSignedAt },
               { label: "Lessee (Tenant)", sig: contract.tenantSignature, name: contract.tenantSignedName, at: contract.tenantSignedAt },

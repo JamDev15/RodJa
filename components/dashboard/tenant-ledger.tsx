@@ -381,7 +381,7 @@ export function TenantLedger({ tenantId, moveInDate, defaultRent }: {
         <table className="w-full text-sm min-w-[820px]">
           <thead>
             <tr className="border-b border-th-line bg-th-surface text-th-muted font-medium text-xs">
-              <th className="text-left px-4 py-3 w-32">Month</th>
+              <th className="sticky left-0 z-10 bg-th-surface text-left px-4 py-3 w-32 shadow-[1px_0_0_var(--th-line)] md:static md:shadow-none">Month</th>
               <th className="text-left px-4 py-3"><span className="flex items-center gap-1"><Home className="h-3.5 w-3.5" />Rent</span></th>
               <th className="text-left px-4 py-3"><span className="flex items-center gap-1"><Zap className="h-3.5 w-3.5" />Electric</span></th>
               <th className="text-left px-4 py-3"><span className="flex items-center gap-1"><Droplets className="h-3.5 w-3.5" />Water</span></th>
@@ -402,9 +402,9 @@ export function TenantLedger({ tenantId, moveInDate, defaultRent }: {
                 <tr key={month} className={`transition-colors ${
                   settled ? "bg-th-paid-soft hover:bg-th-paid-soft"
                   : isCurrent ? "bg-th-brand-soft hover:bg-th-brand-soft"
-                  : "hover:bg-th-raised"
+                  : "bg-th-surface hover:bg-th-raised"
                 }`}>
-                  <td className="px-4 py-3">
+                  <td className="sticky left-0 z-10 bg-inherit px-4 py-3 shadow-[1px_0_0_var(--th-line)] md:static md:shadow-none">
                     <div className="flex flex-col">
                       <span className="text-th-ink font-medium text-xs">{label}</span>
                       {isCurrent && <span className="text-[10px] text-th-accent">Current</span>}

@@ -29,11 +29,11 @@ export default async function UnitDetailPage({ params }: { params: Promise<{ id:
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         <Link href={`/dashboard/properties/${unit.propertyId}`} className="rounded-lg p-1.5 hover:bg-th-raised text-th-muted hover:text-th-ink transition-colors">
           <ArrowLeft className="h-5 w-5" />
         </Link>
-        <div className="flex-1">
+        <div className="min-w-0 flex-1 basis-48">
           <h1 className="text-2xl font-bold text-th-ink">Unit {unit.unitNumber}</h1>
           <p className="text-th-muted text-sm">{unit.property.name}</p>
         </div>
@@ -41,7 +41,7 @@ export default async function UnitDetailPage({ params }: { params: Promise<{ id:
       </div>
 
       {/* Unit Info */}
-      <div className="grid md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="rounded-xl border border-th-line bg-th-surface p-4">
           <p className="text-xs text-th-faint mb-1">Monthly Rent</p>
           <p className="text-xl font-bold text-th-ink">{formatCurrency(unit.rentAmount)}</p>

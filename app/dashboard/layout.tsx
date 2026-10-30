@@ -34,10 +34,10 @@ export default async function DashboardLayout({ children }: { children: React.Re
   }
 
   return (
-    <div className="flex h-screen bg-th-canvas overflow-x-hidden">
+    <div className="flex h-dvh bg-th-canvas overflow-x-hidden">
       <Sidebar accountName={user?.accountName} />
-      <main className="flex-1 min-w-0 pt-14 lg:pt-0 lg:ml-64 overflow-y-auto overflow-x-hidden">
-        <div className="p-4 sm:p-6 lg:p-8">
+      <main className="flex-1 min-w-0 pt-appbar lg:pt-0 lg:ml-64 overflow-y-auto overflow-x-hidden">
+        <div className="p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:p-6 sm:pb-[calc(1.5rem+env(safe-area-inset-bottom))] lg:p-8">
           {children}
         </div>
       </main>

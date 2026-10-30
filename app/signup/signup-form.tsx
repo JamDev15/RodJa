@@ -70,7 +70,7 @@ export function SignupForm() {
       }
     >
       <form onSubmit={handleSubmit} className="space-y-5">
-        <div className="grid gap-5 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
           <div className="space-y-2 sm:col-span-2">
             <label htmlFor="s-name" className={thLabel}>Full name</label>
             <input id="s-name" className="th-input" autoComplete="name" placeholder="Juan dela Cruz" value={form.ownerName} onChange={set("ownerName")} required />

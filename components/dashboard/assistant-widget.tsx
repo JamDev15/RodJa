@@ -122,14 +122,14 @@ export function AssistantWidget() {
     <>
       <button
         onClick={() => setOpen((o) => !o)}
-        className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-th-brand text-th-on-brand shadow-lg shadow-th-brand/30 hover:bg-th-brand-hover transition-colors"
+        className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] right-4 z-50 flex h-14 w-14 sm:bottom-6 sm:right-6 items-center justify-center rounded-full bg-th-brand text-th-on-brand shadow-lg shadow-th-brand/30 hover:bg-th-brand-hover transition-colors"
         aria-label="Open assistant"
       >
         {open ? <X className="h-6 w-6" /> : <MessageCircle className="h-6 w-6" />}
       </button>
 
       {open && (
-        <div className="fixed right-6 top-24 bottom-6 z-50 flex w-[440px] max-w-[calc(100vw-3rem)] flex-col rounded-2xl border border-th-line bg-th-surface shadow-2xl animate-in">
+        <div className="fixed inset-x-3 top-[calc(4.25rem+env(safe-area-inset-top))] bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-50 flex flex-col sm:inset-x-auto sm:right-6 sm:top-24 sm:bottom-6 sm:w-[440px] sm:max-w-[calc(100vw-3rem)] rounded-2xl border border-th-line bg-th-surface shadow-2xl animate-in">
           <div className="flex items-center gap-2 border-b border-th-line px-4 py-3">
             <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-th-brand">
               <MessageCircle className="h-3.5 w-3.5 text-th-on-brand" />

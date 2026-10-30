@@ -30,7 +30,7 @@ const COLUMNS = [
 export function SiteFooter() {
   return (
     <footer className="border-t border-th-line bg-th-surface px-4 sm:px-6">
-      <div className="mx-auto grid max-w-6xl gap-10 py-14 md:grid-cols-[1.4fr_repeat(3,1fr)]">
+      <div className="mx-auto grid grid-cols-1 max-w-6xl gap-10 py-14 md:grid-cols-[1.4fr_repeat(3,1fr)]">
         <div className="max-w-xs">
           <div className="flex items-center gap-2.5">
             <BrandMark className="h-7 w-7" />

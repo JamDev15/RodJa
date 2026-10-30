@@ -57,7 +57,7 @@ function Ledger() {
       <ul className="mt-3 space-y-2.5">
         {rows.map((r) => (
           <li key={r.name} className="flex items-center justify-between gap-3 border-b border-th-line pb-2.5 text-[12px] last:border-0 last:pb-0">
-            <span className="flex items-center gap-2 text-th-ink">
+            <span className="flex min-w-0 items-center gap-2 truncate text-th-ink">
               <span className={`h-1.5 w-1.5 rounded-full ${r.paid ? "bg-th-paid" : "bg-th-due"}`} />{r.name}
             </span>
             <span className="tabular text-th-ink">{r.amt}</span>
@@ -84,10 +84,10 @@ export default function LandingPage() {
       <main>
         {/* Hero */}
         <section className="px-4 pb-16 pt-12 sm:px-6 sm:pt-20">
-          <div className="mx-auto grid max-w-6xl items-center gap-14 lg:grid-cols-[1fr_1.08fr] lg:gap-12">
+          <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-14 lg:grid-cols-[1fr_1.08fr] lg:gap-12">
             <div>
               <p className="th-eyebrow flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-th-accent" />Built for Philippine landlords</p>
-              <h1 className="th-display mt-5 text-[46px] leading-[1.02] text-th-ink sm:text-[64px]">
+              <h1 className="th-display mt-5 text-[40px] leading-[1.02] text-th-ink min-[400px]:text-[46px] sm:text-[64px]">
                 Every peso, accounted for.
                 <br />
                 <em>Every tenant, reminded.</em>
@@ -128,7 +128,7 @@ export default function LandingPage() {
         {/* Bento */}
         <section id="features" className="scroll-mt-20 px-4 py-20 sm:px-6 sm:py-28">
           <div className="mx-auto max-w-6xl">
-            <div className="grid items-end gap-6 md:grid-cols-[1.4fr_1fr]">
+            <div className="grid grid-cols-1 items-end gap-6 md:grid-cols-[1.4fr_1fr]">
               <div>
                 <p className="th-eyebrow">Made for small landlords</p>
                 <h2 className="th-display mt-4 text-[38px] leading-[1.05] text-th-ink sm:text-[52px]">
@@ -142,8 +142,8 @@ export default function LandingPage() {
               </p>
             </div>
 
-            <div className="mt-12 grid gap-4 md:grid-cols-2">
-              <article className="grid items-center gap-8 overflow-hidden rounded-3xl border border-th-line bg-th-tint p-7 sm:p-10 md:col-span-2 md:grid-cols-[1fr_1fr]">
+            <div className="mt-12 grid grid-cols-1 gap-4 md:grid-cols-2">
+              <article className="grid grid-cols-1 items-center gap-8 overflow-hidden rounded-3xl border border-th-line bg-th-tint p-7 sm:p-10 md:col-span-2 md:grid-cols-[1fr_1fr]">
                 <div>
                   <p className="th-eyebrow">01 / Rent, sorted</p>
                   <h3 className="th-display mt-4 text-[32px] leading-[1.1] text-th-ink sm:text-[38px]">Know where every rent payment stands.</h3>
@@ -206,7 +206,7 @@ export default function LandingPage() {
                 Add your first property <ArrowUpRight className="h-4 w-4" />
               </Link>
             </div>
-            <ol className="mt-14 grid gap-10 border-t border-th-band-line pt-10 md:grid-cols-3">
+            <ol className="mt-14 grid grid-cols-1 gap-10 border-t border-th-band-line pt-10 md:grid-cols-3">
               {STEPS.map((s) => (
                 <li key={s.n}>
                   <p className="th-display text-[44px] italic leading-none text-th-band-muted">{s.n}</p>
@@ -220,7 +220,7 @@ export default function LandingPage() {
 
         {/* Pricing */}
         <section id="pricing" className="scroll-mt-20 px-4 py-20 sm:px-6 sm:py-28">
-          <div className="mx-auto grid max-w-6xl items-center gap-12 md:grid-cols-[1fr_440px] md:gap-20">
+          <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-12 md:grid-cols-[minmax(0,1fr)_400px] lg:grid-cols-[minmax(0,1fr)_440px] md:gap-20">
             <div>
               <p className="th-eyebrow">Simple pricing</p>
               <h2 className="th-display mt-4 text-[38px] leading-[1.05] text-th-ink sm:text-[52px]">
@@ -275,7 +275,7 @@ export default function LandingPage() {
         {/* Included grid */}
         <section className="border-t border-th-line px-4 py-20 sm:px-6 sm:py-28">
           <div className="mx-auto max-w-6xl">
-            <div className="grid items-end gap-6 md:grid-cols-[1.4fr_1fr]">
+            <div className="grid grid-cols-1 items-end gap-6 md:grid-cols-[1.4fr_1fr]">
               <div>
                 <p className="th-eyebrow">What you get</p>
                 <h2 className="th-display mt-4 text-[38px] leading-[1.05] text-th-ink sm:text-[52px]">
@@ -288,7 +288,7 @@ export default function LandingPage() {
                 The tools you'd normally piece together from notebooks, chat threads, and spreadsheets — built in.
               </p>
             </div>
-            <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {INCLUDED.map((c) => (
                 <article key={c.tag} className="flex flex-col rounded-2xl border border-th-line bg-th-surface p-6 transition-colors hover:border-th-accent/50">
                   <p className="th-eyebrow">{c.tag}</p>
@@ -305,7 +305,7 @@ export default function LandingPage() {
 
         {/* FAQ */}
         <section id="faq" className="scroll-mt-20 border-t border-th-line px-4 py-20 sm:px-6 sm:py-28">
-          <div className="mx-auto grid max-w-6xl gap-10 md:grid-cols-[1fr_1.5fr]">
+          <div className="mx-auto grid max-w-6xl grid-cols-1 gap-10 md:grid-cols-[1fr_1.5fr]">
             <div>
               <p className="th-eyebrow">Common questions</p>
               <h2 className="th-display mt-4 text-[38px] leading-[1.05] text-th-ink sm:text-[48px]">

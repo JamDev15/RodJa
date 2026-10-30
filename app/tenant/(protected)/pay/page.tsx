@@ -56,7 +56,7 @@ export default function TenantPayPage() {
 
   if (submitted) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 space-y-3 pb-20">
+      <div className="flex flex-col items-center justify-center py-16 space-y-3">
         <CheckCircle className="h-16 w-16 text-th-paid" />
         <h2 className="text-xl font-bold text-th-ink">Payment Submitted!</h2>
         <p className="text-th-muted text-center text-sm">Your landlord will review and approve your payment shortly.</p>
@@ -65,7 +65,7 @@ export default function TenantPayPage() {
   }
 
   return (
-    <div className="space-y-5 pb-20">
+    <div className="space-y-5">
       <div>
         <h1 className="text-xl font-bold text-th-ink">Upload Payment Proof</h1>
         <p className="text-th-muted text-sm">Take a screenshot of your payment and upload it here</p>

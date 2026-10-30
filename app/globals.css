@@ -166,6 +166,29 @@ html[data-theme="dark"] {
 html:has(.th-public) body { background: var(--th-page); }
 
 .tabular { font-variant-numeric: tabular-nums; }
+
+/* Safe areas: the installed app draws under the iPhone status bar
+   (black-translucent) and above the home indicator, so fixed bars pad themselves. */
+@utility pt-safe { padding-top: env(safe-area-inset-top, 0px); }
+@utility pb-safe { padding-bottom: env(safe-area-inset-bottom, 0px); }
+/* Mobile app-shell top bar: 3.5rem plus the status bar inset. */
+@utility pt-appbar { padding-top: calc(3.5rem + env(safe-area-inset-top, 0px)); }
+
+/* iOS Safari zooms the page when a field under 16px gets focus. Keep text
+   fields at 16px on phones (unlayered, so it beats text-sm/text-xs). */
+@media (max-width: 639px) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]),
+  select,
+  textarea { font-size: 16px; }
+}
+
+/* Stop iOS from inflating text in landscape. */
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+
+/* Long unbroken strings (emails, addresses, reference numbers) wrap instead of
+   running out of their box. break-word (not anywhere) leaves table and flex
+   sizing alone. */
+body { overflow-wrap: break-word; }
 /* Serif display: upright line, then an italic accent line underneath. */
 .th-public .th-display { font-family: var(--font-serif); font-weight: 400; letter-spacing: -0.02em; font-optical-sizing: auto; }
 .th-public .th-display em { font-style: italic; color: var(--th-accent); }

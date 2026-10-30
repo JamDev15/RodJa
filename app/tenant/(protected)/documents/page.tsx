@@ -25,7 +25,7 @@ export default async function TenantDocumentsPage() {
   const toSign = contracts.filter((c) => c.status === "sent");
 
   return (
-    <div className="space-y-6 pb-20">
+    <div className="space-y-6">
       <div>
         <h1 className="text-xl font-bold text-th-ink">Documents</h1>
         <p className="text-th-muted text-sm">Your contracts, invoices, and receipts</p>
