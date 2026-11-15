@@ -14,8 +14,11 @@ const navItems = [
   { href: "/tenant/notices", label: "Notices", icon: Bell },
 ];
 
-export function TenantNav({ tenantName }: { tenantName?: string }) {
+export function TenantNav({ tenantName, billingEnabled = false }: { tenantName?: string; billingEnabled?: boolean }) {
   const pathname = usePathname();
+  const items = billingEnabled
+    ? navItems.map((i) => (i.href === "/tenant/pay" ? { ...i, href: "/tenant/billing", label: "Bills" } : i))
+    : navItems;
   const router = useRouter();
   const isHome = pathname === "/tenant/dashboard";
 
@@ -55,8 +58,8 @@ export function TenantNav({ tenantName }: { tenantName?: string }) {
       {/* Bottom nav */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-th-line bg-th-surface pb-safe">
         <div className="max-w-lg mx-auto flex">
-          {navItems.map(({ href, label, icon: Icon }) => {
-            const active = pathname === href;
+          {items.map(({ href, label, icon: Icon }) => {
+            const active = pathname === href || (href === "/tenant/billing" && pathname.startsWith("/tenant/billing"));
             return (
               <Link
                 key={href}

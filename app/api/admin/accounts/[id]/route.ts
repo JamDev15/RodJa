@@ -74,6 +74,18 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
   // *is* schema-level cascade-on-Tenant, so it's cleaned up automatically
   // when the Tenant rows below are deleted.
   await prisma.$transaction([
+    // Collections billing records (financial history is Restrict-protected
+    // from accidental deletion, so this deliberate wipe clears it first).
+    prisma.paymentAllocation.deleteMany({ where: { payment: { accountId: id } } }),
+    prisma.chargeAdjustment.deleteMany({ where: { accountId: id } }),
+    prisma.waterExcessProposal.deleteMany({ where: { accountId: id } }),
+    prisma.rentPayment.deleteMany({ where: { accountId: id } }),
+    prisma.charge.deleteMany({ where: { accountId: id } }),
+    prisma.statement.deleteMany({ where: { accountId: id } }),
+    prisma.vecoReceipt.deleteMany({ where: { accountId: id } }),
+    prisma.vecoReminderLog.deleteMany({ where: { tenantId: { in: (await prisma.tenant.findMany({ where: { unit: { property: { accountId: id } } }, select: { id: true } })).map((t) => t.id) } } }),
+    prisma.storedFile.deleteMany({ where: { accountId: id } }),
+    prisma.billingAuditLog.deleteMany({ where: { accountId: id } }),
     prisma.payment.deleteMany({ where: { tenant: { unit: { property: { accountId: id } } } } }),
     prisma.maintenanceRequest.deleteMany({ where: { tenant: { unit: { property: { accountId: id } } } } }),
     prisma.reminder.deleteMany({ where: { tenant: { unit: { property: { accountId: id } } } } }),

@@ -4,6 +4,10 @@ import { formatCurrency, formatDate, getCurrentMonth } from "@/lib/utils";
 import { PaymentBadge } from "@/components/dashboard/payment-badge";
 import { CreditCard, Home, Phone, AlertCircle } from "lucide-react";
 import Link from "next/link";
+import { getProfile } from "@/lib/collections/profile";
+import { loadTenantLedger } from "@/lib/collections/ledger";
+import { todayIn } from "@/lib/collections/calendar";
+import { formatCentavos } from "@/lib/collections/money";
 
 export default async function TenantDashboardPage() {
   const session = await auth();
@@ -24,6 +28,11 @@ export default async function TenantDashboardPage() {
   const currentPayment = tenant.payments.find((p) => p.month === currentMonth);
   const overduePayments = tenant.payments.filter((p) => p.status === "late");
 
+  // Properties on statement billing show the live balance from the
+  // collections ledger instead of the legacy one-payment-per-month card.
+  const profile = await getProfile(tenant.unit.propertyId);
+  const billing = profile?.enabled ? await loadTenantLedger(prisma, tenant.id, todayIn(profile.timezone)) : null;
+
   return (
     <div className="space-y-5">
       <div>
@@ -31,8 +40,19 @@ export default async function TenantDashboardPage() {
         <p className="text-th-faint text-sm">{tenant.unit.property.name} · Unit {tenant.unit.unitNumber}</p>
       </div>
 
+      {billing && (
+        <Link href="/tenant/billing" className="block rounded-xl border border-th-line bg-th-surface p-5">
+          <p className="text-xs text-th-faint mb-1">{billing.creditCentavos > billing.outstandingCentavos ? "Credit on your account" : "Balance due"}</p>
+          <p className="text-3xl font-bold text-th-ink">{formatCentavos(Math.abs(billing.netBalanceCentavos))}</p>
+          {billing.overdueCentavos > 0 && <p className="mt-1 text-sm text-th-danger">{formatCentavos(billing.overdueCentavos)} is past due</p>}
+          <span className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg bg-th-brand py-2.5 text-sm font-medium text-th-on-brand">
+            <CreditCard className="h-4 w-4" /> Statements &amp; payments
+          </span>
+        </Link>
+      )}
+
       {/* Overdue Alert */}
-      {overduePayments.length > 0 && (
+      {!billing && overduePayments.length > 0 && (
         <div className="rounded-xl border border-th-danger/30 bg-th-danger-soft p-4 flex items-start gap-3">
           <AlertCircle className="h-5 w-5 text-th-danger shrink-0 mt-0.5" />
           <div>
@@ -43,7 +63,7 @@ export default async function TenantDashboardPage() {
       )}
 
       {/* Current Month */}
-      <div className="rounded-xl border border-th-line bg-th-surface p-5">
+      {!billing && <div className="rounded-xl border border-th-line bg-th-surface p-5">
         <p className="text-xs text-th-faint mb-1">This Month&apos;s Rent</p>
         <div className="flex items-end justify-between">
           <p className="text-3xl font-bold text-th-ink">{formatCurrency(tenant.unit.rentAmount)}</p>
@@ -61,7 +81,7 @@ export default async function TenantDashboardPage() {
             Pay Now
           </Link>
         )}
-      </div>
+      </div>}
 
       {/* Landlord Payment Info */}
       <div className="rounded-xl border border-th-line bg-th-surface p-5 space-y-3">
@@ -90,7 +110,7 @@ export default async function TenantDashboardPage() {
       </div>
 
       {/* Recent Payments */}
-      <div>
+      {!billing && <div>
         <h2 className="text-sm font-semibold text-th-ink mb-2">Payment History</h2>
         <div className="space-y-2">
           {tenant.payments.map((p) => (
@@ -103,7 +123,7 @@ export default async function TenantDashboardPage() {
             </div>
           ))}
         </div>
-      </div>
+      </div>}
 
       {/* Unit Info */}
       <div className="rounded-xl border border-th-line bg-th-surface p-5 space-y-3">

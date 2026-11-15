@@ -1,7 +1,13 @@
 import { Resend } from "resend";
 import { logMessage, htmlToText, type LogContext } from "@/lib/message-log";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Created on first send, not at import: constructing Resend without a key
+// throws, which used to break `next build` and any script importing this file.
+let resendClient: Resend | null = null;
+function getResend(): Resend {
+  if (!resendClient) resendClient = new Resend(process.env.RESEND_API_KEY);
+  return resendClient;
+}
 const FROM = process.env.EMAIL_FROM ?? "noreply@tenanthub.com";
 export const APP_URL = (process.env.NEXT_PUBLIC_APP_URL ?? "https://www.tenant-hub.app").replace(/\/$/, "");
 
@@ -55,7 +61,7 @@ export async function sendEmail(opts: SendEmailOptions): Promise<boolean> {
   let ok = false;
   let errorText: string | null = null;
   try {
-    const { error } = await resend.emails.send({
+    const { error } = await getResend().emails.send({
       from: FROM,
       to: opts.to,
       subject: opts.subject,

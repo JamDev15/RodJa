@@ -6,6 +6,7 @@ import { runMonthlyReportSweep } from "@/lib/monthly-report";
 import { runAutomationSweep } from "@/lib/automations";
 import { runWorkflowSweep } from "@/lib/workflows";
 import { runOwnerWorkflowSweep } from "@/lib/owner-workflows";
+import { runCollectionsSweep } from "@/lib/collections/sweep";
 
 export async function GET(req: Request) {
   const cronSecret = process.env.CRON_SECRET;
@@ -34,5 +35,8 @@ export async function GET(req: Request) {
   const freeTrials = await run("freeTrials", () => runFreeTrialSweep());
   const workflows = await run("workflows", () => runWorkflowSweep());
   const monthlyReports = await run("monthlyReports", () => runMonthlyReportSweep());
-  return NextResponse.json({ reminders, billReminders, automations, ownerWorkflows, billing, freeTrials, workflows, monthlyReports });
+  // Statement drafts/distribution and VECO reminders for properties that
+  // have collections billing turned on (no-op for everyone else).
+  const collections = await run("collections", () => runCollectionsSweep());
+  return NextResponse.json({ reminders, billReminders, automations, ownerWorkflows, billing, freeTrials, workflows, monthlyReports, collections });
 }

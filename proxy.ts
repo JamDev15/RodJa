@@ -10,6 +10,11 @@ import type { NextRequest } from "next/server";
 // contracts and open invoices from an emailed link without logging in).
 const PUBLIC_API_PREFIXES = ["/api/auth", "/api/signup", "/api/cron", "/api/sign/", "/api/docs/", "/api/renew", "/api/unsubscribe"];
 const TENANT_API_PREFIXES = ["/api/tenant/", "/api/payments/submit", "/api/maintenance"];
+// Meter entry: caretakers plus the landlord/staff who manage them.
+const CARETAKER_API_PREFIXES = ["/api/caretaker/"];
+// Private billing evidence: every signed-in role reaches the route, which
+// then checks the specific file against the caller (lib/collections/files.ts).
+const FILE_API_PREFIXES = ["/api/files/"];
 const ADMIN_API_PREFIXES = ["/api/admin"];
 
 function startsWithAny(pathname: string, prefixes: string[]): boolean {
@@ -45,6 +50,16 @@ export async function proxy(request: NextRequest) {
       return NextResponse.next();
     }
 
+    if (startsWithAny(pathname, CARETAKER_API_PREFIXES)) {
+      if (!session || !["CARETAKER", "LANDLORD", "STAFF"].includes(role)) return unauthorized();
+      return NextResponse.next();
+    }
+
+    if (startsWithAny(pathname, FILE_API_PREFIXES)) {
+      if (!session || !["TENANT", "LANDLORD", "STAFF"].includes(role)) return unauthorized();
+      return NextResponse.next();
+    }
+
     // Everything else under /api is landlord/staff-scoped.
     if (!session || !["LANDLORD", "STAFF"].includes(role)) return unauthorized();
     return NextResponse.next();
@@ -57,7 +72,16 @@ export async function proxy(request: NextRequest) {
   }
 
   if (isDashboardRoute) {
+    if (role === "CARETAKER") {
+      return NextResponse.redirect(new URL("/caretaker", request.url));
+    }
     if (!session || !["LANDLORD", "STAFF"].includes(role)) {
+      return NextResponse.redirect(new URL("/login", request.url));
+    }
+  }
+
+  if (pathname.startsWith("/caretaker")) {
+    if (!session || !["CARETAKER", "LANDLORD", "STAFF"].includes(role)) {
       return NextResponse.redirect(new URL("/login", request.url));
     }
   }
@@ -72,5 +96,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/dashboard/:path*", "/tenant/:path*", "/api/:path*"],
+  matcher: ["/admin/:path*", "/dashboard/:path*", "/tenant/:path*", "/caretaker/:path*", "/caretaker", "/api/:path*"],
 };
