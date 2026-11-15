@@ -6,6 +6,7 @@ import { SUPPORTED_TIMEZONES, validateCycles, type CycleConfig, type ScheduleCon
 import { audit, inTransaction } from "./db";
 import { invalid, notFound } from "./errors";
 import { penaltyConfigProblem } from "./penalties";
+import { readUpload, storeFile } from "./files";
 
 export const DEFAULT_CYCLES: CycleConfig[] = [
   { key: "A", day: 15 },
@@ -107,5 +108,20 @@ export async function upsertProfile(actor: Actor, propertyId: string, raw: Profi
     }
     await audit(tx, actor, { entityType: "BillingProfile", entityId: saved.id, action: existing ? "settings_updated" : "settings_created", propertyId, details: changed });
     return saved;
+  });
+}
+
+/** Upload the logo printed on this property's statements. */
+export async function setLogo(actor: Actor, propertyId: string, file: File | null) {
+  const property = await adminProperty(actor, propertyId);
+  const profile = await getProfile(propertyId);
+  if (!profile) throw notFound("Set up billing for this property first");
+  const upload = await readUpload(file);
+  if (upload.kind.mime === "application/pdf") throw invalid("Upload the logo as an image (JPG, PNG or WEBP)");
+  const stored = await storeFile({ actor, accountId: property.accountId, propertyId, tenantId: null, purpose: "PROPERTY_LOGO", file: file! }, upload);
+  return inTransaction(async (tx) => {
+    await tx.billingProfile.update({ where: { propertyId }, data: { logoFileId: stored.id } });
+    await audit(tx, actor, { entityType: "BillingProfile", entityId: profile.id, action: "logo_updated", propertyId, details: { fileId: stored.id } });
+    return { logoFileId: stored.id };
   });
 }

@@ -427,6 +427,8 @@ function run() {
       if (draftOfB) await assert.rejects(m.views.statementDetail(tenantActor("b"), draftOfB.id), /not found/i, "drafts are not visible to tenants");
       const fileOfB = await m.prisma.storedFile.findFirstOrThrow({ where: { tenantId: tenants.b } });
       assert.equal(m.files.canReadFile(tenantActor("a"), fileOfB), false);
+      assert.equal(m.files.canReadFile(tenantActor("a"), { accountId, tenantId: null, purpose: "PROPERTY_LOGO" }), true, "logos print on every tenant's statement");
+      assert.equal(m.files.canReadFile(tenantActor("a"), { accountId: otherAccountId, tenantId: null, purpose: "PROPERTY_LOGO" }), false);
       assert.equal(m.files.canReadFile(tenantActor("b"), fileOfB), true);
       const view = await m.views.tenantBillingView(tenantActor("a"));
       assert.ok(view.enabled && view.statements.length > 0);

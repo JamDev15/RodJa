@@ -1,4 +1,5 @@
 import { ActionForm } from "@/components/collections/action-form";
+import { LogoUpload } from "@/components/collections/logo-upload";
 import { Money, Section, SubNav } from "@/components/collections/bits";
 import { PropertyPicker } from "@/components/collections/property-picker";
 import { centavosToInput } from "@/lib/collections/money";
@@ -37,6 +38,10 @@ export default async function CollectionsSettingsPage({ searchParams }: { search
         <PropertyPicker properties={properties} value={propertyId} />
       </div>
       <SubNav propertyId={propertyId} active="settings" />
+
+      <Section title="Statement logo">
+        <LogoUpload propertyId={propertyId} logoFileId={profile.logoFileId} />
+      </Section>
 
       <Section title="Billing schedule and rules">
         <ActionForm

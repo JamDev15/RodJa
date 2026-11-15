@@ -91,11 +91,19 @@ export async function storeFile(input: StoreFileInput, upload?: Awaited<ReturnTy
   });
 }
 
-/** Admins of the owning account, or the tenant the file belongs to. Caretakers never. */
-export function canReadFile(actor: Actor | null, file: { accountId: string; tenantId: string | null }): boolean {
+/**
+ * Admins of the owning account, or the tenant the file belongs to. A
+ * property logo is also readable by that account's tenants (it's printed on
+ * their statements). Caretakers never.
+ */
+export function canReadFile(actor: Actor | null, file: { accountId: string; tenantId: string | null; purpose?: string }): boolean {
   if (!actor) return false;
   if (actor.kind === "ADMIN") return file.accountId === actor.accountId;
-  if (actor.kind === "TENANT") return file.accountId === actor.accountId && file.tenantId === actor.tenantId;
+  if (actor.kind === "TENANT") {
+    if (file.accountId !== actor.accountId) return false;
+    if (file.purpose === "PROPERTY_LOGO") return true;
+    return file.tenantId === actor.tenantId;
+  }
   return false;
 }
 

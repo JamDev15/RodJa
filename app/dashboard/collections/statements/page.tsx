@@ -21,7 +21,11 @@ export default async function StatementsPage({ searchParams }: { searchParams: P
   const today = todayIn(profile.timezone);
   const month = monthOf(today);
   const options = [addMonths(month, -2), addMonths(month, -1), month, addMonths(month, 1)].flatMap((m) => cyclesForMonth(schedule, m).map((c) => cycleSchedule(schedule, c.periodKey)!));
-  const upcoming = options.find((o) => o.cycleDate >= today) ?? options[options.length - 1];
+  // Default to the next cycle that still needs issuing (not one already done).
+  const issued = new Set(
+    (await prisma.statement.groupBy({ by: ["periodKey"], where: { propertyId, status: "PUBLISHED", periodKey: { in: options.map((o) => o.periodKey) } } })).map((g) => g.periodKey),
+  );
+  const upcoming = options.find((o) => o.cycleDate >= today && !issued.has(o.periodKey)) ?? options.find((o) => o.cycleDate >= today) ?? options[options.length - 1];
   const periodKey = sp.period && parsePeriodKey(sp.period) ? sp.period : upcoming.periodKey;
   const s = cycleSchedule(schedule, periodKey);
 
