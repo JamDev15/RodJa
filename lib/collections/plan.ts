@@ -4,7 +4,7 @@
 // matter how many times generation is retried or run concurrently.
 
 import type { Centavos } from "./money";
-import { monthsBetween, type CycleOccurrence, type MonthKey } from "./calendar";
+import { monthsBetween, type CycleOccurrence, type DateOnly, type MonthKey } from "./calendar";
 
 export type ChargeType =
   | "RENT"
@@ -15,6 +15,7 @@ export type ChargeType =
   | "MISC"
   | "PENALTY"
   | "OPENING_BALANCE"
+  | "DAMAGE"
   | "OTHER";
 
 export const CHARGE_LABELS: Record<ChargeType, string> = {
@@ -26,6 +27,7 @@ export const CHARGE_LABELS: Record<ChargeType, string> = {
   MISC: "Miscellaneous",
   PENALTY: "Late penalty",
   OPENING_BALANCE: "Opening balance",
+  DAMAGE: "Damages (move-out)",
   OTHER: "Other recurring",
 };
 
@@ -57,6 +59,24 @@ export interface PlanInput {
   water: WaterConfig;
   occupantCount: number | null;
   waterOverride: { amountCentavos: Centavos; reason: string } | null;
+  /**
+   * Partial cycles. DAILY prorates every-cycle rent by the days the tenancy
+   * covers within [periodStart, periodEnd]; NONE (default) bills it in full.
+   */
+  proration?: { policy: "NONE" | "DAILY"; periodStart: DateOnly; periodEnd: DateOnly; occupiedFrom: DateOnly; occupiedTo: DateOnly | null };
+}
+
+function dayNumber(d: DateOnly): number {
+  const [y, m, day] = d.split("-").map(Number);
+  return Date.UTC(y, m - 1, day) / 86_400_000;
+}
+
+/** Days the tenancy covers in the period (inclusive), and the period length. */
+export function occupiedDays(p: { periodStart: DateOnly; periodEnd: DateOnly; occupiedFrom: DateOnly; occupiedTo: DateOnly | null }): { occupied: number; total: number } {
+  const total = dayNumber(p.periodEnd) - dayNumber(p.periodStart) + 1;
+  const from = Math.max(dayNumber(p.periodStart), dayNumber(p.occupiedFrom));
+  const to = Math.min(dayNumber(p.periodEnd), p.occupiedTo ? dayNumber(p.occupiedTo) : Infinity);
+  return { occupied: Math.max(0, to - from + 1), total };
 }
 
 export interface PlannedCharge {
@@ -121,6 +141,16 @@ export function planCycleCharges(input: PlanInput): PlanResult {
         calc = { basis: "MONTHLY_SPLIT", monthlyCentavos: rc.amountCentavos, cycles: cycle.countInMonth };
       } else if (rc.type === "RENT") {
         calc = { basis: "PER_CYCLE" };
+      }
+      if (rc.type === "RENT" && input.proration?.policy === "DAILY") {
+        const { occupied, total } = occupiedDays(input.proration);
+        if (occupied < total) {
+          const full = amount;
+          // Round half up to the centavo; the formula is kept on the charge.
+          amount = Math.round((full * occupied) / total);
+          calc = { ...(calc ?? {}), prorated: true, fullCentavos: full, occupiedDays: occupied, periodDays: total };
+          notes.push(`Rent prorated: ${occupied} of ${total} days`);
+        }
       }
       if (amount > 0) {
         charges.push({ type: rc.type, description: rc.description, amountCentavos: amount, sourceKey: `rc:${rc.id}:${cycle.periodKey}`, sourceId: rc.id, calc });

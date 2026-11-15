@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { normalizeStatus, STATUS_LABEL } from "@/lib/operations/maintenance-status";
 import { ArrowLeft, Phone, Mail, Calendar, Home, Pencil, Clock, FileSignature, Download } from "lucide-react";
 import { PaymentBadge } from "@/components/dashboard/payment-badge";
 import { Badge } from "@/components/ui/badge";
@@ -43,6 +44,7 @@ export default async function TenantDetailPage({ params }: { params: Promise<{ i
         <div className="min-w-0 flex-1 basis-48">
           <h1 className="text-2xl font-bold text-th-ink">{tenant.name}</h1>
           <p className="text-th-muted text-sm">{tenant.unit.property.name} – Unit {tenant.unit.unitNumber}</p>
+          <Link href={`/dashboard/operations/tenancies/${id}`} className="text-sm text-th-accent hover:underline">Household, lease, deposit &amp; move-out →</Link>
         </div>
         <div className="flex flex-wrap items-center justify-end gap-2">
           <Badge variant={tenant.isActive ? "success" : "secondary"}>{tenant.isActive ? "Active" : "Past"}</Badge>
@@ -220,15 +222,15 @@ export default async function TenantDetailPage({ params }: { params: Promise<{ i
           <h2 className="text-lg font-semibold text-th-ink mb-3">Maintenance Requests</h2>
           <div className="space-y-2">
             {tenant.maintenanceRequests.map((req) => (
-              <div key={req.id} className="flex items-center justify-between rounded-lg border border-th-line bg-th-surface px-4 py-3">
+              <Link key={req.id} href={`/dashboard/operations/maintenance/${req.id}`} className="flex items-center justify-between rounded-lg border border-th-line bg-th-surface px-4 py-3 hover:bg-th-raised">
                 <div>
                   <p className="text-sm font-medium text-th-ink">{req.title}</p>
                   <p className="text-xs text-th-faint">{formatDate(req.createdAt)}</p>
                 </div>
-                <Badge variant={req.status === "resolved" ? "success" : req.status === "in_progress" ? "default" : "warning"}>
-                  {req.status.replace("_", " ")}
+                <Badge variant={["COMPLETED", "CLOSED"].includes(normalizeStatus(req.status)) ? "success" : ["IN_PROGRESS", "ASSIGNED"].includes(normalizeStatus(req.status)) ? "default" : "warning"}>
+                  {STATUS_LABEL[normalizeStatus(req.status)]}
                 </Badge>
-              </div>
+              </Link>
             ))}
           </div>
         </div>

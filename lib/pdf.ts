@@ -1,15 +1,15 @@
 import { PDFDocument, StandardFonts, rgb, type PDFFont, type PDFPage, type PDFImage } from "pdf-lib";
 
 // A4 in points
-const PAGE_W = 595.28;
-const PAGE_H = 841.89;
-const MARGIN = 54;
-const CONTENT_W = PAGE_W - MARGIN * 2;
+export const PAGE_W = 595.28;
+export const PAGE_H = 841.89;
+export const MARGIN = 54;
+export const CONTENT_W = PAGE_W - MARGIN * 2;
 
-const INK = rgb(0.07, 0.09, 0.15);
-const MUTED = rgb(0.42, 0.45, 0.5);
-const BRAND = rgb(0.15, 0.39, 0.92);
-const LINE = rgb(0.88, 0.9, 0.93);
+export const INK = rgb(0.07, 0.09, 0.15);
+export const MUTED = rgb(0.42, 0.45, 0.5);
+export const BRAND = rgb(0.15, 0.39, 0.92);
+export const LINE = rgb(0.88, 0.9, 0.93);
 
 /** Standard PDF fonts only cover WinAnsi; swap anything else for a safe stand-in. */
 function makeSanitizer(font: PDFFont) {
@@ -51,7 +51,7 @@ export function pdfDate(d: Date, withTime = false, moment = withTime): string {
 }
 
 /** Minimal flowing-layout writer: tracks the cursor and adds pages as needed. */
-class Writer {
+export class Writer {
   page!: PDFPage;
   y = 0;
   pageNo = 0;

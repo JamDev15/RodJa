@@ -8,6 +8,8 @@ import { getProfile } from "@/lib/collections/profile";
 import { loadTenantLedger } from "@/lib/collections/ledger";
 import { todayIn } from "@/lib/collections/calendar";
 import { formatCentavos } from "@/lib/collections/money";
+import { MessageSquare, Users } from "lucide-react";
+import { isUnread } from "@/lib/operations/messages";
 
 export default async function TenantDashboardPage() {
   const session = await auth();
@@ -50,6 +52,8 @@ export default async function TenantDashboardPage() {
           </span>
         </Link>
       )}
+
+      {billing && <HouseholdAndMessages tenantId={tenant.id} />}
 
       {/* Overdue Alert */}
       {!billing && overduePayments.length > 0 && (
@@ -136,6 +140,29 @@ export default async function TenantDashboardPage() {
           <Phone className="h-4 w-4" />
           Landlord: {account.ownerName} · {account.phone ?? account.email}
         </div>
+      </div>
+    </div>
+  );
+}
+
+/** Phase 2 (properties with the Dawson feature set on): household names and messages. */
+async function HouseholdAndMessages({ tenantId }: { tenantId: string }) {
+  const [occupants, threads] = await Promise.all([
+    prisma.occupant.findMany({ where: { tenantId, movedOutOn: null }, select: { id: true, name: true, relationship: true }, orderBy: [{ isPrimary: "desc" }, { createdAt: "asc" }] }),
+    prisma.messageThread.findMany({ where: { tenantId }, select: { lastMessageAt: true, lastSenderRole: true, adminReadAt: true, tenantReadAt: true } }),
+  ]);
+  const unread = threads.filter((t) => isUnread(t, "TENANT")).length;
+  return (
+    <div className="grid grid-cols-2 gap-3">
+      <Link href="/tenant/messages" className="rounded-xl border border-th-line bg-th-surface p-4">
+        <MessageSquare className="h-5 w-5 text-th-accent" />
+        <p className="mt-2 text-sm font-medium text-th-ink">Messages</p>
+        <p className="text-xs text-th-faint">{unread ? `${unread} new repl${unread === 1 ? "y" : "ies"}` : "Write to the office"}</p>
+      </Link>
+      <div className="rounded-xl border border-th-line bg-th-surface p-4">
+        <Users className="h-5 w-5 text-th-accent" />
+        <p className="mt-2 text-sm font-medium text-th-ink">Household</p>
+        <p className="text-xs text-th-faint">{occupants.length ? occupants.map((o) => o.name).join(", ") : "Not recorded yet"}</p>
       </div>
     </div>
   );

@@ -25,6 +25,7 @@ export default async function AdminStatementPage({ params }: { params: Promise<{
         <div className="flex flex-wrap items-center gap-2">
           <Pill status={d.statement.settlement ?? d.statement.status} />
           {d.statement.sentAt ? <span className="text-xs text-th-muted">Emailed {formatDateOnly(d.statement.sentAt.slice(0, 10))}</span> : null}
+          {!isDraft && <a href={`/api/files/statements/${d.statement.id}?download`} className="text-sm font-medium text-th-accent hover:underline">Download PDF</a>}
         </div>
       </div>
 

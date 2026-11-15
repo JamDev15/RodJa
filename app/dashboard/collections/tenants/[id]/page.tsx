@@ -49,7 +49,8 @@ export default async function TenantCollectionsPage({ params }: { params: Promis
         <h1 className="mt-2 text-2xl font-bold text-th-ink">{tenant.name}</h1>
         <p className="text-sm text-th-muted">
           Room {tenant.unit.unitNumber} · {tenant.unit.property.name} · {tenant.isActive ? "current tenant" : "moved out"} ·{" "}
-          <Link href={`/dashboard/tenants/${tenant.id}`} className="text-th-accent hover:underline">tenant profile</Link>
+          <Link href={`/dashboard/tenants/${tenant.id}`} className="text-th-accent hover:underline">tenant profile</Link> ·{" "}
+          <Link href={`/dashboard/operations/tenancies/${tenant.id}`} className="text-th-accent hover:underline">household, lease &amp; deposit</Link>
         </p>
       </div>
 
@@ -138,7 +139,11 @@ export default async function TenantCollectionsPage({ params }: { params: Promis
                     <Money c={p.amountCentavos} className="font-semibold" /> · {p.method.toUpperCase()} · paid {formatDateOnly(fromDbDate(p.paidOn))}
                     {p.referenceNumber ? ` · Ref ${p.referenceNumber}` : ""} {p.receiptNumber ? ` · ${p.receiptNumber}` : ""}
                   </span>
-                  <span className="flex items-center gap-2"><Pill status={p.status} /><FileLink id={p.proofFileId} /></span>
+                  <span className="flex items-center gap-2">
+                    <Pill status={p.status} />
+                    <FileLink id={p.proofFileId} />
+                    {p.status === "APPROVED" && p.receiptNumber && <a href={`/api/files/receipts/${p.id}`} target="_blank" rel="noopener noreferrer" className="text-xs font-medium text-th-accent hover:underline">Receipt PDF</a>}
+                  </span>
                 </div>
                 {p.status === "APPROVED" && <p className="mt-1 text-xs text-th-muted">Applied <Money c={active} />{p.amountCentavos > active ? <> · credit <Money c={p.amountCentavos - active} /></> : null}</p>}
                 {p.rejectedReason && <p className="mt-1 text-xs text-th-danger">Rejected: {p.rejectedReason}</p>}

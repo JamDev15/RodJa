@@ -7,6 +7,7 @@ import { runAutomationSweep } from "@/lib/automations";
 import { runWorkflowSweep } from "@/lib/workflows";
 import { runOwnerWorkflowSweep } from "@/lib/owner-workflows";
 import { runCollectionsSweep } from "@/lib/collections/sweep";
+import { sendLeaseExpiryNotices } from "@/lib/operations/summary";
 
 export async function GET(req: Request) {
   const cronSecret = process.env.CRON_SECRET;
@@ -38,5 +39,7 @@ export async function GET(req: Request) {
   // Statement drafts/distribution and VECO reminders for properties that
   // have collections billing turned on (no-op for everyone else).
   const collections = await run("collections", () => runCollectionsSweep());
-  return NextResponse.json({ reminders, billReminders, automations, ownerWorkflows, billing, freeTrials, workflows, monthlyReports, collections });
+  // Owner email 30 days before a recorded lease term ends (Phase 2 lease terms only).
+  const leaseExpiry = await run("leaseExpiry", () => sendLeaseExpiryNotices());
+  return NextResponse.json({ reminders, billReminders, automations, ownerWorkflows, billing, freeTrials, workflows, monthlyReports, collections, leaseExpiry });
 }

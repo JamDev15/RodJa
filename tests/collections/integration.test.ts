@@ -346,7 +346,7 @@ function run() {
       // No penalty on statements still inside grace (Dec-A due Dec 15 + 3 → late after Dec 18; assessed Dec 27 → yes). Earlier-than-grace check:
       const early = await m.statements.generateStatements(admin, propertyId, "2027-01-A", { now: new Date("2026-12-31T02:00:00Z") });
       assert.ok(early.results.length > 0);
-      const decB = await m.prisma.statement.findMany({ where: { periodKey: "2026-12-B", status: "PUBLISHED" } });
+      const decB = await m.prisma.statement.findMany({ where: { propertyId, periodKey: "2026-12-B", status: "PUBLISHED" } });
       assert.equal(decB.length, 0, "Dec-B not yet issued, so it can't be penalised");
       // Publish and waive tenant d's penalty.
       const draft = await m.prisma.statement.findFirstOrThrow({ where: { tenantId: tenants.d, periodKey: "2026-12-B" } });

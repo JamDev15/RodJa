@@ -98,6 +98,13 @@ async function generateForTenant(
     recurring: tenant.unit.recurringCharges.map((r) => r as unknown as RecurringChargeInput),
     water: profile,
     occupantCount: tenant.occupantCount,
+    proration: {
+      policy: profile.prorationPolicy === "DAILY" ? "DAILY" : "NONE",
+      periodStart: s.periodStart,
+      periodEnd: s.periodEnd,
+      occupiedFrom: dateIn(profile.timezone, tenant.moveInDate),
+      occupiedTo: tenant.moveOutDate ? dateIn(profile.timezone, tenant.moveOutDate) : null,
+    },
     waterOverride: room?.waterOverrideCentavos != null ? { amountCentavos: room.waterOverrideCentavos, reason: room.waterOverrideReason ?? "" } : null,
   });
 
@@ -127,9 +134,21 @@ async function generateForTenant(
   });
   if (earlier.length > 0) {
     const ledger = await loadTenantLedger(tx, tenant.id);
+    // Penalties already charged per earlier statement, on other cycles' drafts
+    // (this cycle's own draft lines are excluded so a rerun reuses its key).
+    const prior = await tx.charge.groupBy({
+      by: ["sourceId"],
+      where: { tenantId: tenant.id, type: "PENALTY", sourceId: { in: earlier.map((e) => e.id) }, NOT: { periodKey: s.periodKey } },
+      _count: { _all: true },
+    });
+    const priorBy = new Map(prior.map((p) => [p.sourceId, p._count._all]));
     for (const st of earlier) {
       const unpaid = ledger.charges.filter((c) => c.statementId === st.id && c.type !== "PENALTY").reduce((sum, c) => sum + c.outstandingCentavos, 0);
-      const decision = assessPenalty(profile, { statementId: st.id, dueDate: fromDbDate(st.dueDate), unpaidNonPenaltyCentavos: unpaid, tenantExempt: tenant.penaltyExempt }, today);
+      const decision = assessPenalty(
+        profile,
+        { statementId: st.id, dueDate: fromDbDate(st.dueDate), unpaidNonPenaltyCentavos: unpaid, tenantExempt: tenant.penaltyExempt, priorPenalties: priorBy.get(st.id) ?? 0, carrierPeriodKey: s.periodKey },
+        today,
+      );
       if (!decision.apply) continue;
       rows.push({
         accountId: profile.accountId,
@@ -138,7 +157,7 @@ async function generateForTenant(
         tenantId: tenant.id,
         statementId: statement.id,
         type: "PENALTY",
-        description: `Late penalty — statement ${st.number ?? ""}`.trim(),
+        description: `Late penalty — statement ${st.number ?? ""}${(decision.calc.occurrence as number) > 1 ? ` (#${decision.calc.occurrence})` : ""}`.trim(),
         amountCentavos: decision.amountCentavos,
         billingMonth: s.month,
         periodKey: s.periodKey,

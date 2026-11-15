@@ -8,7 +8,7 @@ import { parsePesos } from "@/lib/collections/money";
 import { cn } from "@/lib/utils";
 
 export type Field =
-  | { name: string; label: string; type: "text" | "date" | "month" | "textarea"; required?: boolean; placeholder?: string; defaultValue?: string; hint?: string }
+  | { name: string; label: string; type: "text" | "date" | "month" | "textarea"; required?: boolean; placeholder?: string; defaultValue?: string; hint?: string; rows?: number }
   | { name: string; label: string; type: "pesos"; required?: boolean; placeholder?: string; defaultValue?: string; hint?: string }
   | { name: string; label: string; type: "number"; required?: boolean; placeholder?: string; defaultValue?: string; hint?: string; step?: string }
   | { name: string; label: string; type: "select"; options: { value: string; label: string }[]; required?: boolean; defaultValue?: string; hint?: string }
@@ -129,7 +129,7 @@ export function ActionForm({ url, method = "POST", body, fields = [], submitLabe
                 {"required" in f && f.required ? " *" : ""}
               </label>
               {f.type === "textarea" ? (
-                <textarea id={`${url}-${f.name}`} name={f.name} rows={2} defaultValue={f.defaultValue} placeholder={f.placeholder} className={inputClass} />
+                <textarea id={`${url}-${f.name}`} name={f.name} rows={"rows" in f && f.rows ? f.rows : 2} defaultValue={f.defaultValue} placeholder={f.placeholder} className={inputClass} />
               ) : f.type === "select" ? (
                 <select id={`${url}-${f.name}`} name={f.name} defaultValue={f.defaultValue} className={inputClass}>
                   {f.options.map((o) => (

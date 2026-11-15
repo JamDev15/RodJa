@@ -30,12 +30,27 @@ export function sniffFileType(bytes: Uint8Array): Kind | null {
   return null;
 }
 
+export type FilePurpose =
+  | "PAYMENT_PROOF"
+  | "VECO_RECEIPT"
+  | "PROPERTY_LOGO"
+  | "OCCUPANT_ID"
+  | "OCCUPANT_PHOTO"
+  | "LEASE_DOCUMENT"
+  | "MOVEOUT_PHOTO"
+  | "MAINTENANCE_PHOTO"
+  | "MESSAGE_ATTACHMENT"
+  | "CHECKLIST_PHOTO";
+
+/** Purposes a tenant may read when the file belongs to their tenancy. IDs, inspection and checklist photos are office-only. */
+const TENANT_READABLE = new Set(["PAYMENT_PROOF", "VECO_RECEIPT", "LEASE_DOCUMENT", "MAINTENANCE_PHOTO", "MESSAGE_ATTACHMENT"]);
+
 export interface StoreFileInput {
   actor: Actor;
   accountId: string;
   propertyId: string | null;
   tenantId: string | null;
-  purpose: "PAYMENT_PROOF" | "VECO_RECEIPT" | "PROPERTY_LOGO";
+  purpose: FilePurpose;
   file: File;
 }
 
@@ -92,9 +107,10 @@ export async function storeFile(input: StoreFileInput, upload?: Awaited<ReturnTy
 }
 
 /**
- * Admins of the owning account, or the tenant the file belongs to. A
- * property logo is also readable by that account's tenants (it's printed on
- * their statements). Caretakers never.
+ * Admins of the owning account read everything in it. A tenant reads files
+ * of their own tenancy whose purpose is tenant-readable (never ID documents
+ * or inspection photos), plus their account's property logo. Caretakers
+ * read nothing here; see canReadFileAsync for maintenance photos.
  */
 export function canReadFile(actor: Actor | null, file: { accountId: string; tenantId: string | null; purpose?: string }): boolean {
   if (!actor) return false;
@@ -102,9 +118,19 @@ export function canReadFile(actor: Actor | null, file: { accountId: string; tena
   if (actor.kind === "TENANT") {
     if (file.accountId !== actor.accountId) return false;
     if (file.purpose === "PROPERTY_LOGO") return true;
+    if (file.purpose && !TENANT_READABLE.has(file.purpose)) return false;
     return file.tenantId === actor.tenantId;
   }
   return false;
+}
+
+/** canReadFile, plus caretakers: maintenance photos of properties assigned to them. */
+export async function canReadFileAsync(actor: Actor | null, file: { accountId: string; tenantId: string | null; purpose?: string; propertyId?: string | null }): Promise<boolean> {
+  if (canReadFile(actor, file)) return true;
+  if (actor?.kind !== "CARETAKER" || file.accountId !== actor.accountId) return false;
+  if (file.purpose !== "MAINTENANCE_PHOTO" || !file.propertyId) return false;
+  const assigned = await prisma.caretakerProperty.findFirst({ where: { userId: actor.id, propertyId: file.propertyId }, select: { id: true } });
+  return !!assigned;
 }
 
 export async function readFileBytes(file: { storage: string; objectPath: string | null; data: Uint8Array | null }): Promise<Uint8Array | null> {

@@ -4,7 +4,7 @@ import { upsertProfile, type ProfileUpdate } from "@/lib/collections/profile";
 
 // Settings that may be cleared (set to null) from the form. Anything else
 // left blank is ignored rather than wiped.
-const NULLABLE = new Set(["penaltyRateBps", "penaltyGraceDays", "meterAllowance", "meterExcessRateCentavos", "meterReadingFrequency", "paymentInstructions"]);
+const NULLABLE = new Set(["penaltyRateBps", "penaltyGraceDays", "penaltyMaxRepeats", "meterAllowance", "meterExcessRateCentavos", "meterReadingFrequency", "paymentInstructions"]);
 
 export async function POST(req: Request) {
   return handle(async (actor) => {

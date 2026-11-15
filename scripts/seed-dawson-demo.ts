@@ -29,6 +29,8 @@ async function main() {
   const existing = await prisma.property.findFirst({ where: { accountId: account.id, name: "Dawson Residences (Demo)" } });
   if (existing) {
     console.log("Demo property already exists:", existing.id);
+    await seedPhase2(admin, existing.id);
+    await prisma.$disconnect();
     return;
   }
   const property = await prisma.property.create({
@@ -85,10 +87,33 @@ async function main() {
   const ana = await prisma.tenant.findFirstOrThrow({ where: { phone: "09170000101" } });
   await recordAdminPayment(admin, ana.id, { amountCentavos: 435000, method: "cash", paidOn: todayIn("Asia/Manila"), referenceNumber: "DEMO-OR-1", clientRequestId: "demo-seed-ana-1" });
 
+  await seedPhase2(admin, property.id);
   console.log("Demo property:", property.id);
   console.log("Tenant logins: phone 09170000101..09170000106, PIN 123456");
   console.log("Caretaker login: caretaker.demo@example.test / caretaker123");
   await prisma.$disconnect();
+}
+
+/** Phase 2 demo records (household, lease, deposit, a work order, a message). Skips if already there. */
+async function seedPhase2(admin: { kind: "ADMIN"; id: string; role: "LANDLORD"; accountId: string }, propertyId: string) {
+  const { prisma } = await import("@/lib/prisma");
+  const { addOccupant } = await import("@/lib/operations/occupants");
+  const { addLeaseTerm } = await import("@/lib/operations/leases");
+  const { receiveDeposit } = await import("@/lib/operations/deposits");
+  const { startChecklist } = await import("@/lib/operations/checklists");
+  const { createAdminRequest } = await import("@/lib/operations/maintenance");
+  const { startThread } = await import("@/lib/operations/messages");
+  const ana = await prisma.tenant.findFirst({ where: { phone: "09170000101", unit: { propertyId } } });
+  if (!ana) return;
+  if (await prisma.occupant.count({ where: { tenantId: ana.id } })) return;
+  await addOccupant(admin, ana.id, { name: ana.name, isPrimary: true });
+  await addLeaseTerm(admin, ana.id, { startDate: "2026-09-01", endDate: "2027-08-31", monthlyRentCentavos: 700000 });
+  await receiveDeposit(admin, ana.id, { fund: "SECURITY_DEPOSIT", amountCentavos: 700000, occurredOn: "2026-09-01", method: "cash", reference: "DEMO-DEP-1" });
+  await startChecklist(admin, ana.id, "MOVE_IN");
+  const caretaker = await prisma.user.findUnique({ where: { email: "caretaker.demo@example.test" } });
+  const unit = await prisma.unit.findUniqueOrThrow({ where: { id: ana.unitId } });
+  await createAdminRequest(admin, { propertyId, unitId: unit.id, title: "Bathroom faucet dripping", description: "Reported at the office (demo).", priority: "high", assignedToId: caretaker?.id });
+  await startThread({ kind: "TENANT", id: ana.id, role: "TENANT", accountId: admin.accountId, tenantId: ana.id }, { subject: "Parking question (demo)", body: "Can I park a second motorcycle?" });
 }
 
 main().catch((e) => {

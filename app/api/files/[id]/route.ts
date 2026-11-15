@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { currentActor } from "@/lib/collections/actor";
-import { canReadFile, readFileBytes } from "@/lib/collections/files";
+import { canReadFileAsync, readFileBytes } from "@/lib/collections/files";
 
 /**
  * The only way to read billing evidence. Checks the caller against the file
@@ -12,7 +12,7 @@ export async function GET(_req: Request, ctx: RouteContext<"/api/files/[id]">) {
   const actor = await currentActor();
   const file = await prisma.storedFile.findUnique({ where: { id } });
   // Same response for "missing" and "not yours", so ids can't be probed.
-  if (!file || !canReadFile(actor, file)) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (!file || !(await canReadFileAsync(actor, file))) return NextResponse.json({ error: "Not found" }, { status: 404 });
   const bytes = await readFileBytes(file);
   if (!bytes) return NextResponse.json({ error: "File unavailable" }, { status: 502 });
   return new NextResponse(Buffer.from(bytes), {

@@ -220,3 +220,67 @@ test("VECO: expected receipt months respect move-in, tracking start and due day"
   const before = expectedVecoMonths({ moveIn: "2026-08-20", moveOut: null, trackingStart: "2026-09", dueDay: 10, today: "2026-11-05" });
   assert.deepEqual(before, ["2026-09"], "October isn't due until Nov 10");
 });
+
+// ─── Phase 1 follow-ups: proration and repeating penalties ──────────────────
+
+test("proration: off by default bills the full cycle; DAILY prorates every-cycle rent only", async () => {
+  const { occupiedDays } = await import("@/lib/collections/plan");
+  const s = cycleSchedule(DAWSON, "2026-11-A")!; // Nov 15 – Nov 29 (15 days)
+  assert.deepEqual(occupiedDays({ periodStart: s.periodStart, periodEnd: s.periodEnd, occupiedFrom: "2026-11-20", occupiedTo: null }), { occupied: 10, total: 15 });
+  assert.deepEqual(occupiedDays({ periodStart: s.periodStart, periodEnd: s.periodEnd, occupiedFrom: "2026-10-01", occupiedTo: "2026-11-15" }), { occupied: 1, total: 15 });
+  const rent: RecurringChargeInput = { id: "r", type: "RENT", description: "Rent", amountCentavos: 500000, amountBasis: "PER_CYCLE", frequency: "EVERY_CYCLE", intervalMonths: 1, cycleKey: null, startMonth: "2026-01", endMonth: null, isActive: true };
+  const net: RecurringChargeInput = { ...rent, id: "n", type: "INTERNET", description: "Internet", amountCentavos: 50000, amountBasis: "PER_OCCURRENCE", frequency: "MONTHLY" };
+  const base = { cycle: s, monthlyCycleKey: "A", recurring: [rent, net], water: WATER, occupantCount: 2, waterOverride: null };
+  const full = planCycleCharges({ ...base, proration: { policy: "NONE", periodStart: s.periodStart, periodEnd: s.periodEnd, occupiedFrom: "2026-11-20", occupiedTo: null } });
+  assert.equal(full.charges.find((c) => c.type === "RENT")!.amountCentavos, 500000);
+  const pro = planCycleCharges({ ...base, proration: { policy: "DAILY", periodStart: s.periodStart, periodEnd: s.periodEnd, occupiedFrom: "2026-11-20", occupiedTo: null } });
+  const r = pro.charges.find((c) => c.type === "RENT")!;
+  assert.equal(r.amountCentavos, 333333, "5,000 × 10/15, rounded to the centavo");
+  assert.equal((r.calc as { fullCentavos: number }).fullCentavos, 500000);
+  assert.equal(pro.charges.find((c) => c.type === "INTERNET")!.amountCentavos, 50000, "monthly items are never prorated");
+  assert.equal(pro.charges.find((c) => c.type === "WATER")!.amountCentavos, 55000, "water is never prorated");
+  const whole = planCycleCharges({ ...base, proration: { policy: "DAILY", periodStart: s.periodStart, periodEnd: s.periodEnd, occupiedFrom: "2026-10-01", occupiedTo: null } });
+  assert.equal(whole.charges.find((c) => c.type === "RENT")!.amountCentavos, 500000, "a full cycle is unchanged");
+});
+
+test("penalties: EACH_CYCLE needs a cap, repeats on the same basis, keys differ per carrying cycle", () => {
+  const on = { penaltyEnabled: true, penaltyRateBps: 500, penaltyGraceDays: 3, penaltyRepeat: "EACH_CYCLE", penaltyBasis: "STATEMENT_UNPAID_CHARGES", penaltyMaxRepeats: null };
+  assert.match(penaltyConfigProblem(on)!, /how many penalties/);
+  const cfg = { ...on, penaltyMaxRepeats: 2 };
+  assert.equal(penaltyConfigProblem(cfg), null);
+  const cand = { statementId: "s1", dueDate: "2026-11-15", unpaidNonPenaltyCentavos: 500000, tenantExempt: false };
+  const first = assessPenalty(cfg, { ...cand, priorPenalties: 0, carrierPeriodKey: "2026-12-A" }, "2026-12-01");
+  const second = assessPenalty(cfg, { ...cand, priorPenalties: 1, carrierPeriodKey: "2026-12-B" }, "2026-12-20");
+  const third = assessPenalty(cfg, { ...cand, priorPenalties: 2, carrierPeriodKey: "2027-01-A" }, "2027-01-10");
+  assert.ok(first.apply && second.apply);
+  assert.equal(third.apply, false, "cap reached");
+  if (first.apply && second.apply) {
+    assert.equal(first.sourceKey, "penalty:s1");
+    assert.equal(second.sourceKey, "penalty:s1:2026-12-B");
+    assert.equal(first.amountCentavos, 25000);
+    assert.equal(second.amountCentavos, 25000, "repeat is on the statement's own unpaid charges — never compounding");
+  }
+  const once = { ...cfg, penaltyRepeat: "ONCE" };
+  assert.equal(assessPenalty(once, { ...cand, priorPenalties: 1, carrierPeriodKey: "2026-12-B" }, "2026-12-20").apply, false, "ONCE never repeats");
+});
+
+test("maintenance statuses: legacy values normalize; role moves are limited", async () => {
+  const { normalizeStatus, allowedMoves, rawStatuses } = await import("@/lib/operations/maintenance-status");
+  assert.equal(normalizeStatus("open"), "SUBMITTED");
+  assert.equal(normalizeStatus("in_progress"), "IN_PROGRESS");
+  assert.equal(normalizeStatus("resolved"), "COMPLETED");
+  assert.equal(normalizeStatus("WAITING"), "WAITING");
+  assert.ok(rawStatuses(["SUBMITTED"]).includes("open"));
+  assert.deepEqual(allowedMoves("CARETAKER", "SUBMITTED"), [], "caretakers can't pick up unassigned work");
+  assert.ok(!allowedMoves("CARETAKER", "IN_PROGRESS").includes("CLOSED"), "only the office closes");
+  assert.ok(allowedMoves("ADMIN", "COMPLETED").includes("CLOSED"));
+  assert.deepEqual(allowedMoves("ADMIN", "CLOSED"), ["IN_PROGRESS"], "closed requests can only be reopened");
+});
+
+test("checklist template text: '*' marks required, blank lines ignored, limits enforced", async () => {
+  const { parseItemLines, itemsToLines } = await import("@/lib/operations/checklists");
+  const items = parseItemLines("* Keys returned\n\nRoom photos\n*  Final reading ");
+  assert.deepEqual(items, [{ label: "Keys returned", required: true }, { label: "Room photos", required: false }, { label: "Final reading", required: true }]);
+  assert.equal(itemsToLines(items), "* Keys returned\nRoom photos\n* Final reading");
+  assert.throws(() => parseItemLines("   \n "), /at least one/);
+});

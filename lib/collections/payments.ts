@@ -195,6 +195,9 @@ export async function reversePayment(actor: Actor, paymentId: string, reason: st
   const p = await adminPayment(actor, paymentId);
   const why = reason?.trim();
   if (!why) throw invalid("A reason is required to reverse a payment");
+  // Deposit/advance applications are undone from the deposit ledger, which
+  // restores the fund and reverses this payment together.
+  if (p.method === "deposit" || p.method === "advance_rent") throw conflict("This payment came from the deposit — undo it from the tenant's deposit ledger instead");
   return inTransaction(async (tx) => {
     await lockTenant(tx, p.tenantId);
     const claimed = await tx.rentPayment.updateMany({

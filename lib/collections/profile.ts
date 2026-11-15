@@ -53,6 +53,9 @@ export const profileUpdateSchema = z.object({
   penaltyEnabled: z.boolean().optional(),
   penaltyRateBps: z.number().int().min(1).max(10000).nullable().optional(),
   penaltyGraceDays: z.number().int().min(0).max(60).nullable().optional(),
+  penaltyRepeat: z.enum(["ONCE", "EACH_CYCLE"]).optional(),
+  penaltyMaxRepeats: z.number().int().min(1).max(24).nullable().optional(),
+  prorationPolicy: z.enum(["NONE", "DAILY"]).optional(),
   meterUnitLabel: z.string().trim().min(1).max(10).optional(),
   meterAllowance: z.string().regex(/^\d{1,9}(\.\d{1,3})?$/).nullable().optional(),
   meterExcessRateCentavos: centavos.nullable().optional(),
@@ -84,8 +87,9 @@ export async function upsertProfile(actor: Actor, propertyId: string, raw: Profi
       penaltyEnabled: true,
       penaltyRateBps: next.penaltyRateBps ?? null,
       penaltyGraceDays: next.penaltyGraceDays ?? null,
-      penaltyRepeat: existing?.penaltyRepeat ?? "ONCE",
+      penaltyRepeat: next.penaltyRepeat ?? "ONCE",
       penaltyBasis: existing?.penaltyBasis ?? "STATEMENT_UNPAID_CHARGES",
+      penaltyMaxRepeats: next.penaltyMaxRepeats ?? null,
     });
     if (problem) throw invalid(`Can't turn on late penalties: ${problem}`);
   }

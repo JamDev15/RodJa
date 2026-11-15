@@ -7,6 +7,7 @@ import { requireAdmin, type Actor } from "./actor";
 import { formatDateOnly, formatMonth, fromDbDate } from "./calendar";
 import { notFound } from "./errors";
 import { formatCentavos } from "./money";
+import { buildStatementPdf } from "./documents";
 
 export async function sendStatementEmail(statementId: string): Promise<{ sent: boolean; reason?: string }> {
   const st = await prisma.statement.findUnique({ where: { id: statementId }, include: { tenant: { include: { unit: { include: { property: true } } } } } });
@@ -30,8 +31,13 @@ export async function sendStatementEmail(statementId: string): Promise<{ sent: b
     <p style="margin-top:16px">Sign in to the tenant portal to see the full statement and upload your payment proof.</p>
     ${button(`${APP_URL}/tenant/billing/statements/${st.id}`, "View statement")}
   `, `${st.tenant.unit.property.name} · Sent through TenantHub`);
+  const pdf = await buildStatementPdf(st).catch((err) => {
+    console.error("Statement PDF failed; sending without attachment:", err);
+    return null;
+  });
   const ok = await sendEmail({
     to: email,
+    attachments: pdf ? [{ filename: pdf.fileName, content: pdf.bytes }] : undefined,
     subject: `Statement ${st.number} — ${formatCentavos(st.totalDueCentavos ?? 0)} due ${formatDateOnly(fromDbDate(st.dueDate))}`,
     html,
     log: { accountId: st.accountId, tenantId: st.tenantId, recipientType: "tenant", recipientName: st.tenant.name, category: "invoice" },

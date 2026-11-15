@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { formatDate } from "@/lib/utils";
 import Link from "next/link";
+import { tenantNoticeWhere } from "@/lib/operations/announcements";
 import { Bell, AlertTriangle, Info } from "lucide-react";
 
 export default async function TenantNoticesPage() {
@@ -9,8 +10,9 @@ export default async function TenantNoticesPage() {
   const tenantId = (session?.user as any)?.tenantId;
   const accountId = (session?.user as any)?.accountId;
 
+  const tenancy = await prisma.tenant.findUnique({ where: { id: tenantId }, select: { unit: { select: { propertyId: true } } } });
   const notices = await prisma.notice.findMany({
-    where: { OR: [{ tenantId }, { accountId, tenantId: null }] },
+    where: tenantNoticeWhere(accountId, tenantId, tenancy?.unit.propertyId ?? null),
     orderBy: { createdAt: "desc" },
   });
 

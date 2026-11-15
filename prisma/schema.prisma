@@ -171,6 +171,13 @@ model Tenant {
   charges                  Charge[]
   rentPayments             RentPayment[]
   vecoReceipts             VecoReceipt[]
+  occupants                Occupant[]
+  checklists               TenancyChecklist[]
+  depositTransactions      DepositTransaction[]
+  leaseTerms               LeaseTerm[]
+  leaseDocuments           LeaseDocument[]
+  moveOut                  MoveOut?
+  messageThreads           MessageThread[]
 }
 
 model Payment {
@@ -194,17 +201,34 @@ model Payment {
 }
 
 model MaintenanceRequest {
-  id          String    @id @default(cuid())
-  tenantId    String
-  tenant      Tenant    @relation(fields: [tenantId], references: [id])
-  title       String
-  description String
-  priority    String    @default("normal")
-  status      String    @default("open")
-  images      Json?
-  resolvedAt  DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id           String              @id @default(cuid())
+  // Optional so administrators can log common-area work orders.
+  tenantId     String?
+  tenant       Tenant?             @relation(fields: [tenantId], references: [id])
+  // Set on requests created since Phase 2; older rows are reached through
+  // tenant → unit → property.
+  accountId    String?
+  propertyId   String?
+  unitId       String?
+  title        String
+  description  String
+  priority     String              @default("normal") // low | normal | high | urgent
+  // Legacy: open | in_progress | resolved. Phase 2: SUBMITTED | ASSIGNED |
+  // IN_PROGRESS | WAITING | COMPLETED | CLOSED (lib/operations/maintenance.ts
+  // reads both).
+  status       String              @default("open")
+  category     String?
+  source       String? // TENANT | ADMIN
+  assignedToId String?
+  images       Json?
+  resolvedAt   DateTime?
+  closedAt     DateTime?
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  updates      MaintenanceUpdate[]
+
+  @@index([accountId, status])
+  @@index([assignedToId])
 }
 
 model Reminder {
@@ -226,6 +250,10 @@ model Notice {
   title     String
   content   String
   type      String   @default("general")
+  // Announcements to one property's tenants (tenantId null). Null = every
+  // tenant in the account, as before.
+  propertyId String?
+  createdBy  String?
   createdAt DateTime @default(now())
 }
 
@@ -641,6 +669,11 @@ model BillingProfile {
   penaltyGraceDays        Int?
   penaltyBasis            String   @default("STATEMENT_UNPAID_CHARGES")
   penaltyRepeat           String   @default("ONCE")
+  // EACH_CYCLE only: how many penalties one statement can receive in total.
+  penaltyMaxRepeats       Int?
+  // Partial cycles at move-in / move-out: NONE bills the full cycle; DAILY
+  // prorates every-cycle rent by days occupied. Off until the owner decides.
+  prorationPolicy         String   @default("NONE")
   // Water meter monitoring. Excess charges stay off until both the
   // allowance and the rate are set.
   meterUnitLabel          String   @default("m³")
@@ -825,6 +858,8 @@ model RentPayment {
   reversedAt      DateTime?
   reversalReason  String?
   receiptNumber   String?
+  // Set when the receipt email went out (claimed before sending, cleared on failure).
+  receiptEmailedAt DateTime?
   createdAt       DateTime            @default(now())
   updatedAt       DateTime            @updatedAt
   allocations     PaymentAllocation[]
@@ -941,7 +976,7 @@ model StoredFile {
   accountId      String
   propertyId     String?
   tenantId       String?
-  purpose        String // PAYMENT_PROOF | VECO_RECEIPT | PROPERTY_LOGO
+  purpose        String // PAYMENT_PROOF | VECO_RECEIPT | PROPERTY_LOGO | OCCUPANT_ID | OCCUPANT_PHOTO | LEASE_DOCUMENT | MOVEOUT_PHOTO | MAINTENANCE_PHOTO | MESSAGE_ATTACHMENT | CHECKLIST_PHOTO
   fileName       String
   mimeType       String
   sizeBytes      Int
@@ -986,4 +1021,228 @@ model CaretakerProperty {
   createdAt  DateTime @default(now())
 
   @@unique([userId, propertyId])
+}
+
+// ─── Phase 2: tenancy lifecycle and operations ──────────────────────────────
+
+// Everyone living in the room under one tenancy, including the tenant of
+// record (max 4 at a time, enforced in lib/operations/occupants.ts). ID and
+// photo files are private StoredFiles readable by administrators only.
+model Occupant {
+  id           String    @id @default(cuid())
+  accountId    String
+  tenantId     String
+  tenant       Tenant    @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  name         String
+  isPrimary    Boolean   @default(false)
+  relationship String?
+  phone        String?
+  idFileId     String?
+  photoFileId  String?
+  movedInOn    DateTime  @db.Date
+  movedOutOn   DateTime? @db.Date
+  notes        String?
+  createdBy    String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([tenantId])
+}
+
+// Owner-editable checklist templates (MOVE_IN | MOVE_OUT). items:
+// [{ "label": "Keys handed over", "required": true }]
+model ChecklistTemplate {
+  id         String   @id @default(cuid())
+  accountId  String
+  propertyId String?
+  kind       String
+  name       String
+  items      Json
+  isActive   Boolean  @default(true)
+  createdBy  String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([accountId, kind])
+}
+
+// One move-in and one move-out checklist per tenancy, copied from a template
+// so later template edits never rewrite history.
+model TenancyChecklist {
+  id          String                 @id @default(cuid())
+  accountId   String
+  tenantId    String
+  tenant      Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  kind        String
+  templateId  String?
+  title       String
+  status      String                 @default("OPEN") // OPEN | COMPLETED
+  completedAt DateTime?
+  completedBy String?
+  createdBy   String
+  createdAt   DateTime               @default(now())
+  items       TenancyChecklistItem[]
+
+  @@unique([tenantId, kind])
+}
+
+model TenancyChecklistItem {
+  id          String           @id @default(cuid())
+  checklistId String
+  checklist   TenancyChecklist @relation(fields: [checklistId], references: [id], onDelete: Cascade)
+  position    Int
+  label       String
+  required    Boolean          @default(false)
+  done        Boolean          @default(false)
+  doneAt      DateTime?
+  doneBy      String?
+  note        String?
+  photoFileId String?
+
+  @@index([checklistId])
+}
+
+// Security deposit and advance rent, kept apart from rent receivables.
+// Balance of a fund = SUM(amountCentavos). RECEIVED is positive; APPLIED
+// (to unpaid charges, through an APPROVED RentPayment), REFUNDED and
+// FORFEITED are negative; REVERSAL offsets one earlier row exactly.
+model DepositTransaction {
+  id             String   @id @default(cuid())
+  accountId      String
+  propertyId     String
+  tenantId       String
+  tenant         Tenant   @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  fund           String // SECURITY_DEPOSIT | ADVANCE_RENT
+  kind           String // RECEIVED | APPLIED | REFUNDED | FORFEITED | REVERSAL
+  amountCentavos Int
+  occurredOn     DateTime @db.Date
+  method         String?
+  reference      String?
+  reason         String?
+  paymentId      String?
+  reversalOfId   String?  @unique
+  createdBy      String
+  createdAt      DateTime @default(now())
+
+  @@index([tenantId, fund])
+}
+
+// Lease terms per tenancy; a renewal is a new term that starts after the
+// previous one ends (renewalOfId).
+model LeaseTerm {
+  id                   String    @id @default(cuid())
+  accountId            String
+  tenantId             String
+  tenant               Tenant    @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  startDate            DateTime  @db.Date
+  endDate              DateTime? @db.Date
+  monthlyRentCentavos  Int?
+  renewalOfId          String?   @unique
+  notes                String?
+  expiryNoticeSentAt   DateTime?
+  createdBy            String
+  createdAt            DateTime  @default(now())
+
+  @@index([tenantId])
+}
+
+// Owner-provided lease files and signed copies (print → sign → upload).
+model LeaseDocument {
+  id             String   @id @default(cuid())
+  accountId      String
+  tenantId       String
+  tenant         Tenant   @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  leaseTermId    String?
+  kind           String // OWNER_LEASE | SIGNED_COPY | OTHER
+  title          String
+  fileId         String
+  uploadedBy     String
+  uploadedByRole String
+  createdAt      DateTime @default(now())
+
+  @@index([tenantId])
+}
+
+// Move-out workflow for one tenancy. Vacancy is approved only when the
+// checklist, deposit and balance conditions are met (lib/operations/moveout.ts).
+model MoveOut {
+  id                     String    @id @default(cuid())
+  accountId              String
+  propertyId             String
+  unitId                 String
+  tenantId               String    @unique
+  tenant                 Tenant    @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  status                 String    @default("IN_PROGRESS") // IN_PROGRESS | COMPLETED | CANCELLED
+  noticeDate             DateTime? @db.Date
+  plannedDate            DateTime  @db.Date
+  actualDate             DateTime? @db.Date
+  reason                 String?
+  inspectionNotes        String?
+  inspectionPhotoIds     Json?
+  inspectedAt            DateTime?
+  inspectedBy            String?
+  finalReadingId         String?
+  outstandingAtCloseCentavos Int?
+  outstandingNote        String?
+  vacancyApprovedAt      DateTime?
+  vacancyApprovedBy      String?
+  cancelledReason        String?
+  createdBy              String
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+}
+
+// History of a maintenance request: status changes, assignment, notes and
+// photos from the office, the caretaker or the tenant.
+model MaintenanceUpdate {
+  id              String             @id @default(cuid())
+  requestId       String
+  request         MaintenanceRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  actorId         String
+  actorRole       String
+  actorName       String
+  statusFrom      String?
+  statusTo        String?
+  assignedToId    String?
+  note            String?
+  photoFileIds    Json?
+  visibleToTenant Boolean            @default(true)
+  createdAt       DateTime           @default(now())
+
+  @@index([requestId, createdAt])
+}
+
+// Private tenant ↔ office conversations.
+model MessageThread {
+  id              String          @id @default(cuid())
+  accountId       String
+  propertyId      String
+  tenantId        String
+  tenant          Tenant          @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  subject         String
+  status          String          @default("OPEN") // OPEN | CLOSED
+  lastMessageAt   DateTime        @default(now())
+  lastSenderRole  String?
+  adminReadAt     DateTime?
+  tenantReadAt    DateTime?
+  ownerNotifiedAt DateTime?
+  createdAt       DateTime        @default(now())
+  messages        ThreadMessage[]
+
+  @@index([accountId, lastMessageAt])
+  @@index([tenantId])
+}
+
+model ThreadMessage {
+  id               String        @id @default(cuid())
+  threadId         String
+  thread           MessageThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  senderRole       String // TENANT | ADMIN
+  senderId         String
+  senderName       String
+  body             String
+  attachmentFileId String?
+  createdAt        DateTime      @default(now())
+
+  @@index([threadId, createdAt])
 }

@@ -2,7 +2,7 @@
 
 Classification describes the application **as it was on `main` before this branch** (evidence paths point at that code), and the "Required changes" column says what this branch did or what remains.
 
-> The requirements PDF ("To Do List Dawson Res App.pdf") was not available when this was written. Phase 1 IDs (BILL-01…BILL-10, CARETAKER) come from the written brief. Phase 2 and 3 IDs (P2-…, P3-…) are **provisional** and should be remapped to the PDF's IDs.
+> The requirements PDF ("To Do List Dawson Res App.pdf") was not available when this was written. Phase 1 IDs (BILL-01…BILL-10, CARETAKER) come from the written brief. Phase 2 and 3 IDs (P2-…, P3-…) are **provisional** and should be remapped to the PDF's IDs. Phase 1 and Phase 2 are implemented on this branch; Phase 3 is assessed only.
 
 Classifications: **Existing** · **Minor Modification** · **Major Modification** · **Not Supported** · **Deferred**
 
@@ -24,24 +24,35 @@ Classifications: **Existing** · **Minor Modification** · **Major Modification*
 | SEC Protected evidence | Not Supported | Public bucket URLs (`lib/storage.ts` → `/object/public/payment-proofs/…`) | `StoredFile` in a **private** Supabase bucket (or Postgres when Supabase isn't configured), served only through `/api/files/[id]` after a per-file check; type detected from file content; 5 MB limit; `no-store` + sandbox headers. | 1 |
 | AUDIT Financial history | Not Supported | — | `BillingAuditLog` for approvals, rejections, reversals, waivers, overrides, publications, settings changes; allocations and adjustments are reversed, never deleted. | 1 |
 
-## Phase 2 — reuse existing features; substantial additions deferred
+## Phase 1 follow-ups (implemented on this branch, second commit set)
 
-| Requirement (provisional ID) | Classification | Evidence / file paths | Required changes | Phase |
+| Requirement | Classification (before) | Evidence / file paths | Required changes (done) | Phase |
 |---|---|---|---|---|
-| P2-OCC Tenant + occupant records, max 4 per room | Minor Modification (count done) | `Tenant` holds one person per tenancy | Occupant **count** added for water (Phase 1). Named occupant records with max-4 validation: new `Occupant` model + UI | 2 |
-| P2-PRIV Restricted photos, IDs, contact details | Not Supported | Tenant has phone/email/emergencyContact only | Reuse `StoredFile` + `/api/files` access checks for ID photos; restrict fields from caretaker | 2 |
-| P2-HIST Historical occupancy | Existing | Each `Tenant` row is a tenancy with `moveInDate`, `moveOutDate`, `isActive`; statements and payments are per tenancy | None for billing (verified by test "historical tenancy separation"); a room-history view would be a small UI addition | 2 |
-| P2-MOVEIN Customizable move-in checklist | Not Supported | — | Checklist template + per-tenancy instance | 2 |
-| P2-DEP Advance rent and security deposit kept separate | Minor Modification | `Tenant.depositAmount`, `Tenant.depositPaid`, `Unit.depositAmount` (Float); no advance-rent field | Deposit/advance ledger separate from rent receivables (could reuse `Charge`/`RentPayment` with a non-rent type excluded from rental income) | 2 |
-| P2-LEASE Owner-provided lease uploads and signed copies | Minor Modification | E-signature contracts exist: `app/dashboard/contracts`, `lib/contracts.ts`, `Contract` model | Add upload of the owner's own lease PDF and the signed scan (reuse `StoredFile`). No legal-compliance claim made for e-signatures. | 2 |
-| P2-RENEW Lease dates, renewals, expiry reminders | Existing | `Contract.startDate/endDate`; automation trigger `lease_end` (`lib/automations.ts`) | Renewal record (new term on same tenancy) | 2 |
-| P2-PSU Print-sign-upload | Not Supported | — | Print contract PDF (exists), upload signed scan (new, small) | 2 |
-| P2-MOVEOUT Move-out checklist, inspection, final meter reading, damages, deposit reconciliation, approved vacancy | Not Supported | — | Awaiting owner's move-out SOP. Final meter reading can reuse `MeterReading`; damages can post as `MISC` charges; deposit applied as a credit | 2 |
-| P2-MAINT Maintenance with assignment, urgency, photos, statuses Submitted / Assigned / In Progress / Waiting / Completed / Closed | Major Modification | `MaintenanceRequest` (statuses `open` / `in_progress` / `resolved`, `priority`, `images` Json); tenant create only (`app/api/tenant/maintenance/route.ts`); no landlord status update or assignment found | Status enum migration, assignment to caretaker users, photo upload via `StoredFile`, status history | 2 |
-| P2-WO Caretaker work orders, notes, photos, updates | Not Supported | Caretaker role now exists (Phase 1) | Builds on P2-MAINT | 2 |
-| P2-MSG Private tenant–administrator messages | Not Supported | `MessageLog` records outbound sends only | Conversation threads | 2 |
-| P2-ANN Optional announcements | Minor Modification | `Notice` model + tenant notices page; notices are created by reminders/automations/assistant (`lib/automations.ts`, `app/api/assistant/route.ts`) | Simple "post announcement to property" form | 2 |
-| P2-DASH Occupancy, lease expiry, maintenance, move-in/out summaries | Minor Modification | `app/dashboard/page.tsx`, `app/dashboard/analytics` | Summary cards per property | 2 |
+| Statement PDF | Minor Modification | Printable page only (`components/collections/statement-document.tsx`); PDF code existed for invoices (`lib/pdf.ts`) | `lib/collections/documents.ts` builds the PDF from the issued snapshot (with logo); `GET /api/files/statements/[id]` (admins of the account / the tenant, issued statements only); attached to statement emails | 1 |
+| Receipt PDF and email for collections payments | Minor Modification | Receipt number only | `GET /api/files/receipts/[id]`; receipt emailed after approval (best effort, at most once via `RentPayment.receiptEmailedAt`, respects the account's auto-receipt setting) | 1 |
+| Proration (owner decision 6) | Not Supported | Full cycle billed | `BillingProfile.prorationPolicy` NONE (default) / DAILY; prorates every-cycle rent by days occupied, formula kept on the charge (`lib/collections/plan.ts`) | 1 |
+| Repeating penalties (owner decision 7) | Not Supported | Once per statement only | `penaltyRepeat` EACH_CYCLE with required `penaltyMaxRepeats`; repeats always on the original statement's unpaid charges (never compounding); per-cycle keys keep reruns harmless (`lib/collections/penalties.ts`) | 1 |
+
+## Phase 2 — tenancy lifecycle and operations (implemented on this branch)
+
+All under **Dashboard → Operations** (`app/dashboard/operations/*`, services in `lib/operations/*`). Tenant-facing parts (messages, household on the home screen, signed-lease upload) appear only for properties with the Dawson feature set on (an enabled billing profile), so other landlords' tenant portals are unchanged.
+
+| Requirement (provisional ID) | Classification (before) | Evidence / file paths (before) | Required changes (done) | Phase |
+|---|---|---|---|---|
+| P2-OCC Tenant + occupant records, max 4 per room | Minor Modification | `Tenant` holds one person per tenancy | `Occupant` model (includes the tenant of record), max 4 active enforced under a lock; moved-out people kept for history. Billing occupant count is never changed silently — a mismatch warning links to it. `lib/operations/occupants.ts` | 2 |
+| P2-PRIV Restricted photos, IDs, contact details | Not Supported | Tenant has phone/email/emergencyContact only | ID and photo uploads are private `StoredFile`s (`OCCUPANT_ID`, `OCCUPANT_PHOTO`), readable by the office only — not by tenants or caretakers (`canReadFile` purpose rules). Tenants see household names only; caretakers see room numbers only | 2 |
+| P2-HIST Historical occupancy | Existing | Each `Tenant` row is a tenancy | Tenancies list has Current / Moved out views; household, checklists, deposits, lease and move-out are all per tenancy | 2 |
+| P2-MOVEIN Customizable move-in checklist | Not Supported | — | `ChecklistTemplate` (account-wide or per property, edited as text, `*` = required) copied into `TenancyChecklist` + items (done / note / photo). Completion blocked until required items are done; reopen needs a reason. `lib/operations/checklists.ts` | 2 |
+| P2-DEP Advance rent and security deposit kept separate | Minor Modification | `Tenant.depositAmount`, `depositPaid` (Float, no ledger) | `DepositTransaction` ledger per fund (RECEIVED / APPLIED / REFUNDED / FORFEITED / REVERSAL). Held money never touches rent balances; applying creates an APPROVED `RentPayment` (method `deposit` / `advance_rent`) in the same transaction; undo restores fund and debt together. Legacy deposit fields untouched. `lib/operations/deposits.ts` | 2 |
+| P2-LEASE Owner-provided lease uploads and signed copies | Minor Modification | E-signature contracts exist (`lib/contracts.ts`) | `LeaseDocument` (OWNER_LEASE / SIGNED_COPY / OTHER) on private storage; shown to the tenant in Documents. No legal-compliance claim made. `lib/operations/leases.ts` | 2 |
+| P2-RENEW Lease dates, renewals, expiry reminders | Existing (contracts) | `Contract.startDate/endDate` | `LeaseTerm` per tenancy; overlap refused; renewal = next term from the day after, only once; leases ending in 60 days on the overview; owner email 30 days before the end (daily cron). The old `lease_end` automation is unchanged | 2 |
+| P2-PSU Print-sign-upload | Not Supported | — | Office uploads the lease PDF → tenant prints and signs → tenant (or office) uploads the signed copy | 2 |
+| P2-MOVEOUT Move-out checklist, inspection, final meter reading, damages, deposit reconciliation, approved vacancy | Not Supported | — | `MoveOut` workflow: checklist (generic until Dawson's SOP arrives), inspection notes + photos, final reading through the normal meter rules, damages as `DAMAGE` charges, deposit settled via the deposit ledger. Vacancy approval is refused until required checklist items are done, both deposit funds are zero and the final reading exists; an open balance needs a recorded reason. Approval ends the tenancy, moves out the household and marks the room vacant. `lib/operations/moveout.ts` | 2 |
+| P2-MAINT Maintenance with assignment, urgency, photos, statuses Submitted / Assigned / In Progress / Waiting / Completed / Closed | Major Modification | `MaintenanceRequest` open / in_progress / resolved, tenant create only | New statuses (legacy values read as Submitted / In progress / Completed and left as they are until changed), assignment to caretakers of the property or staff, urgency, private photos, `MaintenanceUpdate` history with tenant-visible / internal notes, conditional status writes. Office can log common-area work orders (`tenantId` now optional). `lib/operations/maintenance.ts` | 2 |
+| P2-WO Caretaker work orders, notes, photos, updates | Not Supported | — | `/caretaker/work-orders`: only requests assigned to them at their properties; may start / wait / complete (not close), add notes and photos; never sees tenant names, phones or money | 2 |
+| P2-MSG Private tenant–administrator messages | Not Supported | `MessageLog` is outbound history only | `MessageThread` + `ThreadMessage`, optional private attachment, unread tracking, close/reopen; email notice to the tenant on office replies and to the owner at most hourly per conversation. Caretakers have no access. `lib/operations/messages.ts` | 2 |
+| P2-ANN Optional announcements | Minor Modification | `Notice` model, created by automations | Announcements form per property (`Notice.propertyId`), optional email to tenants with an address; tenant Notices shows own + account-wide + their property's announcements | 2 |
+| P2-DASH Occupancy, lease expiry, maintenance, move-in/out summaries | Minor Modification | `app/dashboard/page.tsx` | Operations overview: occupancy and vacant rooms, open/urgent/unassigned maintenance, leases ending, move-outs in progress, upcoming move-ins, unfinished move-in checklists, unread messages. `lib/operations/summary.ts` | 2 |
 
 ## Phase 3 — assess and defer
 

@@ -86,7 +86,10 @@ export default async function TenantBillingPage() {
             {p.status === "PENDING" && <p className="mt-1 text-xs text-th-muted">Waiting for the office to verify.</p>}
             {p.status === "REJECTED" && <p className="mt-1 text-xs text-th-danger">Not accepted: {p.rejectedReason}</p>}
             {p.status === "REVERSED" && <p className="mt-1 text-xs text-th-danger">Reversed: {p.reversalReason}</p>}
-            <div className="mt-1"><FileLink id={p.proofFileId} label="Your proof" /></div>
+            <div className="mt-1 flex flex-wrap gap-3">
+              <FileLink id={p.proofFileId} label="Your proof" />
+              {p.status === "APPROVED" && p.receiptNumber && <a href={`/api/files/receipts/${p.id}?download`} className="text-xs font-medium text-th-accent underline-offset-2 hover:underline">Download receipt</a>}
+            </div>
           </div>
         ))}
       </section>

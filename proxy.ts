@@ -56,7 +56,7 @@ export async function proxy(request: NextRequest) {
     }
 
     if (startsWithAny(pathname, FILE_API_PREFIXES)) {
-      if (!session || !["TENANT", "LANDLORD", "STAFF"].includes(role)) return unauthorized();
+      if (!session || !["TENANT", "LANDLORD", "STAFF", "CARETAKER"].includes(role)) return unauthorized();
       return NextResponse.next();
     }
 
