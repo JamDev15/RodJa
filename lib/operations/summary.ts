@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { adminProperty, type Actor } from "@/lib/collections/actor";
 import { addDays, fromDbDate, toDbDate } from "@/lib/collections/calendar";
 import { APP_URL, button, emailLayout, escapeHtml, sendEmail } from "@/lib/email";
-import { today } from "./common";
+import { today, toDateOnly } from "./common";
 import { expiringLeases } from "./leases";
 import { accountScope, listRequests, OPEN_RAW } from "./maintenance";
 import { listThreads } from "./messages";
@@ -35,7 +35,7 @@ export async function operationsSummary(actor: Actor, propertyId: string) {
     maintenance: { open: openRequests.length, urgent: openRequests.filter((r) => r.priority === "urgent" || r.priority === "high").length, unassigned: openRequests.filter((r) => !r.assignee).length, byStatus, top: openRequests.slice(0, 5) },
     leases: leases.map((l) => ({ id: l.id, tenantId: l.tenant.id, tenantName: l.tenant.name, room: l.tenant.unit.unitNumber, endDate: fromDbDate(l.endDate!) })),
     moveOuts: moveOuts.map((m) => ({ id: m.id, tenantId: m.tenant.id, tenantName: m.tenant.name, room: m.tenant.unit.unitNumber, plannedDate: fromDbDate(m.plannedDate) })),
-    moveIns: upcomingMoveIns.map((t) => ({ tenantId: t.id, tenantName: t.name, room: t.unit.unitNumber, date: fromDbDate(t.moveInDate) })),
+    moveIns: upcomingMoveIns.map((t) => ({ tenantId: t.id, tenantName: t.name, room: t.unit.unitNumber, date: toDateOnly(t.moveInDate) })),
     moveInChecklistsOpen: recentMoveIns.filter((t) => t.checklists[0]?.status !== "COMPLETED").map((t) => ({ tenantId: t.id, tenantName: t.name, room: t.unit.unitNumber, started: t.checklists.length > 0 })),
     messages: { unread: threads.filter((t) => t.unread).length, open: threads.filter((t) => t.status === "OPEN").length },
   };

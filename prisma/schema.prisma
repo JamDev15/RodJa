@@ -977,6 +977,7 @@ model StoredFile {
   propertyId     String?
   tenantId       String?
   purpose        String // PAYMENT_PROOF | VECO_RECEIPT | PROPERTY_LOGO | OCCUPANT_ID | OCCUPANT_PHOTO | LEASE_DOCUMENT | MOVEOUT_PHOTO | MAINTENANCE_PHOTO | MESSAGE_ATTACHMENT | CHECKLIST_PHOTO
+  // Phase 3 adds EXPENSE_RECEIPT and UTILITY_BILL (office-only).
   fileName       String
   mimeType       String
   sizeBytes      Int
@@ -1245,4 +1246,112 @@ model ThreadMessage {
   createdAt        DateTime      @default(now())
 
   @@index([threadId, createdAt])
+}
+
+// ─── Phase 3: expenses, utilities, petty cash ───────────────────────────────
+
+// Operating expense of a property. Corrections are made by voiding with a
+// reason (the row stays). Expenses paid from petty cash or created by paying
+// a utility bill link back to their source and are voided through it.
+model Expense {
+  id                   String    @id @default(cuid())
+  accountId            String
+  propertyId           String
+  unitId               String?
+  maintenanceRequestId String?
+  category             String
+  description          String
+  vendor               String?
+  amountCentavos       Int
+  incurredOn           DateTime  @db.Date
+  paidOn               DateTime? @db.Date
+  method               String? // cash | gcash | maya | bank | check | petty_cash | other
+  referenceNumber      String?
+  receiptFileId        String?
+  source               String    @default("MANUAL") // MANUAL | PETTY_CASH | UTILITY_BILL
+  sourceId             String?   @unique
+  status               String    @default("RECORDED") // RECORDED | VOID
+  voidReason           String?
+  voidedAt             DateTime?
+  voidedBy             String?
+  createdBy            String
+  createdAt            DateTime  @default(now())
+
+  @@index([propertyId, incurredOn])
+  @@index([accountId, status])
+}
+
+// The building's own utility bills: the master water bill and the
+// common-area electricity bill (VECO). Paying a bill records an Expense.
+model UtilityBill {
+  id               String    @id @default(cuid())
+  accountId        String
+  propertyId       String
+  utility          String // WATER | ELECTRICITY
+  scope            String // MASTER | COMMON_AREA
+  billingMonth     String // YYYY-MM
+  periodStart      DateTime? @db.Date
+  periodEnd        DateTime? @db.Date
+  accountNumber    String?
+  consumption      Decimal?  @db.Decimal(12, 3)
+  consumptionUnit  String? // m3 | kWh
+  amountCentavos   Int
+  dueDate          DateTime? @db.Date
+  billFileId       String?
+  expenseId        String?   @unique
+  status           String    @default("UNPAID") // UNPAID | PAID | VOID
+  voidReason       String?
+  notes            String?
+  createdBy        String
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@index([propertyId, utility, billingMonth])
+}
+
+// Readings of the building's own meters (main water meter, common-area
+// electric meter), with the same rules as room meters.
+model MasterMeterReading {
+  id                String   @id @default(cuid())
+  accountId         String
+  propertyId        String
+  utility           String // WATER | ELECTRICITY
+  meterLabel        String
+  readingDate       DateTime @db.Date
+  value             Decimal  @db.Decimal(12, 3)
+  isMeterReset      Boolean  @default(false)
+  previousReadingId String?
+  usage             Decimal? @db.Decimal(12, 3)
+  status            String   @default("ACTIVE") // ACTIVE | VOID
+  voidReason        String?
+  notes             String?
+  enteredBy         String
+  enteredByRole     String
+  createdAt         DateTime @default(now())
+
+  @@index([propertyId, utility, meterLabel, readingDate], map: "MasterMeterReading_meter_date_idx")
+}
+
+// Petty cash per property. Balance = SUM(amountCentavos); it can never go
+// below zero. TOP_UP adds cash (a transfer, not an expense); DISBURSEMENT
+// pays for something and creates the matching Expense in the same
+// transaction; COUNT_ADJUSTMENT records a counted difference with a reason;
+// REVERSAL offsets one earlier row exactly.
+model PettyCashTransaction {
+  id             String   @id @default(cuid())
+  accountId      String
+  propertyId     String
+  kind           String // TOP_UP | DISBURSEMENT | COUNT_ADJUSTMENT | REVERSAL
+  amountCentavos Int
+  occurredOn     DateTime @db.Date
+  description    String
+  category       String?
+  receiptFileId  String?
+  expenseId      String?  @unique
+  reference      String?
+  reversalOfId   String?  @unique
+  createdBy      String
+  createdAt      DateTime @default(now())
+
+  @@index([propertyId, occurredOn])
 }

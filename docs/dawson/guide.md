@@ -82,12 +82,37 @@ Private conversations with tenants (caretakers can't see them). Start one with *
 ### Announcements
 Post to every current tenant of the property; optionally email those with an address. Remove an announcement if posted by mistake.
 
+## Money and reports (Operations → Expenses, Petty cash, Utilities, Reports)
+
+### Expenses
+**Record an expense**: category, what it was for, amount, date, who was paid, how, the OR/reference number, the room if it's for one room, and a photo/PDF of the receipt (kept private to the office). Leave *Paid with* as *Not paid yet* for bills you'll pay later, then use **Mark paid**. Mistakes are **Voided** with a reason; voided entries stay visible with *Show voided*.
+
+### Petty cash
+- **Top up** when cash is put in the box (this isn't an expense).
+- **Spend** for each purchase, with the receipt photo — it's automatically listed under Expenses as paid from petty cash. Spending more than the box holds is refused.
+- **Record a cash count** now and then: enter what you actually counted; any difference is saved as a shortage or overage with your explanation.
+- **Undo** reverses an entry with a reason (undoing spending also voids its expense).
+
+### Utilities
+- **Record a bill** for the building's master water bill or the common-area electricity bill each month (one per month and type), with the scan. **Correct** fixes an unpaid bill; **Mark paid** records it as an expense. To undo a payment, void its expense on the Expenses page; the bill becomes unpaid again.
+- **Building meter readings**: the main water meter and any common-area electric meter. Caretakers can also enter these from their phone.
+
+### Reports
+Pick a report and a month range (up to 24 months), then **Show** or **Download CSV** (opens in Excel or Google Sheets). Each report explains under the table exactly what it counts. In short:
+- **Income**: verified payments by the date paid, split into rent, water, internet, parking, penalties, damages and credit.
+- **Collections**: what was billed each month and how much of it has been paid so far.
+- **Receivables aging**: who owes what today, by how late.
+- **Utilities**: water billed to tenants and collected, against the master water bill; common-area electricity; VECO receipts received.
+- **Expenses** by category, **Cash flow** (money in and out by month), **Occupancy** (room-days, move-ins/outs) and **Deposits held**.
+
 ## Caretaker
 1. Sign in at the normal login page; you land on **Water meter readings**.
 2. For each room, enter the reading and date, then **Save**. The first reading sets the starting point.
 3. If the meter was **replaced or reset**, tick that box so the lower number is accepted as a new starting point.
 4. Readings must be entered in date order. If one was wrong, ask the office to void it.
 5. You won't see payments, balances or tenant finances.
+
+**Building meters** (bottom of the readings page): enter the main water meter (or common-area electric meter) reading and date. One reading per meter per day; the office can void a wrong one.
 
 **Work orders** (top menu): requests the office assigned to you. Open one, then **Update** to start (*In progress*), pause (*Waiting*, e.g. for parts) or finish (*Completed*), with a note. **Add a photo** of the work. Only the office can close a request. You see the room number, not the tenant's name or phone.
 

@@ -40,7 +40,9 @@ export type FilePurpose =
   | "MOVEOUT_PHOTO"
   | "MAINTENANCE_PHOTO"
   | "MESSAGE_ATTACHMENT"
-  | "CHECKLIST_PHOTO";
+  | "CHECKLIST_PHOTO"
+  | "EXPENSE_RECEIPT"
+  | "UTILITY_BILL";
 
 /** Purposes a tenant may read when the file belongs to their tenancy. IDs, inspection and checklist photos are office-only. */
 const TENANT_READABLE = new Set(["PAYMENT_PROOF", "VECO_RECEIPT", "LEASE_DOCUMENT", "MAINTENANCE_PHOTO", "MESSAGE_ATTACHMENT"]);

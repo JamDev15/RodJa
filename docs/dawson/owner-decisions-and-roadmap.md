@@ -31,27 +31,26 @@ Everything below is already a setting or has a safe default; nothing questionabl
 17. **Occupant IDs.** Which IDs are required for each occupant, and how long ID copies are kept after someone leaves (they're kept until deleted; no automatic deletion is built).
 18. **Maintenance.** Which categories and urgency levels Dawson uses, and whether tenants should see caretaker notes (currently they don't unless the office repeats them).
 19. **Messages.** Expected reply time, and whether the owner wants the hourly email notice or none.
+20. **Expense categories.** The built-in list (repairs, building water/electricity, supplies, cleaning, security, salaries, internet, taxes/permits, insurance, other) — add or rename to match Dawson's books.
+21. **Petty cash.** Who handles the box (currently office users only; caretakers can't record spending), the usual float, and how often it's counted.
+22. **Reports.** Whether income should be on a cash basis (payments by date paid — current) or also shown by billing month, and which reports the owner wants emailed monthly (not built; the existing monthly owner email covers the old ledger only).
 
 ## Remaining work and rough effort
 Assumptions: one developer familiar with this codebase; estimates include tests; owner decisions are available; no paid integrations.
 
-**Done on this branch:** Phase 1, the Phase 1 follow-ups (statement and receipt PDFs, receipt email, proration and repeating-penalty settings) and Phase 2 (household, IDs, move-in checklist, deposits and advance rent, lease terms/renewals/uploads, move-out, maintenance and work orders, messages, announcements, operations overview).
+**Done on this branch:** Phase 1, the Phase 1 follow-ups (statement and receipt PDFs, receipt email, proration and repeating-penalty settings), Phase 2 (household, IDs, move-in checklist, deposits and advance rent, lease terms/renewals/uploads, move-out, maintenance and work orders, messages, announcements, operations overview) and Phase 3 (expenses with receipts, building utility bills and meters, petty cash, eight reports with CSV export).
 
 | Item | Est. hours |
 |---|---|
-| **Still to do for Phase 1 / 2** | |
 | Production checks: `prisma migrate diff`, private bucket, a real-device run-through with the owner | 3–4 |
 | Fit the move-out checklist and vacancy rules to Dawson's SOP once provided | 2–4 |
 | Deposit amounts/rules as room settings once decided (decision 15) | 4–6 |
-| Push notifications for new messages / work orders (the app already has web push for owners) | 4–6 |
+| Push notifications for new messages / work orders | 4–6 |
 | Automatic deletion of ID copies after a retention period (if wanted) | 3–4 |
-| **Phase 3** | |
-| Expenses with receipt attachments | 10–14 |
-| Master water and common-area electricity records | 8–12 |
-| Petty cash | 8–10 |
-| Reports (income, collections, receivables, utilities, expenses, cash flow, occupancy, deposits held) with CSV export | 20–30 |
+| Monthly owner email built from the new reports (decision 22) | 4–6 |
+| Caretaker petty-cash entry with office approval (if wanted, decision 21) | 4–6 |
 
-Rough totals: remaining Phase 1/2 items **16–24 h**, Phase 3 **46–66 h**.
+Rough total of remaining optional work: **24–36 h**. Phases 1, 2 and 3 are otherwise complete on this branch.
 
 ## Hosting, storage, email and recurring costs
 Collections billing adds **no new paid service**. It uses the existing Supabase database and storage, Resend email, and the daily Vercel cron.
@@ -74,3 +73,6 @@ Sources: [Resend pricing](https://resend.com/pricing), [Vercel cron usage & pric
 - Tenant-facing Phase 2 features (messages, household, signed-lease upload) only appear for properties with statement billing turned on; other properties' tenant portals are unchanged.
 - Maintenance photos are readable by every caretaker assigned to that property (not only the assignee).
 - No automatic deletion of ID copies.
+- Reports cover the statement-billing ledger only; amounts entered in the older monthly ledger (before go-live) aren't included.
+- Cash flow is a movement report starting at zero for the first month shown, not a bank balance.
+- Petty cash is office-only; caretakers can't record spending.

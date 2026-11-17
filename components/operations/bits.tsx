@@ -11,6 +11,10 @@ export function OpsNav({ propertyId, active }: { propertyId: string; active: str
     ["inbox", "Inbox", `/dashboard/operations/inbox${q}`],
     ["announcements", "Announcements", `/dashboard/operations/announcements${q}`],
     ["checklists", "Checklists", `/dashboard/operations/checklists${q}`],
+    ["expenses", "Expenses", `/dashboard/operations/expenses${q}`],
+    ["petty-cash", "Petty cash", `/dashboard/operations/petty-cash${q}`],
+    ["utilities", "Utilities", `/dashboard/operations/utilities${q}`],
+    ["reports", "Reports", `/dashboard/operations/reports${q}`],
   ];
   return (
     <nav className="-mx-1 flex gap-1 overflow-x-auto pb-1" aria-label="Operations">
