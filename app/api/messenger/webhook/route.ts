@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import { handleWebhook, messengerConfig, validSignature, verifyChallenge } from "@/lib/messenger";
+import { handleWebhook, metaApp, validSignature, verifyChallenge } from "@/lib/messenger";
 
 /**
- * Meta webhook for the Messenger Page. Public route (see proxy.ts): it
+ * Meta webhook for every connected Facebook Page (TenantHub's Meta app). Public route (see proxy.ts): it
  * authenticates every POST by the X-Hub-Signature-256 HMAC with the app
- * secret, and the GET subscription check by MESSENGER_VERIFY_TOKEN.
+ * secret, and the GET subscription check by META_VERIFY_TOKEN.
  */
 export async function GET(req: Request) {
   const challenge = verifyChallenge(new URL(req.url).searchParams);
@@ -13,7 +13,7 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-  if (!messengerConfig()) return new NextResponse("Not configured", { status: 404 });
+  if (!metaApp()) return new NextResponse("Not configured", { status: 404 });
   const raw = await req.text();
   if (!validSignature(raw, req.headers.get("x-hub-signature-256"))) return new NextResponse("Bad signature", { status: 401 });
   let payload: unknown;

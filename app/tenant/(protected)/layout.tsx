@@ -21,11 +21,8 @@ export default async function TenantProtectedLayout({ children }: { children: Re
   });
 
   // Office replies not yet read, for the Messages badge.
-  let unread = 0;
-  if (billing) {
-    const threads = await prisma.messageThread.findMany({ where: { tenantId: user.tenantId, lastSenderRole: "ADMIN" }, select: { lastMessageAt: true, tenantReadAt: true } });
-    unread = threads.filter((t) => !t.tenantReadAt || t.tenantReadAt < t.lastMessageAt).length;
-  }
+  const threads = await prisma.messageThread.findMany({ where: { tenantId: user.tenantId, lastSenderRole: "ADMIN" }, select: { lastMessageAt: true, tenantReadAt: true } });
+  const unread = threads.filter((t) => !t.tenantReadAt || t.tenantReadAt < t.lastMessageAt).length;
 
   return (
     <div className="min-h-screen bg-th-canvas">

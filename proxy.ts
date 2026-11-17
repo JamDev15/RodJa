@@ -9,8 +9,9 @@ import type { NextRequest } from "next/server";
 // unguessable or signed token in their URL instead of a session (tenants sign
 // contracts and open invoices from an emailed link without logging in).
 // /api/messenger/webhook is called by Meta and verifies the request's
-// X-Hub-Signature-256 HMAC with the app secret instead.
-const PUBLIC_API_PREFIXES = ["/api/auth", "/api/signup", "/api/cron", "/api/sign/", "/api/docs/", "/api/renew", "/api/unsubscribe", "/api/messenger/webhook"];
+// X-Hub-Signature-256 HMAC with the app secret instead; /api/facebook/
+// (data deletion) verifies Meta's signed_request the same way.
+const PUBLIC_API_PREFIXES = ["/api/auth", "/api/signup", "/api/cron", "/api/sign/", "/api/docs/", "/api/renew", "/api/unsubscribe", "/api/messenger/webhook", "/api/facebook/"];
 const TENANT_API_PREFIXES = ["/api/tenant/", "/api/payments/submit", "/api/maintenance"];
 // Meter entry: caretakers plus the landlord/staff who manage them.
 const CARETAKER_API_PREFIXES = ["/api/caretaker/"];
@@ -54,6 +55,12 @@ export async function proxy(request: NextRequest) {
 
     if (startsWithAny(pathname, CARETAKER_API_PREFIXES)) {
       if (!session || !["CARETAKER", "LANDLORD", "STAFF"].includes(role)) return unauthorized();
+      return NextResponse.next();
+    }
+
+    if (pathname === "/api/devices" || pathname.startsWith("/api/devices/")) {
+      // Phone-app push registration: tenants and office users (checked again in the route).
+      if (!session || !["TENANT", "LANDLORD", "STAFF"].includes(role)) return unauthorized();
       return NextResponse.next();
     }
 

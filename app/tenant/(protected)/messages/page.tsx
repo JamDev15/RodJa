@@ -13,7 +13,7 @@ export default async function TenantMessagesPage() {
   if (!actor || actor.kind !== "TENANT") redirect("/tenant/login");
   const tenant = await ownTenancy(actor);
   if (!(await tenantFeaturesEnabled(tenant.unit.propertyId))) redirect("/tenant/dashboard");
-  const [threads, messenger] = await Promise.all([listThreads(actor), linkStatus({ kind: "TENANT", tenantId: tenant.id })]);
+  const [threads, messenger] = await Promise.all([listThreads(actor), linkStatus({ kind: "TENANT", tenantId: tenant.id }, tenant.unit.property.accountId)]);
 
   return (
     <div className="space-y-5">

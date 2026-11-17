@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { deleteAccountData } from "@/lib/account-deletion";
 import { adminAccountUpdateSchema, adminAccountDeleteSchema, formatZodError } from "@/lib/validations";
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -66,53 +67,7 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     return NextResponse.json({ error: "Confirmation name does not match" }, { status: 400 });
   }
 
-  // Hard delete, cascading through every account-scoped record. Order
-  // matters — children before parents — since none of these relations are
-  // configured with onDelete: Cascade at the schema level (deliberately;
-  // that'd make cascades possible from any deletion path, not just this
-  // one deliberate admin action). MonthlyLedger is the one exception: it
-  // *is* schema-level cascade-on-Tenant, so it's cleaned up automatically
-  // when the Tenant rows below are deleted.
-  await prisma.$transaction([
-    // Collections billing records (financial history is Restrict-protected
-    // from accidental deletion, so this deliberate wipe clears it first).
-    prisma.paymentAllocation.deleteMany({ where: { payment: { accountId: id } } }),
-    prisma.chargeAdjustment.deleteMany({ where: { accountId: id } }),
-    prisma.waterExcessProposal.deleteMany({ where: { accountId: id } }),
-    prisma.rentPayment.deleteMany({ where: { accountId: id } }),
-    prisma.charge.deleteMany({ where: { accountId: id } }),
-    prisma.statement.deleteMany({ where: { accountId: id } }),
-    prisma.vecoReceipt.deleteMany({ where: { accountId: id } }),
-    prisma.vecoReminderLog.deleteMany({ where: { tenantId: { in: (await prisma.tenant.findMany({ where: { unit: { property: { accountId: id } } }, select: { id: true } })).map((t) => t.id) } } }),
-    prisma.storedFile.deleteMany({ where: { accountId: id } }),
-    prisma.billingAuditLog.deleteMany({ where: { accountId: id } }),
-    prisma.payment.deleteMany({ where: { tenant: { unit: { property: { accountId: id } } } } }),
-    prisma.maintenanceUpdate.deleteMany({ where: { request: { OR: [{ accountId: id }, { tenant: { unit: { property: { accountId: id } } } }] } } }),
-    prisma.maintenanceRequest.deleteMany({ where: { OR: [{ accountId: id }, { tenant: { unit: { property: { accountId: id } } } }] } }),
-    prisma.threadMessage.deleteMany({ where: { thread: { accountId: id } } }),
-    prisma.messageThread.deleteMany({ where: { accountId: id } }),
-    prisma.occupant.deleteMany({ where: { accountId: id } }),
-    prisma.tenancyChecklist.deleteMany({ where: { accountId: id } }),
-    prisma.checklistTemplate.deleteMany({ where: { accountId: id } }),
-    prisma.depositTransaction.deleteMany({ where: { accountId: id } }),
-    prisma.leaseDocument.deleteMany({ where: { accountId: id } }),
-    prisma.leaseTerm.deleteMany({ where: { accountId: id } }),
-    prisma.moveOut.deleteMany({ where: { accountId: id } }),
-    prisma.pettyCashTransaction.deleteMany({ where: { accountId: id } }),
-    prisma.utilityBill.deleteMany({ where: { accountId: id } }),
-    prisma.expense.deleteMany({ where: { accountId: id } }),
-    prisma.masterMeterReading.deleteMany({ where: { accountId: id } }),
-    prisma.reminder.deleteMany({ where: { tenant: { unit: { property: { accountId: id } } } } }),
-    prisma.notice.deleteMany({ where: { accountId: id } }),
-    prisma.tenant.deleteMany({ where: { unit: { property: { accountId: id } } } }),
-    prisma.unit.deleteMany({ where: { property: { accountId: id } } }),
-    prisma.property.deleteMany({ where: { accountId: id } }),
-    prisma.billingRecord.deleteMany({ where: { accountId: id } }),
-    prisma.user.deleteMany({ where: { accountId: id } }),
-    prisma.reminderConfig.deleteMany({ where: { accountId: id } }),
-    prisma.loginToken.deleteMany({ where: { accountId: id } }),
-    prisma.account.delete({ where: { id } }),
-  ]);
+  await deleteAccountData(id);
 
   return NextResponse.json({ success: true });
 }

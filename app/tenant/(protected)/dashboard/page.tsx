@@ -53,7 +53,7 @@ export default async function TenantDashboardPage() {
         </Link>
       )}
 
-      {billing && <HouseholdAndMessages tenantId={tenant.id} />}
+      <HouseholdAndMessages tenantId={tenant.id} />
 
       {/* Overdue Alert */}
       {!billing && overduePayments.length > 0 && (

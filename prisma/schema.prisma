@@ -1381,3 +1381,53 @@ model MessengerLink {
   @@index([tenantId])
   @@index([accountId, kind])
 }
+
+// The Facebook Page an account connected (Settings → Integrations) through
+// TenantHub's Meta app. One Page per account, and a Page can belong to only
+// one account. The Page access token is stored encrypted (lib/crypto-box.ts).
+model MessengerPage {
+  id                   String    @id @default(cuid())
+  accountId            String    @unique
+  pageId               String    @unique
+  pageName             String
+  pageUsername         String?
+  pageTokenEnc         String
+  connectedByFbUserId  String?
+  connectedBy          String
+  connectedAt          DateTime  @default(now())
+  tenantTemplateName   String?
+  tenantTemplateStatus String?
+  officeTemplateName   String?
+  officeTemplateStatus String?
+  lastError            String?
+  updatedAt            DateTime  @updatedAt
+}
+
+// Short-lived result of a Facebook login, while the landlord picks a Page.
+model FacebookConnectRequest {
+  id        String   @id @default(cuid())
+  accountId String
+  actorId   String
+  fbUserId  String
+  pages     Json // [{ id, name, username, tokenEnc }]
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([accountId])
+}
+
+// Native app installs (iOS / Android) that registered for push notifications.
+model DeviceToken {
+  id         String   @id @default(cuid())
+  token      String   @unique
+  platform   String // ios | android
+  accountId  String
+  kind       String // TENANT | ADMIN
+  tenantId   String?
+  userId     String?
+  createdAt  DateTime @default(now())
+  lastSeenAt DateTime @default(now())
+
+  @@index([tenantId])
+  @@index([accountId, kind])
+}

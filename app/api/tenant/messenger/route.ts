@@ -7,7 +7,7 @@ import { tenantFeaturesEnabled } from "@/lib/operations/messages";
 async function tenantOrNull() {
   const actor = await currentActor();
   if (actor?.kind !== "TENANT") return null;
-  const t = await prisma.tenant.findFirst({ where: { id: actor.tenantId, isActive: true, unit: { property: { accountId: actor.accountId } } }, select: { id: true, unit: { select: { propertyId: true } } } });
+  const t = await prisma.tenant.findFirst({ where: { id: actor.tenantId, isActive: true, unit: { property: { accountId: actor.accountId } } }, select: { id: true, unit: { select: { propertyId: true, property: { select: { accountId: true } } } } } });
   if (!t || !(await tenantFeaturesEnabled(t.unit.propertyId))) return null;
   return t;
 }
@@ -16,8 +16,8 @@ async function tenantOrNull() {
 export async function GET() {
   const t = await tenantOrNull();
   if (!t) return NextResponse.json({ error: "Not available" }, { status: 404 });
-  const url = connectUrl({ kind: "TENANT", tenantId: t.id });
-  if (!url) return NextResponse.json({ error: "Messenger alerts aren't set up yet" }, { status: 404 });
+  const url = await connectUrl({ kind: "TENANT", tenantId: t.id }, t.unit.property.accountId);
+  if (!url) return NextResponse.json({ error: "Your landlord hasn't connected Messenger yet" }, { status: 404 });
   return NextResponse.redirect(url, 303);
 }
 

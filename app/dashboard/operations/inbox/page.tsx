@@ -12,10 +12,11 @@ export default async function InboxPage({ searchParams }: { searchParams: Promis
   const sp = await searchParams;
   const { actor, properties, propertyId } = await adminPageContext(sp.propertyId);
   if (!propertyId) return <Empty>Add a property first.</Empty>;
-  const [threads, tenants, messenger] = await Promise.all([
+  const [threads, tenants, messenger, page] = await Promise.all([
     listThreads(actor, { propertyId }),
     prisma.tenant.findMany({ where: { isActive: true, unit: { propertyId } }, select: { id: true, name: true, unit: { select: { unitNumber: true } } }, orderBy: { unit: { unitNumber: "asc" } } }),
-    linkStatus({ kind: "ADMIN", accountId: actor.accountId, userId: actor.id }),
+    linkStatus({ kind: "ADMIN", accountId: actor.accountId, userId: actor.id }, actor.accountId),
+    prisma.messengerPage.findUnique({ where: { accountId: actor.accountId }, select: { id: true } }),
   ]);
   const shown = sp.tenantId ? threads.filter((t) => t.tenantId === sp.tenantId) : threads;
 
@@ -29,7 +30,14 @@ export default async function InboxPage({ searchParams }: { searchParams: Promis
         <PropertyPicker properties={properties} value={propertyId} />
       </div>
       <OpsNav propertyId={propertyId} active="inbox" />
-      <MessengerCard available={messenger.available} linked={messenger.linked} connectHref="/api/operations/messenger" apiUrl="/api/operations/messenger" audience="office" />
+      {page ? (
+        <MessengerCard available={messenger.available} linked={messenger.linked} connectHref="/api/operations/messenger" apiUrl="/api/operations/messenger" audience="office" />
+      ) : (
+        <p className="rounded-xl border border-th-line bg-th-surface p-4 text-sm text-th-muted">
+          Want tenants to get alerts on Facebook Messenger?{" "}
+          <Link href="/dashboard/settings/integrations" className="font-medium text-th-accent hover:underline">Connect your Facebook Page</Link>.
+        </p>
+      )}
 
       {tenants.length > 0 && (
         <UploadForm

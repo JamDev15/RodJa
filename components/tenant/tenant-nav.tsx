@@ -16,14 +16,12 @@ const navItems = [
 
 export function TenantNav({ tenantName, billingEnabled = false, unreadMessages = 0 }: { tenantName?: string; billingEnabled?: boolean; unreadMessages?: number }) {
   const pathname = usePathname();
-  // Properties with statement billing on get Bills instead of Pay, plus Messages.
-  const items = billingEnabled
-    ? [
-        ...navItems.slice(0, 2).map((i) => (i.href === "/tenant/pay" ? { ...i, href: "/tenant/billing", label: "Bills" } : i)),
-        { href: "/tenant/messages", label: "Messages", icon: MessageSquare },
-        ...navItems.slice(2).map((i) => (i.href === "/tenant/documents" ? { ...i, label: "Docs" } : i)),
-      ]
-    : navItems;
+  // Everyone gets Messages; properties with statement billing get Bills instead of Pay.
+  const items = [
+    ...navItems.slice(0, 2).map((i) => (i.href === "/tenant/pay" && billingEnabled ? { ...i, href: "/tenant/billing", label: "Bills" } : i)),
+    { href: "/tenant/messages", label: "Messages", icon: MessageSquare },
+    ...navItems.slice(2).map((i) => (i.href === "/tenant/documents" ? { ...i, label: "Docs" } : i)),
+  ];
   const router = useRouter();
   const isHome = pathname === "/tenant/dashboard";
 

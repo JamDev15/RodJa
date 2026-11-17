@@ -17,13 +17,12 @@ import { alertOffice, alertTenant } from "@/lib/messenger";
 const NOTIFY_EVERY_MS = 60 * 60 * 1000;
 
 /**
- * Tenant-facing Phase 2 features (messages, household, signed-lease upload)
- * appear only for properties that turned on the Dawson feature set (an
- * enabled billing profile), so other landlords' tenant portals are unchanged.
+ * Tenant-facing features (messages, household, signed-lease upload,
+ * Messenger alerts) are available to every account and property. Kept as
+ * one switch point in case they are ever tied to a plan.
  */
 export async function tenantFeaturesEnabled(propertyId: string): Promise<boolean> {
-  const p = await prisma.billingProfile.findUnique({ where: { propertyId }, select: { enabled: true } });
-  return !!p?.enabled;
+  return !!propertyId;
 }
 
 async function loadThread(actor: Actor, threadId: string) {
