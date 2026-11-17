@@ -1,34 +1,17 @@
-import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { maintenanceCreateSchema, formatZodError } from "@/lib/validations";
+import { forbidden } from "@/lib/collections/errors";
+import { handle, jsonBody } from "@/lib/collections/http";
+import { createTenantRequest } from "@/lib/operations/maintenance";
 
+/** The signed-in tenant's own requests (raw rows; the page normalizes statuses). */
 export async function GET() {
-  const session = await auth();
-  const tenantId = (session?.user as any)?.tenantId;
-  if (!tenantId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-  const requests = await prisma.maintenanceRequest.findMany({
-    where: { tenantId },
-    orderBy: { createdAt: "desc" },
+  return handle(async (actor) => {
+    if (actor.kind !== "TENANT") throw forbidden();
+    return prisma.maintenanceRequest.findMany({ where: { tenantId: actor.tenantId }, orderBy: { createdAt: "desc" } });
   });
-  return NextResponse.json(requests);
 }
 
+/** Tenant reports a problem in their room (status starts at SUBMITTED). */
 export async function POST(req: Request) {
-  const session = await auth();
-  const tenantId = (session?.user as any)?.tenantId;
-  if (!tenantId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-  let body: unknown;
-  try { body = await req.json(); } catch { return NextResponse.json({ error: "Invalid body" }, { status: 400 }); }
-
-  const parsed = maintenanceCreateSchema.safeParse(body);
-  if (!parsed.success) return NextResponse.json({ error: formatZodError(parsed.error) }, { status: 400 });
-  const { title, description, priority } = parsed.data;
-
-  const request = await prisma.maintenanceRequest.create({
-    data: { tenantId, title, description, priority: priority ?? "normal" },
-  });
-  return NextResponse.json(request, { status: 201 });
+  return handle(async (actor) => createTenantRequest(actor, await jsonBody(req)), 201);
 }

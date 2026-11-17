@@ -74,8 +74,30 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
   // *is* schema-level cascade-on-Tenant, so it's cleaned up automatically
   // when the Tenant rows below are deleted.
   await prisma.$transaction([
+    // Collections billing records (financial history is Restrict-protected
+    // from accidental deletion, so this deliberate wipe clears it first).
+    prisma.paymentAllocation.deleteMany({ where: { payment: { accountId: id } } }),
+    prisma.chargeAdjustment.deleteMany({ where: { accountId: id } }),
+    prisma.waterExcessProposal.deleteMany({ where: { accountId: id } }),
+    prisma.rentPayment.deleteMany({ where: { accountId: id } }),
+    prisma.charge.deleteMany({ where: { accountId: id } }),
+    prisma.statement.deleteMany({ where: { accountId: id } }),
+    prisma.vecoReceipt.deleteMany({ where: { accountId: id } }),
+    prisma.vecoReminderLog.deleteMany({ where: { tenantId: { in: (await prisma.tenant.findMany({ where: { unit: { property: { accountId: id } } }, select: { id: true } })).map((t) => t.id) } } }),
+    prisma.storedFile.deleteMany({ where: { accountId: id } }),
+    prisma.billingAuditLog.deleteMany({ where: { accountId: id } }),
     prisma.payment.deleteMany({ where: { tenant: { unit: { property: { accountId: id } } } } }),
-    prisma.maintenanceRequest.deleteMany({ where: { tenant: { unit: { property: { accountId: id } } } } }),
+    prisma.maintenanceUpdate.deleteMany({ where: { request: { OR: [{ accountId: id }, { tenant: { unit: { property: { accountId: id } } } }] } } }),
+    prisma.maintenanceRequest.deleteMany({ where: { OR: [{ accountId: id }, { tenant: { unit: { property: { accountId: id } } } }] } }),
+    prisma.threadMessage.deleteMany({ where: { thread: { accountId: id } } }),
+    prisma.messageThread.deleteMany({ where: { accountId: id } }),
+    prisma.occupant.deleteMany({ where: { accountId: id } }),
+    prisma.tenancyChecklist.deleteMany({ where: { accountId: id } }),
+    prisma.checklistTemplate.deleteMany({ where: { accountId: id } }),
+    prisma.depositTransaction.deleteMany({ where: { accountId: id } }),
+    prisma.leaseDocument.deleteMany({ where: { accountId: id } }),
+    prisma.leaseTerm.deleteMany({ where: { accountId: id } }),
+    prisma.moveOut.deleteMany({ where: { accountId: id } }),
     prisma.reminder.deleteMany({ where: { tenant: { unit: { property: { accountId: id } } } } }),
     prisma.notice.deleteMany({ where: { accountId: id } }),
     prisma.tenant.deleteMany({ where: { unit: { property: { accountId: id } } } }),

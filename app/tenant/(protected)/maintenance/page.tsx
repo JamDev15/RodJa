@@ -9,6 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
 import { Wrench, Plus } from "lucide-react";
 import { formatDate } from "@/lib/utils";
+import Link from "next/link";
+import { normalizeStatus, STATUS_LABEL } from "@/lib/operations/maintenance-status";
 
 interface MaintenanceReq {
   id: string;
@@ -114,12 +116,13 @@ export default function TenantMaintenancePage() {
                 <Badge variant={req.priority === "urgent" ? "destructive" : req.priority === "high" ? "warning" : "secondary"} className="text-xs">
                   {req.priority}
                 </Badge>
-                <Badge variant={req.status === "resolved" ? "success" : req.status === "in_progress" ? "default" : "warning"} className="text-xs">
-                  {req.status.replace("_", " ")}
+                <Badge variant={["COMPLETED", "CLOSED"].includes(normalizeStatus(req.status)) ? "success" : ["IN_PROGRESS", "ASSIGNED"].includes(normalizeStatus(req.status)) ? "default" : "warning"} className="text-xs">
+                  {STATUS_LABEL[normalizeStatus(req.status)]}
                 </Badge>
               </div>
             </div>
             {req.description && <p className="text-xs text-th-muted mt-2">{req.description}</p>}
+            <Link href={`/tenant/maintenance/${req.id}`} className="mt-2 inline-block text-xs font-medium text-th-accent hover:underline">Updates, photos and notes →</Link>
           </div>
         ))}
       </div>

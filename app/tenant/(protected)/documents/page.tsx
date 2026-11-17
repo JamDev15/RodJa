@@ -3,6 +3,9 @@ import { FileSignature, FileText, ReceiptText, ChevronRight } from "lucide-react
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import { UploadForm } from "@/components/operations/upload-form";
+import { DOC_LABEL } from "@/lib/operations/leases";
+import { tenantFeaturesEnabled } from "@/lib/operations/messages";
 
 export default async function TenantDocumentsPage() {
   const session = await auth();
@@ -23,6 +26,9 @@ export default async function TenantDocumentsPage() {
   ]);
 
   const toSign = contracts.filter((c) => c.status === "sent");
+  const tenancy = await prisma.tenant.findUnique({ where: { id: tenantId }, select: { unit: { select: { propertyId: true } } } });
+  const leaseFeatures = tenancy ? await tenantFeaturesEnabled(tenancy.unit.propertyId) : false;
+  const leaseDocs = await prisma.leaseDocument.findMany({ where: { tenantId }, orderBy: { createdAt: "desc" } });
 
   return (
     <div className="space-y-6">
@@ -64,6 +70,29 @@ export default async function TenantDocumentsPage() {
           ))
         )}
       </section>
+
+      {(leaseFeatures || leaseDocs.length > 0) && (
+        <section className="space-y-2">
+          <h2 className="text-sm font-semibold text-th-ink/80">Lease files</h2>
+          {leaseDocs.length === 0 ? (
+            <p className="text-sm text-th-faint">No lease files yet.</p>
+          ) : (
+            leaseDocs.map((d) => (
+              <a key={d.id} href={`/api/files/${d.fileId}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 rounded-xl border border-th-line bg-th-surface p-4 hover:bg-th-raised">
+                <FileText className="h-5 w-5 text-th-accent" />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium text-th-ink">{d.title}</p>
+                  <p className="text-xs text-th-faint">{DOC_LABEL[d.kind as keyof typeof DOC_LABEL] ?? d.kind} · {formatDate(d.createdAt)}</p>
+                </div>
+                <ChevronRight className="h-4 w-4 text-th-faint" />
+              </a>
+            ))
+          )}
+          {leaseFeatures && (
+            <UploadForm url="/api/tenant/leases/documents" toggleLabel="Upload your signed lease" fields={[{ name: "title", label: "Title", placeholder: "e.g. Signed lease 2027" }]} fileLabel="Photo or scan of the signed lease" submitLabel="Upload" successMessage="Uploaded — the office will see it" />
+          )}
+        </section>
+      )}
 
       <section className="space-y-2">
         <h2 className="text-sm font-semibold text-th-ink/80">Invoices &amp; receipts</h2>

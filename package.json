@@ -8,6 +8,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test": "node --import tsx --test tests/collections/rules.test.ts",
+    "test:integration": "node --import tsx --test --test-concurrency=1 tests/collections/integration.test.ts tests/operations/integration.test.ts",
     "seed": "dotenv -e .env -- npx tsx prisma/seed.ts",
     "hash-pins": "dotenv -e .env -- npx tsx prisma/hash-pins.ts",
     "db:migrate": "prisma migrate dev",

@@ -78,50 +78,58 @@ model Account {
   invoices              Invoice[]
   workflowEnrollments   WorkflowEnrollment[]
   ownerWorkflows        OwnerWorkflow[]
+  billingProfiles       BillingProfile[]
 }
 
 model User {
-  id        String   @id @default(cuid())
-  accountId String
-  account   Account  @relation(fields: [accountId], references: [id])
-  email     String   @unique
-  password  String
-  name      String
-  role      String   @default("STAFF")
-  createdAt DateTime @default(now())
+  id                  String              @id @default(cuid())
+  accountId           String
+  account             Account             @relation(fields: [accountId], references: [id])
+  email               String              @unique
+  password            String
+  name                String
+  // STAFF (full account access, legacy default) | CARETAKER (meter entry only)
+  role                String              @default("STAFF")
+  createdAt           DateTime            @default(now())
+  caretakerProperties CaretakerProperty[]
 }
 
 model Property {
-  id            String   @id @default(cuid())
-  accountId     String
-  account       Account  @relation(fields: [accountId], references: [id])
-  name          String
-  address       String
-  type          String
-  description   String?
-  amenities     Json?
-  images        Json?
-  isListed      Boolean  @default(false)
-  listingStatus String   @default("unlisted")
-  slug          String?  @unique
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  units         Unit[]
+  id             String              @id @default(cuid())
+  accountId      String
+  account        Account             @relation(fields: [accountId], references: [id])
+  name           String
+  address        String
+  type           String
+  description    String?
+  amenities      Json?
+  images         Json?
+  isListed       Boolean             @default(false)
+  listingStatus  String              @default("unlisted")
+  slug           String?             @unique
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  units          Unit[]
+  billingProfile BillingProfile?
+  caretakers     CaretakerProperty[]
 }
 
 model Unit {
-  id            String   @id @default(cuid())
-  propertyId    String
-  property      Property @relation(fields: [propertyId], references: [id])
-  unitNumber    String
-  floor         String?
-  rentAmount    Float
-  depositAmount Float?
-  status        String   @default("vacant")
-  description   String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  tenants       Tenant[]
+  id               String            @id @default(cuid())
+  propertyId       String
+  property         Property          @relation(fields: [propertyId], references: [id])
+  unitNumber       String
+  floor            String?
+  rentAmount       Float
+  depositAmount    Float?
+  status           String            @default("vacant")
+  description      String?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  tenants          Tenant[]
+  roomBilling      RoomBilling?
+  recurringCharges RecurringCharge[]
+  meterReadings    MeterReading[]
 }
 
 model Tenant {
@@ -140,6 +148,13 @@ model Tenant {
   isActive                 Boolean                   @default(true)
   emergencyContact         String?
   notes                    String?
+  // Collections billing: how many people live in the room this tenancy
+  // (1-4) — drives the occupant-based water charge. Null = not recorded,
+  // so no water charge is generated automatically.
+  occupantCount            Int?
+  // Per-tenant exception to automatic late penalties (with the reason).
+  penaltyExempt            Boolean                   @default(false)
+  penaltyExemptReason      String?
   createdAt                DateTime                  @default(now())
   updatedAt                DateTime                  @updatedAt
   payments                 Payment[]
@@ -152,6 +167,17 @@ model Tenant {
   contracts                Contract[]
   invoices                 Invoice[]
   ownerWorkflowEnrollments OwnerWorkflowEnrollment[]
+  statements               Statement[]
+  charges                  Charge[]
+  rentPayments             RentPayment[]
+  vecoReceipts             VecoReceipt[]
+  occupants                Occupant[]
+  checklists               TenancyChecklist[]
+  depositTransactions      DepositTransaction[]
+  leaseTerms               LeaseTerm[]
+  leaseDocuments           LeaseDocument[]
+  moveOut                  MoveOut?
+  messageThreads           MessageThread[]
 }
 
 model Payment {
@@ -175,17 +201,34 @@ model Payment {
 }
 
 model MaintenanceRequest {
-  id          String    @id @default(cuid())
-  tenantId    String
-  tenant      Tenant    @relation(fields: [tenantId], references: [id])
-  title       String
-  description String
-  priority    String    @default("normal")
-  status      String    @default("open")
-  images      Json?
-  resolvedAt  DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id           String              @id @default(cuid())
+  // Optional so administrators can log common-area work orders.
+  tenantId     String?
+  tenant       Tenant?             @relation(fields: [tenantId], references: [id])
+  // Set on requests created since Phase 2; older rows are reached through
+  // tenant → unit → property.
+  accountId    String?
+  propertyId   String?
+  unitId       String?
+  title        String
+  description  String
+  priority     String              @default("normal") // low | normal | high | urgent
+  // Legacy: open | in_progress | resolved. Phase 2: SUBMITTED | ASSIGNED |
+  // IN_PROGRESS | WAITING | COMPLETED | CLOSED (lib/operations/maintenance.ts
+  // reads both).
+  status       String              @default("open")
+  category     String?
+  source       String? // TENANT | ADMIN
+  assignedToId String?
+  images       Json?
+  resolvedAt   DateTime?
+  closedAt     DateTime?
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  updates      MaintenanceUpdate[]
+
+  @@index([accountId, status])
+  @@index([assignedToId])
 }
 
 model Reminder {
@@ -207,6 +250,10 @@ model Notice {
   title     String
   content   String
   type      String   @default("general")
+  // Announcements to one property's tenants (tenantId null). Null = every
+  // tenant in the account, as before.
+  propertyId String?
+  createdBy  String?
   createdAt DateTime @default(now())
 }
 
@@ -576,4 +623,626 @@ model OwnerWorkflowEnrollment {
 
   @@unique([workflowId, tenantId, periodKey])
   @@index([status, nextRunAt])
+}
+
+// ─── Collections billing (statements, charges, verified payments) ────────────
+//
+// Opt-in per property (BillingProfile.enabled). Properties without an enabled
+// profile keep using MonthlyLedger/Payment exactly as before. All amounts in
+// this section are integer centavos (₱1.00 = 100) — never Float.
+//
+// The receivable ledger is Charge (+ ChargeAdjustment) minus active
+// PaymentAllocation rows; every balance shown anywhere is derived from those
+// rows (lib/collections/ledger.ts). Statement totals are a snapshot of what
+// was issued, kept for history, and are never added to the ledger again.
+
+model BillingProfile {
+  id                      String   @id @default(cuid())
+  accountId               String
+  account                 Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  propertyId              String   @unique
+  property                Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  enabled                 Boolean  @default(false)
+  timezone                String   @default("Asia/Manila")
+  // [{ "key": "A", "day": 15 }, { "key": "B", "day": 30 }]
+  cycles                  Json
+  // When a cycle day doesn't exist in a month (the 30th in February):
+  // LAST_DAY uses the month's last day; NEXT_MONTH_FIRST uses the 1st of
+  // the following month.
+  shortMonthPolicy        String   @default("LAST_DAY")
+  generateDaysBefore      Int      @default(3)
+  distributeDaysBefore    Int      @default(3)
+  dueDaysAfter            Int      @default(0)
+  // Once-a-month items (water, internet, monthly parking) are billed on
+  // this cycle only, so they can never be charged twice in a month.
+  monthlyCycleKey         String   @default("A")
+  autoGenerate            Boolean  @default(false)
+  requireReview           Boolean  @default(true)
+  // Occupant-based water: base + perExtra × (occupants − 1), up to max.
+  waterEnabled            Boolean  @default(false)
+  waterBaseCentavos       Int      @default(35000)
+  waterPerExtraCentavos   Int      @default(20000)
+  waterMaxOccupants       Int      @default(4)
+  // Late penalties — off until the owner confirms the rule.
+  penaltyEnabled          Boolean  @default(false)
+  penaltyRateBps          Int? // 500 = 5.00%
+  penaltyGraceDays        Int?
+  penaltyBasis            String   @default("STATEMENT_UNPAID_CHARGES")
+  penaltyRepeat           String   @default("ONCE")
+  // EACH_CYCLE only: how many penalties one statement can receive in total.
+  penaltyMaxRepeats       Int?
+  // Partial cycles at move-in / move-out: NONE bills the full cycle; DAILY
+  // prorates every-cycle rent by days occupied. Off until the owner decides.
+  prorationPolicy         String   @default("NONE")
+  // Water meter monitoring. Excess charges stay off until both the
+  // allowance and the rate are set.
+  meterUnitLabel          String   @default("m³")
+  meterAllowance          Decimal? @db.Decimal(12, 3)
+  meterExcessRateCentavos Int?
+  meterReadingFrequency   String?
+  // VECO (tenants pay the utility directly; we only track receipts).
+  vecoEnabled             Boolean  @default(false)
+  // A month's VECO receipt counts as missing after this day of the next month.
+  vecoReceiptDueDay       Int      @default(10)
+  paymentInstructions     String?
+  logoFileId              String?
+  statementPrefix         String   @default("SOA")
+  nextStatementNumber     Int      @default(1)
+  receiptPrefix           String   @default("PR")
+  nextReceiptNumber       Int      @default(1)
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  @@index([accountId])
+}
+
+model RoomBilling {
+  id                    String    @id @default(cuid())
+  unitId                String    @unique
+  unit                  Unit      @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  meterId               String?
+  vecoAccountNumber     String?
+  // Administrator override of the occupant-based water charge.
+  waterOverrideCentavos Int?
+  waterOverrideReason   String?
+  waterOverrideBy       String?
+  waterOverrideAt       DateTime?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+}
+
+model RecurringCharge {
+  id             String   @id @default(cuid())
+  accountId      String
+  propertyId     String
+  unitId         String
+  unit           Unit     @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  type           String // RENT | INTERNET | PARKING | OTHER
+  description    String
+  amountCentavos Int
+  // RENT only: PER_CYCLE = this amount every cycle; MONTHLY_SPLIT = this is
+  // the monthly rent, split across the month's cycles (remainder centavos on
+  // the last). Must be chosen explicitly so monthly rent is never doubled.
+  amountBasis    String   @default("PER_OCCURRENCE")
+  frequency      String // EVERY_CYCLE | MONTHLY | EVERY_N_MONTHS
+  intervalMonths Int      @default(1)
+  cycleKey       String? // cycle that carries a monthly item (default: profile.monthlyCycleKey)
+  startMonth     String // "YYYY-MM"
+  endMonth       String?
+  isActive       Boolean  @default(true)
+  createdBy      String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([unitId])
+  @@index([propertyId])
+}
+
+model Statement {
+  id                      String    @id @default(cuid())
+  accountId               String
+  propertyId              String
+  unitId                  String
+  tenantId                String
+  tenant                  Tenant    @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  periodKey               String // "2026-11-A"
+  cycleKey                String
+  billingMonth            String // "2026-11"
+  cycleDate               DateTime  @db.Date
+  periodStart             DateTime  @db.Date
+  periodEnd               DateTime  @db.Date
+  generateOn              DateTime  @db.Date
+  distributeOn            DateTime  @db.Date
+  dueDate                 DateTime  @db.Date
+  status                  String    @default("DRAFT") // DRAFT | PUBLISHED
+  number                  String?
+  // Snapshot of the issued statement (display/history only).
+  previousBalanceCentavos Int?
+  unappliedCreditCentavos Int?
+  currentChargesCentavos  Int?
+  penaltiesCentavos       Int?
+  totalDueCentavos        Int?
+  snapshot                Json?
+  publishedAt             DateTime?
+  publishedBy             String?
+  sentAt                  DateTime?
+  sendError               String?
+  createdBy               String?
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+  charges                 Charge[]
+
+  @@unique([tenantId, periodKey])
+  @@unique([propertyId, number])
+  @@index([propertyId, periodKey])
+  @@index([accountId, status])
+}
+
+model Charge {
+  id             String              @id @default(cuid())
+  accountId      String
+  propertyId     String
+  unitId         String
+  tenantId       String
+  tenant         Tenant              @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  statementId    String?
+  statement      Statement?          @relation(fields: [statementId], references: [id], onDelete: Restrict)
+  // RENT | INTERNET | WATER | WATER_EXCESS | PARKING | MISC | PENALTY | OPENING_BALANCE
+  type           String
+  description    String
+  amountCentavos Int
+  billingMonth   String
+  periodKey      String?
+  dueDate        DateTime            @db.Date
+  // Idempotency key, unique per tenant: re-running generation can never
+  // create the same charge twice (e.g. "rent:<recurringId>:2026-11-A").
+  sourceKey      String
+  sourceId       String?
+  calc           Json?
+  status         String              @default("DRAFT") // DRAFT | POSTED
+  postedAt       DateTime?
+  createdBy      String?
+  createdAt      DateTime            @default(now())
+  adjustments    ChargeAdjustment[]
+  allocations    PaymentAllocation[]
+
+  @@unique([tenantId, sourceKey])
+  @@index([tenantId, status])
+  @@index([statementId])
+  @@index([propertyId, billingMonth])
+}
+
+model ChargeAdjustment {
+  id             String    @id @default(cuid())
+  chargeId       String
+  charge         Charge    @relation(fields: [chargeId], references: [id], onDelete: Restrict)
+  accountId      String
+  tenantId       String
+  kind           String // WAIVER | REDUCTION
+  // Signed; reductions and waivers are negative.
+  amountCentavos Int
+  reason         String
+  createdBy      String
+  createdAt      DateTime  @default(now())
+  reversedAt     DateTime?
+  reversedBy     String?
+  reversalReason String?
+
+  @@index([chargeId])
+}
+
+model RentPayment {
+  id              String              @id @default(cuid())
+  accountId       String
+  propertyId      String
+  unitId          String
+  tenantId        String
+  tenant          Tenant              @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  amountCentavos  Int
+  method          String // gcash | maya | bank | cash | other
+  referenceNumber String?
+  paidOn          DateTime            @db.Date
+  notes           String?
+  // Verification state only — whether a bill is settled is derived from
+  // allocations, never from this field.
+  status          String              @default("PENDING") // PENDING | APPROVED | REJECTED | REVERSED
+  source          String // TENANT | ADMIN
+  clientRequestId String?
+  proofFileId     String?
+  proofSha256     String?
+  submittedBy     String
+  reviewedBy      String?
+  reviewedAt      DateTime?
+  rejectedReason  String?
+  reversedBy      String?
+  reversedAt      DateTime?
+  reversalReason  String?
+  receiptNumber   String?
+  // Set when the receipt email went out (claimed before sending, cleared on failure).
+  receiptEmailedAt DateTime?
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  allocations     PaymentAllocation[]
+
+  @@unique([tenantId, clientRequestId])
+  @@index([tenantId, status])
+  @@index([propertyId, status])
+}
+
+model PaymentAllocation {
+  id             String      @id @default(cuid())
+  paymentId      String
+  payment        RentPayment @relation(fields: [paymentId], references: [id], onDelete: Restrict)
+  chargeId       String
+  charge         Charge      @relation(fields: [chargeId], references: [id], onDelete: Restrict)
+  tenantId       String
+  amountCentavos Int
+  createdAt      DateTime    @default(now())
+  reversedAt     DateTime?
+  reversalReason String?
+
+  @@index([paymentId])
+  @@index([chargeId])
+  @@index([tenantId])
+}
+
+model MeterReading {
+  id                String               @id @default(cuid())
+  accountId         String
+  propertyId        String
+  unitId            String
+  unit              Unit                 @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  meterId           String
+  readingDate       DateTime             @db.Date
+  value             Decimal              @db.Decimal(12, 3)
+  // Meter replaced or reset: this reading starts a new baseline, no usage.
+  isMeterReset      Boolean              @default(false)
+  previousReadingId String?
+  usage             Decimal?             @db.Decimal(12, 3)
+  overAllowance     Boolean              @default(false)
+  status            String               @default("ACTIVE") // ACTIVE | VOID
+  voidReason        String?
+  notes             String?
+  enteredBy         String
+  enteredByRole     String
+  createdAt         DateTime             @default(now())
+  excessProposal    WaterExcessProposal?
+
+  @@index([unitId, readingDate])
+  @@index([propertyId, readingDate])
+}
+
+model WaterExcessProposal {
+  id               String       @id @default(cuid())
+  accountId        String
+  propertyId       String
+  unitId           String
+  tenantId         String?
+  readingId        String       @unique
+  reading          MeterReading @relation(fields: [readingId], references: [id], onDelete: Restrict)
+  usage            Decimal      @db.Decimal(12, 3)
+  allowance        Decimal      @db.Decimal(12, 3)
+  excessUnits      Decimal      @db.Decimal(12, 3)
+  rateCentavos     Int
+  proposedCentavos Int
+  status           String       @default("PENDING") // PENDING | APPROVED | REJECTED
+  decidedBy        String?
+  decidedAt        DateTime?
+  decisionNote     String?
+  chargeId         String?      @unique
+  createdAt        DateTime     @default(now())
+
+  @@index([propertyId, status])
+}
+
+model VecoReceipt {
+  id                String    @id @default(cuid())
+  accountId         String
+  propertyId        String
+  unitId            String
+  tenantId          String
+  tenant            Tenant    @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  billingMonth      String // electricity billing month "YYYY-MM"
+  vecoAccountNumber String?
+  // Informational only: VECO is paid to the utility, never rental income.
+  amountCentavos    Int?
+  paidOn            DateTime? @db.Date
+  fileId            String
+  status            String    @default("PENDING") // PENDING | VERIFIED | REJECTED
+  rejectedReason    String?
+  reviewedBy        String?
+  reviewedAt        DateTime?
+  submittedBy       String
+  createdAt         DateTime  @default(now())
+
+  @@index([tenantId, billingMonth])
+  @@index([propertyId, status])
+}
+
+model VecoReminderLog {
+  id           String   @id @default(cuid())
+  tenantId     String
+  billingMonth String
+  channel      String // email | portal
+  createdAt    DateTime @default(now())
+
+  @@unique([tenantId, billingMonth, channel])
+}
+
+// Uploaded evidence (payment proofs, VECO receipts, logos). Never served by
+// public URL — only through /api/files/[id] after an authorization check.
+model StoredFile {
+  id             String   @id @default(cuid())
+  accountId      String
+  propertyId     String?
+  tenantId       String?
+  purpose        String // PAYMENT_PROOF | VECO_RECEIPT | PROPERTY_LOGO | OCCUPANT_ID | OCCUPANT_PHOTO | LEASE_DOCUMENT | MOVEOUT_PHOTO | MAINTENANCE_PHOTO | MESSAGE_ATTACHMENT | CHECKLIST_PHOTO
+  fileName       String
+  mimeType       String
+  sizeBytes      Int
+  sha256         String
+  storage        String // SUPABASE_PRIVATE | DATABASE
+  objectPath     String?
+  data           Bytes?
+  uploadedBy     String
+  uploadedByRole String
+  createdAt      DateTime @default(now())
+
+  @@index([accountId, purpose])
+  @@index([tenantId, sha256])
+}
+
+// Who did what to billing records — approvals, rejections, reversals,
+// waivers, overrides, publications, setting changes.
+model BillingAuditLog {
+  id         String   @id @default(cuid())
+  accountId  String
+  propertyId String?
+  tenantId   String?
+  entityType String
+  entityId   String
+  action     String
+  actorId    String
+  actorRole  String
+  details    Json?
+  createdAt  DateTime @default(now())
+
+  @@index([accountId, createdAt])
+  @@index([entityType, entityId])
+  @@index([tenantId, createdAt])
+}
+
+model CaretakerProperty {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@unique([userId, propertyId])
+}
+
+// ─── Phase 2: tenancy lifecycle and operations ──────────────────────────────
+
+// Everyone living in the room under one tenancy, including the tenant of
+// record (max 4 at a time, enforced in lib/operations/occupants.ts). ID and
+// photo files are private StoredFiles readable by administrators only.
+model Occupant {
+  id           String    @id @default(cuid())
+  accountId    String
+  tenantId     String
+  tenant       Tenant    @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  name         String
+  isPrimary    Boolean   @default(false)
+  relationship String?
+  phone        String?
+  idFileId     String?
+  photoFileId  String?
+  movedInOn    DateTime  @db.Date
+  movedOutOn   DateTime? @db.Date
+  notes        String?
+  createdBy    String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([tenantId])
+}
+
+// Owner-editable checklist templates (MOVE_IN | MOVE_OUT). items:
+// [{ "label": "Keys handed over", "required": true }]
+model ChecklistTemplate {
+  id         String   @id @default(cuid())
+  accountId  String
+  propertyId String?
+  kind       String
+  name       String
+  items      Json
+  isActive   Boolean  @default(true)
+  createdBy  String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([accountId, kind])
+}
+
+// One move-in and one move-out checklist per tenancy, copied from a template
+// so later template edits never rewrite history.
+model TenancyChecklist {
+  id          String                 @id @default(cuid())
+  accountId   String
+  tenantId    String
+  tenant      Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  kind        String
+  templateId  String?
+  title       String
+  status      String                 @default("OPEN") // OPEN | COMPLETED
+  completedAt DateTime?
+  completedBy String?
+  createdBy   String
+  createdAt   DateTime               @default(now())
+  items       TenancyChecklistItem[]
+
+  @@unique([tenantId, kind])
+}
+
+model TenancyChecklistItem {
+  id          String           @id @default(cuid())
+  checklistId String
+  checklist   TenancyChecklist @relation(fields: [checklistId], references: [id], onDelete: Cascade)
+  position    Int
+  label       String
+  required    Boolean          @default(false)
+  done        Boolean          @default(false)
+  doneAt      DateTime?
+  doneBy      String?
+  note        String?
+  photoFileId String?
+
+  @@index([checklistId])
+}
+
+// Security deposit and advance rent, kept apart from rent receivables.
+// Balance of a fund = SUM(amountCentavos). RECEIVED is positive; APPLIED
+// (to unpaid charges, through an APPROVED RentPayment), REFUNDED and
+// FORFEITED are negative; REVERSAL offsets one earlier row exactly.
+model DepositTransaction {
+  id             String   @id @default(cuid())
+  accountId      String
+  propertyId     String
+  tenantId       String
+  tenant         Tenant   @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  fund           String // SECURITY_DEPOSIT | ADVANCE_RENT
+  kind           String // RECEIVED | APPLIED | REFUNDED | FORFEITED | REVERSAL
+  amountCentavos Int
+  occurredOn     DateTime @db.Date
+  method         String?
+  reference      String?
+  reason         String?
+  paymentId      String?
+  reversalOfId   String?  @unique
+  createdBy      String
+  createdAt      DateTime @default(now())
+
+  @@index([tenantId, fund])
+}
+
+// Lease terms per tenancy; a renewal is a new term that starts after the
+// previous one ends (renewalOfId).
+model LeaseTerm {
+  id                   String    @id @default(cuid())
+  accountId            String
+  tenantId             String
+  tenant               Tenant    @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  startDate            DateTime  @db.Date
+  endDate              DateTime? @db.Date
+  monthlyRentCentavos  Int?
+  renewalOfId          String?   @unique
+  notes                String?
+  expiryNoticeSentAt   DateTime?
+  createdBy            String
+  createdAt            DateTime  @default(now())
+
+  @@index([tenantId])
+}
+
+// Owner-provided lease files and signed copies (print → sign → upload).
+model LeaseDocument {
+  id             String   @id @default(cuid())
+  accountId      String
+  tenantId       String
+  tenant         Tenant   @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  leaseTermId    String?
+  kind           String // OWNER_LEASE | SIGNED_COPY | OTHER
+  title          String
+  fileId         String
+  uploadedBy     String
+  uploadedByRole String
+  createdAt      DateTime @default(now())
+
+  @@index([tenantId])
+}
+
+// Move-out workflow for one tenancy. Vacancy is approved only when the
+// checklist, deposit and balance conditions are met (lib/operations/moveout.ts).
+model MoveOut {
+  id                     String    @id @default(cuid())
+  accountId              String
+  propertyId             String
+  unitId                 String
+  tenantId               String    @unique
+  tenant                 Tenant    @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  status                 String    @default("IN_PROGRESS") // IN_PROGRESS | COMPLETED | CANCELLED
+  noticeDate             DateTime? @db.Date
+  plannedDate            DateTime  @db.Date
+  actualDate             DateTime? @db.Date
+  reason                 String?
+  inspectionNotes        String?
+  inspectionPhotoIds     Json?
+  inspectedAt            DateTime?
+  inspectedBy            String?
+  finalReadingId         String?
+  outstandingAtCloseCentavos Int?
+  outstandingNote        String?
+  vacancyApprovedAt      DateTime?
+  vacancyApprovedBy      String?
+  cancelledReason        String?
+  createdBy              String
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+}
+
+// History of a maintenance request: status changes, assignment, notes and
+// photos from the office, the caretaker or the tenant.
+model MaintenanceUpdate {
+  id              String             @id @default(cuid())
+  requestId       String
+  request         MaintenanceRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  actorId         String
+  actorRole       String
+  actorName       String
+  statusFrom      String?
+  statusTo        String?
+  assignedToId    String?
+  note            String?
+  photoFileIds    Json?
+  visibleToTenant Boolean            @default(true)
+  createdAt       DateTime           @default(now())
+
+  @@index([requestId, createdAt])
+}
+
+// Private tenant ↔ office conversations.
+model MessageThread {
+  id              String          @id @default(cuid())
+  accountId       String
+  propertyId      String
+  tenantId        String
+  tenant          Tenant          @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  subject         String
+  status          String          @default("OPEN") // OPEN | CLOSED
+  lastMessageAt   DateTime        @default(now())
+  lastSenderRole  String?
+  adminReadAt     DateTime?
+  tenantReadAt    DateTime?
+  ownerNotifiedAt DateTime?
+  createdAt       DateTime        @default(now())
+  messages        ThreadMessage[]
+
+  @@index([accountId, lastMessageAt])
+  @@index([tenantId])
+}
+
+model ThreadMessage {
+  id               String        @id @default(cuid())
+  threadId         String
+  thread           MessageThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  senderRole       String // TENANT | ADMIN
+  senderId         String
+  senderName       String
+  body             String
+  attachmentFileId String?
+  createdAt        DateTime      @default(now())
+
+  @@index([threadId, createdAt])
 }

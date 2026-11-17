@@ -88,7 +88,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             id: user.id,
             email: user.email,
             name: user.name,
-            role: "STAFF",
+            // CARETAKER users only get meter entry (see proxy.ts); every
+            // other user keeps the existing full STAFF access.
+            role: user.role === "CARETAKER" ? "CARETAKER" : "STAFF",
             accountId: user.accountId,
           };
         }
