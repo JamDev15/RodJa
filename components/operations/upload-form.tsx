@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 const inputClass =
   "w-full rounded-lg border border-th-line bg-th-surface px-3 py-2 text-base sm:text-sm text-th-ink placeholder:text-th-faint focus:border-th-accent focus:outline-none";
 
-type TextField = { name: string; label: string; type?: "text" | "textarea" | "select"; required?: boolean; placeholder?: string; options?: { value: string; label: string }[]; defaultValue?: string };
+type TextField = { name: string; label: string; type?: "text" | "textarea" | "select" | "date" | "month" | "pesos"; hint?: string; required?: boolean; placeholder?: string; options?: { value: string; label: string }[]; defaultValue?: string };
 
 interface Props {
   url: string;
@@ -17,6 +17,8 @@ interface Props {
   hidden?: Record<string, string>;
   fields?: TextField[];
   fileLabel?: string;
+  /** Shown under the file input. */
+  fileHint?: string;
   fileRequired?: boolean;
   accept?: string;
   submitLabel: string;
@@ -32,7 +34,7 @@ interface Props {
  * messages with an optional attachment. The server checks the file's
  * content and size; this only gives quick feedback.
  */
-export function UploadForm({ url, hidden, fields = [], fileLabel = "File", fileRequired = true, accept = "image/jpeg,image/png,image/webp,application/pdf", submitLabel, toggleLabel, successMessage, className, redirectTo }: Props) {
+export function UploadForm({ url, hidden, fields = [], fileLabel = "File", fileHint = "JPG, PNG, WEBP or PDF, up to 5 MB. Kept private.", fileRequired = true, accept = "image/jpeg,image/png,image/webp,application/pdf", submitLabel, toggleLabel, successMessage, className, redirectTo }: Props) {
   const router = useRouter();
   const [open, setOpen] = useState(!toggleLabel);
   const [busy, setBusy] = useState(false);
@@ -92,8 +94,16 @@ export function UploadForm({ url, hidden, fields = [], fileLabel = "File", fileR
               ))}
             </select>
           ) : (
-            <input name={f.name} placeholder={f.placeholder} defaultValue={f.defaultValue} className={inputClass} />
+            <input
+              name={f.name}
+              type={f.type === "date" || f.type === "month" ? f.type : "text"}
+              inputMode={f.type === "pesos" ? "decimal" : undefined}
+              placeholder={f.placeholder ?? (f.type === "pesos" ? "0.00" : undefined)}
+              defaultValue={f.defaultValue}
+              className={inputClass}
+            />
           )}
+          {f.hint && <span className="block font-normal text-th-faint">{f.hint}</span>}
         </label>
       ))}
       <label className="block space-y-1 text-xs font-medium text-th-muted">
@@ -102,7 +112,7 @@ export function UploadForm({ url, hidden, fields = [], fileLabel = "File", fileR
           {fileRequired ? " *" : " (optional)"}
         </span>
         <input name="file" type="file" accept={accept} className="block w-full text-sm text-th-ink file:mr-3 file:rounded-md file:border-0 file:bg-th-raised file:px-3 file:py-1.5 file:text-sm" />
-        <span className="block font-normal text-th-faint">JPG, PNG, WEBP or PDF, up to 5 MB. Kept private.</span>
+        <span className="block font-normal text-th-faint">{fileHint}</span>
       </label>
       {error && (
         <p className="text-sm text-th-danger" role="alert">

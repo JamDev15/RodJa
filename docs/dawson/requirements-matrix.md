@@ -54,11 +54,13 @@ All under **Dashboard → Operations** (`app/dashboard/operations/*`, services i
 | P2-ANN Optional announcements | Minor Modification | `Notice` model, created by automations | Announcements form per property (`Notice.propertyId`), optional email to tenants with an address; tenant Notices shows own + account-wide + their property's announcements | 2 |
 | P2-DASH Occupancy, lease expiry, maintenance, move-in/out summaries | Minor Modification | `app/dashboard/page.tsx` | Operations overview: occupancy and vacant rooms, open/urgent/unassigned maintenance, leases ending, move-outs in progress, upcoming move-ins, unfinished move-in checklists, unread messages. `lib/operations/summary.ts` | 2 |
 
-## Phase 3 — assess and defer
+## Phase 3 — expenses, utilities, petty cash and reports (implemented on this branch)
 
-| Requirement (provisional ID) | Classification | Evidence | Required changes | Phase |
+Office-only screens under **Operations → Expenses / Petty cash / Utilities / Reports** (`app/dashboard/operations/*`, services in `lib/finance/*`). Caretakers can only enter building meter readings.
+
+| Requirement (provisional ID) | Classification (before) | Evidence (before) | Required changes (done) | Phase |
 |---|---|---|---|---|
-| P3-EXP Operating expenses with receipt attachments | Not Supported | — | `Expense` model + `StoredFile` attachments | 3 |
-| P3-UTIL Master water and common-area electricity records | Not Supported | — | Master meter readings (can mirror `MeterReading`) and bill records | 3 |
-| P3-PETTY Petty cash | Not Supported | — | Petty-cash fund, top-ups, disbursements with receipts | 3 |
-| P3-RPT Income, collections, receivables, utility collections, expenses, cash flow, occupancy reports | Minor → Major | Monthly owner report email (`lib/monthly-report.ts`) and analytics page cover the legacy ledger only | Reports on the collections ledger (charges, allocations, payments by date), plus expenses once P3-EXP exists | 3 |
+| P3-EXP Operating expenses with receipt attachments | Not Supported | — | `Expense` (category, vendor, room, optional link to a maintenance request, paid/unpaid, method, reference) with a private receipt (`EXPENSE_RECEIPT`, office-only). Never deleted: void with a reason. `lib/finance/expenses.ts` | 3 |
+| P3-UTIL Master water and common-area electricity records | Not Supported | Room meters only (Phase 1) | `UtilityBill` (water/electricity, master/common-area, month, consumption, amount, due date, bill scan), one active per month and type; paying records the expense in the same transaction, voiding that expense reopens the bill. `MasterMeterReading` with the room-meter rules (date order, no lower value unless reset, only the latest voidable); caretakers of the property may enter readings. `lib/finance/utilities.ts` | 3 |
+| P3-PETTY Petty cash | Not Supported | — | `PettyCashTransaction` per property: top-ups (transfers), spending (creates the matching expense atomically), cash counts (shortage/overage with a reason), undo by reversal. Balance can never go below zero, also under simultaneous entries. `lib/finance/pettycash.ts` | 3 |
+| P3-RPT Income, collections, receivables, utility collections, expenses, cash flow, occupancy reports | Minor → Major | `lib/monthly-report.ts` covers the legacy ledger only | Eight reports computed from the ledgers — income (cash basis, by charge type), collections (billed vs collected by billing month), receivables aging, utilities (water billed/collected vs master bill, usage, common-area electricity, VECO receipts), expenses by category, cash flow, occupancy (room-days, move-ins/outs), deposits held — each with CSV export (formula-safe, pesos as numbers). Up to 24 months per report. `lib/finance/reports.ts`, `GET /api/operations/reports/[name]` | 3 |
