@@ -77,6 +77,8 @@ Occupancy and vacant rooms, open and urgent maintenance, leases ending in the ne
 - Requests from before this update show their old status with the new names (open → Submitted, resolved → Completed).
 
 ### Inbox
+The **Operations** menu item shows how many tenant messages are unread. **Get alerts on Messenger** (top of the Inbox, once set up — see messenger-setup.md) sends you a Messenger message when a tenant writes, sends a payment or reports a repair. Replies a tenant sends from Messenger appear here marked *(via Messenger)*.
+
 Private conversations with tenants (caretakers can't see them). Start one with **New message to a tenant**, reply with optional photo/PDF, **Close** when done (a reply reopens it). Tenants with an email get a notice when you reply; you get at most one email an hour per conversation when a tenant writes.
 
 ### Announcements
@@ -129,7 +131,8 @@ Pick a report and a month range (up to 24 months), then **Show** or **Download C
    4. It shows **Pending review** until the office checks it, then **Approved** with what it was applied to, or **Not accepted** with the reason.
 5. **VECO receipts:** pick the electricity bill month, attach a photo of the receipt, and upload. This doesn't change your rent balance.
 6. **Statements and receipts as PDF:** open a statement → **Download PDF**; approved payments show **Download receipt**.
-7. **Messages:** Home → **Messages** → **Message the office**. Replies show as *New reply*. Use Repairs for repairs and Bills for payments.
+7. **Messages:** the **Messages** tab (a red number shows unread replies) → **Message the office**. Use Repairs for repairs and Bills for payments.
+   - **Get alerts on Messenger** (if the office set it up): tap **Open Messenger**, then *Get Started*. You'll get a Messenger message when the office replies, a statement is ready, or a payment is checked, and you can reply in Messenger — it goes to the same conversation. Send **STOP** or tap **Turn off** to stop.
 8. **Repairs:** tap **New**, describe the problem, then open **Updates, photos and notes** to add photos or notes and follow progress (Submitted → Assigned → In progress → Completed).
 9. **Lease:** Documents → **Lease files** shows the lease from the office. Print it, sign it, then **Upload your signed lease**.
 10. **Household:** Home shows the names the office recorded for your room.

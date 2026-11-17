@@ -418,7 +418,7 @@ model MessageLog {
   tenant        Tenant?  @relation(fields: [tenantId], references: [id], onDelete: SetNull)
   recipientType String // tenant | owner | admin | lead
   recipientName String?
-  channel       String // email | sms | push | in_app
+  channel       String // email | sms | push | in_app | messenger
   to            String?
   subject       String?
   body          String
@@ -1243,6 +1243,8 @@ model ThreadMessage {
   senderName       String
   body             String
   attachmentFileId String?
+  // Messenger message id for replies sent from Messenger (webhook retries are ignored).
+  externalId       String?       @unique
   createdAt        DateTime      @default(now())
 
   @@index([threadId, createdAt])
@@ -1354,4 +1356,28 @@ model PettyCashTransaction {
   createdAt      DateTime @default(now())
 
   @@index([propertyId, occurredOn])
+}
+
+// ─── Facebook Messenger notifications ───────────────────────────────────────
+
+// A person who connected Messenger by tapping "Get alerts on Messenger"
+// (an m.me link carrying a signed ref). kind TENANT links a tenancy; ADMIN
+// links an office user (accountId + userId). One row per Messenger person on
+// the Page; connecting again moves it. lastInboundAt opens Meta's 24-hour
+// window for normal messages; outside it only approved utility templates go.
+model MessengerLink {
+  id            String    @id @default(cuid())
+  accountId     String
+  kind          String // TENANT | ADMIN
+  tenantId      String?
+  userId        String?
+  pageId        String
+  psid          String
+  linkedAt      DateTime  @default(now())
+  lastInboundAt DateTime?
+  unlinkedAt    DateTime?
+
+  @@unique([pageId, psid])
+  @@index([tenantId])
+  @@index([accountId, kind])
 }

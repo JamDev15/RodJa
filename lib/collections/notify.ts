@@ -8,10 +8,18 @@ import { formatDateOnly, formatMonth, fromDbDate } from "./calendar";
 import { notFound } from "./errors";
 import { formatCentavos } from "./money";
 import { buildStatementPdf } from "./documents";
+import { alertTenant } from "@/lib/messenger";
 
 export async function sendStatementEmail(statementId: string): Promise<{ sent: boolean; reason?: string }> {
   const st = await prisma.statement.findUnique({ where: { id: statementId }, include: { tenant: { include: { unit: { include: { property: true } } } } } });
   if (!st || st.status !== "PUBLISHED") return { sent: false, reason: "Statement isn't issued" };
+  // Messenger alert (if connected), at most once per statement, with or without email.
+  await alertTenant(st.tenantId, {
+    text: `Your statement ${st.number ?? ""} from ${st.tenant.unit.property.name} is ready: ${formatCentavos(st.totalDueCentavos ?? 0).replace("₱", "PHP ")} due ${formatDateOnly(fromDbDate(st.dueDate))}.`,
+    path: `/tenant/billing/statements/${st.id}`,
+    dedupeKey: `statement:${st.id}`,
+    category: "invoice",
+  });
   const email = st.tenant.email;
   if (!email) {
     await prisma.statement.update({ where: { id: st.id }, data: { sendError: "Tenant has no email — visible in the tenant portal" } });

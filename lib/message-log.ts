@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 
 export type RecipientType = "tenant" | "owner" | "admin" | "lead";
-export type MessageChannel = "email" | "sms" | "push" | "in_app";
+export type MessageChannel = "email" | "sms" | "push" | "in_app" | "messenger";
 export type MessageCategory =
   | "reminder"
   | "bill_reminder"

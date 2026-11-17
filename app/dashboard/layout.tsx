@@ -6,6 +6,7 @@ import { Sidebar } from "@/components/dashboard/sidebar";
 import { AssistantWidget } from "@/components/dashboard/assistant-widget";
 import { getAccessState } from "@/lib/access";
 import { createSignedToken } from "@/lib/tokens";
+import { accountOperationCounts } from "@/lib/operations/summary";
 
 // Private app area — keep it out of search results.
 export const metadata: Metadata = { robots: { index: false, follow: false } };
@@ -33,9 +34,12 @@ export default async function DashboardLayout({ children }: { children: React.Re
     isPro = account?.plan.name === "Pro";
   }
 
+  // Unread tenant messages, shown on the Operations menu item.
+  const unreadMessages = user.accountId ? (await accountOperationCounts(user.accountId).catch(() => ({ unreadMessages: 0 }))).unreadMessages : 0;
+
   return (
     <div className="flex h-dvh bg-th-canvas overflow-x-hidden">
-      <Sidebar accountName={user?.accountName} />
+      <Sidebar accountName={user?.accountName} badges={{ "/dashboard/operations": unreadMessages }} />
       <main className="flex-1 min-w-0 pt-appbar lg:pt-0 lg:ml-64 overflow-y-auto overflow-x-hidden">
         <div className="p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:p-6 sm:pb-[calc(1.5rem+env(safe-area-inset-bottom))] lg:p-8">
           {children}

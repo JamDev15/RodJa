@@ -4,6 +4,7 @@
 // administrators can read it (caretakers never). Email notifications are
 // best effort and throttled so a back-and-forth doesn't flood anyone.
 
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin, type Actor } from "@/lib/collections/actor";
 import { APP_URL, button, emailLayout, escapeHtml, sendEmail } from "@/lib/email";
@@ -11,6 +12,7 @@ import { audit, inTransaction } from "@/lib/collections/db";
 import { forbidden, notFound } from "@/lib/collections/errors";
 import { readUpload, storeFile } from "@/lib/collections/files";
 import { actorName, adminTenant, ownTenancy, requireText } from "./common";
+import { alertOffice, alertTenant } from "@/lib/messenger";
 
 const NOTIFY_EVERY_MS = 60 * 60 * 1000;
 
@@ -139,6 +141,12 @@ async function notify(threadId: string) {
   const account = t.tenant.unit.property.account;
   const propertyName = t.tenant.unit.property.name;
   if (t.lastSenderRole === "ADMIN") {
+    const last = await prisma.threadMessage.findFirst({ where: { threadId: t.id }, orderBy: { createdAt: "desc" }, select: { id: true, body: true } });
+    await alertTenant(t.tenantId, {
+      text: `New message from ${propertyName} (${t.subject}): ${(last?.body ?? "").slice(0, 300)}`,
+      path: `/tenant/messages/${t.id}`,
+      dedupeKey: last ? `thread-msg:${last.id}` : undefined,
+    });
     if (!t.tenant.email) return;
     await sendEmail({
       to: t.tenant.email,
@@ -151,10 +159,42 @@ async function notify(threadId: string) {
   const since = new Date(Date.now() - NOTIFY_EVERY_MS);
   const claimed = await prisma.messageThread.updateMany({ where: { id: t.id, OR: [{ ownerNotifiedAt: null }, { ownerNotifiedAt: { lt: since } }] }, data: { ownerNotifiedAt: new Date() } });
   if (claimed.count === 0) return;
+  await alertOffice(t.accountId, { text: `${t.tenant.name} (room ${t.tenant.unit.unitNumber}) sent a message: ${t.subject}`, path: `/dashboard/operations/inbox/${t.id}` });
   await sendEmail({
     to: account.email,
     subject: `Message from ${t.tenant.name} (room ${t.tenant.unit.unitNumber}): ${t.subject}`,
     html: emailLayout(`<p>${escapeHtml(t.tenant.name)} (room ${escapeHtml(t.tenant.unit.unitNumber)}, ${escapeHtml(propertyName)}) sent a message: “${escapeHtml(t.subject)}”.</p>${button(`${APP_URL}/dashboard/operations/inbox/${t.id}`, "Open the conversation")}`),
     log: { accountId: t.accountId, recipientType: "owner", recipientName: account.ownerName, category: "system" },
   });
+}
+
+/**
+ * A tenant replied from Messenger: add it to their most recent open
+ * conversation (or start one). Meta may deliver the same message twice, so
+ * the Messenger message id is unique. Returns false for a duplicate.
+ */
+export async function addMessengerReply(tenantId: string, text: string, externalId: string | null): Promise<boolean> {
+  const tenant = await prisma.tenant.findUnique({ where: { id: tenantId }, include: { unit: { include: { property: true } } } });
+  if (!tenant) return false;
+  if (externalId && (await prisma.threadMessage.findUnique({ where: { externalId } }))) return false;
+  const body = text.slice(0, 4000);
+  try {
+    const threadId = await inTransaction(async (tx) => {
+      const now = new Date();
+      const recent = await tx.messageThread.findFirst({ where: { tenantId, status: "OPEN", lastMessageAt: { gte: new Date(Date.now() - 14 * 86_400_000) } }, orderBy: { lastMessageAt: "desc" } });
+      const thread =
+        recent ??
+        (await tx.messageThread.create({
+          data: { accountId: tenant.unit.property.accountId, propertyId: tenant.unit.propertyId, tenantId, subject: "Message from Messenger", lastMessageAt: now, lastSenderRole: "TENANT", tenantReadAt: now },
+        }));
+      await tx.threadMessage.create({ data: { threadId: thread.id, senderRole: "TENANT", senderId: tenantId, senderName: `${tenant.name} (via Messenger)`, body, externalId } });
+      await tx.messageThread.update({ where: { id: thread.id }, data: { lastMessageAt: now, lastSenderRole: "TENANT", tenantReadAt: now, status: "OPEN" } });
+      return thread.id;
+    });
+    await notify(threadId).catch(() => undefined);
+    return true;
+  } catch (err) {
+    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") return false;
+    throw err;
+  }
 }

@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { Home, CreditCard, Wrench, Bell, LogOut, ArrowLeft, FileText } from "lucide-react";
+import { Home, CreditCard, Wrench, Bell, LogOut, ArrowLeft, FileText, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/public/theme-toggle";
 
@@ -14,10 +14,15 @@ const navItems = [
   { href: "/tenant/notices", label: "Notices", icon: Bell },
 ];
 
-export function TenantNav({ tenantName, billingEnabled = false }: { tenantName?: string; billingEnabled?: boolean }) {
+export function TenantNav({ tenantName, billingEnabled = false, unreadMessages = 0 }: { tenantName?: string; billingEnabled?: boolean; unreadMessages?: number }) {
   const pathname = usePathname();
+  // Properties with statement billing on get Bills instead of Pay, plus Messages.
   const items = billingEnabled
-    ? navItems.map((i) => (i.href === "/tenant/pay" ? { ...i, href: "/tenant/billing", label: "Bills" } : i))
+    ? [
+        ...navItems.slice(0, 2).map((i) => (i.href === "/tenant/pay" ? { ...i, href: "/tenant/billing", label: "Bills" } : i)),
+        { href: "/tenant/messages", label: "Messages", icon: MessageSquare },
+        ...navItems.slice(2).map((i) => (i.href === "/tenant/documents" ? { ...i, label: "Docs" } : i)),
+      ]
     : navItems;
   const router = useRouter();
   const isHome = pathname === "/tenant/dashboard";
@@ -59,18 +64,25 @@ export function TenantNav({ tenantName, billingEnabled = false }: { tenantName?:
       <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-th-line bg-th-surface pb-safe">
         <div className="max-w-lg mx-auto flex">
           {items.map(({ href, label, icon: Icon }) => {
-            const active = pathname === href || (href === "/tenant/billing" && pathname.startsWith("/tenant/billing"));
+            const active = pathname === href || ((href === "/tenant/billing" || href === "/tenant/messages") && pathname.startsWith(href));
+            const badge = href === "/tenant/messages" && unreadMessages > 0 ? unreadMessages : 0;
             return (
               <Link
                 key={href}
                 href={href}
                 className={cn(
-                  "flex min-w-0 flex-1 flex-col items-center gap-1 py-2.5 text-[11px] min-[360px]:text-xs transition-colors",
+                  "relative flex min-w-0 flex-1 flex-col items-center gap-1 py-2.5 transition-colors",
+                  items.length > 5 ? "text-[10px] min-[380px]:text-[11px]" : "text-[11px] min-[360px]:text-xs",
                   active ? "text-th-brand font-medium" : "text-th-faint hover:text-th-ink"
                 )}
               >
                 <Icon className="h-5 w-5" />
-                {label}
+                {badge > 0 && (
+                  <span className="absolute left-1/2 top-1.5 ml-1.5 min-w-4 rounded-full bg-th-danger px-1 text-center text-[10px] font-semibold leading-4 text-white" aria-label={`${badge} unread`}>
+                    {badge}
+                  </span>
+                )}
+                <span className="max-w-full truncate px-0.5">{label}</span>
               </Link>
             );
           })}

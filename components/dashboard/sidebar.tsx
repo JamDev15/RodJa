@@ -30,9 +30,11 @@ const navItems = [
 
 interface SidebarProps {
   accountName?: string;
+  /** Unread counts by nav href, e.g. tenant messages on Operations. */
+  badges?: Record<string, number>;
 }
 
-export function Sidebar({ accountName }: SidebarProps) {
+export function Sidebar({ accountName, badges }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -126,7 +128,13 @@ export function Sidebar({ accountName }: SidebarProps) {
               >
                 <Icon className="h-4 w-4 shrink-0" />
                 {label}
-                {active && <ChevronRight className="ml-auto h-3 w-3" />}
+                {badges?.[href] ? (
+                  <span className="ml-auto rounded-full bg-th-danger px-1.5 py-0.5 text-[10px] font-semibold leading-none text-white" aria-label={`${badges[href]} unread`}>
+                    {badges[href]}
+                  </span>
+                ) : (
+                  active && <ChevronRight className="ml-auto h-3 w-3" />
+                )}
               </Link>
             );
           })}

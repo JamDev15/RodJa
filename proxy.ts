@@ -8,7 +8,9 @@ import type { NextRequest } from "next/server";
 // /api/sign, /api/docs, /api/renew and /api/unsubscribe are authorized by the
 // unguessable or signed token in their URL instead of a session (tenants sign
 // contracts and open invoices from an emailed link without logging in).
-const PUBLIC_API_PREFIXES = ["/api/auth", "/api/signup", "/api/cron", "/api/sign/", "/api/docs/", "/api/renew", "/api/unsubscribe"];
+// /api/messenger/webhook is called by Meta and verifies the request's
+// X-Hub-Signature-256 HMAC with the app secret instead.
+const PUBLIC_API_PREFIXES = ["/api/auth", "/api/signup", "/api/cron", "/api/sign/", "/api/docs/", "/api/renew", "/api/unsubscribe", "/api/messenger/webhook"];
 const TENANT_API_PREFIXES = ["/api/tenant/", "/api/payments/submit", "/api/maintenance"];
 // Meter entry: caretakers plus the landlord/staff who manage them.
 const CARETAKER_API_PREFIXES = ["/api/caretaker/"];

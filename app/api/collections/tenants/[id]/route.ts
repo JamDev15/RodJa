@@ -1,4 +1,5 @@
 import { sendReceiptEmail } from "@/lib/collections/documents";
+import { paymentReviewed } from "@/lib/messenger/events";
 import { invalid } from "@/lib/collections/errors";
 import { handle, jsonBody, num, str } from "@/lib/collections/http";
 import { recordAdminPayment } from "@/lib/collections/payments";
@@ -17,6 +18,7 @@ export async function POST(req: Request, ctx: RouteContext<"/api/collections/ten
       {
         const result = await recordAdminPayment(actor, id, body as never);
         const receiptEmail = result.duplicate ? null : await sendReceiptEmail(result.payment.id).catch(() => ({ sent: false, reason: "Email failed" }));
+        if (!result.duplicate) await paymentReviewed(result.payment.id).catch(() => undefined);
         return { ...result, receiptEmail };
       }
       default:

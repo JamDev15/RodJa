@@ -2,6 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { when } from "@/components/operations/bits";
 import { UploadForm } from "@/components/operations/upload-form";
+import { MessengerCard } from "@/components/operations/messenger-card";
+import { linkStatus } from "@/lib/messenger";
 import { currentActor } from "@/lib/collections/actor";
 import { ownTenancy } from "@/lib/operations/common";
 import { listThreads, tenantFeaturesEnabled } from "@/lib/operations/messages";
@@ -11,7 +13,7 @@ export default async function TenantMessagesPage() {
   if (!actor || actor.kind !== "TENANT") redirect("/tenant/login");
   const tenant = await ownTenancy(actor);
   if (!(await tenantFeaturesEnabled(tenant.unit.propertyId))) redirect("/tenant/dashboard");
-  const threads = await listThreads(actor);
+  const [threads, messenger] = await Promise.all([listThreads(actor), linkStatus({ kind: "TENANT", tenantId: tenant.id })]);
 
   return (
     <div className="space-y-5">
@@ -19,6 +21,7 @@ export default async function TenantMessagesPage() {
         <h1 className="text-xl font-bold text-th-ink">Messages</h1>
         <p className="text-sm text-th-muted">Private messages with the office of {tenant.unit.property.name}</p>
       </div>
+      <MessengerCard available={messenger.available} linked={messenger.linked} connectHref="/api/tenant/messenger" apiUrl="/api/tenant/messenger" audience="tenant" />
       <UploadForm
         url="/api/tenant/messages"
         toggleLabel="Message the office"

@@ -6,6 +6,7 @@ Statement-based billing that a property opts into. Built for Dawson Residences (
 |---|---|
 | [requirements-matrix.md](requirements-matrix.md) | Every requirement, how it stood before this branch, evidence paths, what changed |
 | [guide.md](guide.md) | Administrator guide, caretaker steps, tenant walkthrough |
+| [messenger-setup.md](messenger-setup.md) | Facebook Messenger alerts: what's sent, Meta setup, environment variables |
 | [owner-decisions-and-roadmap.md](owner-decisions-and-roadmap.md) | Rules Byron still needs to confirm, remaining work, effort, running costs |
 
 ## How it works
@@ -20,15 +21,16 @@ Statement-based billing that a property opts into. Built for Dawson Residences (
 
 ## Deploying (do not merge or deploy without review)
 
-1. **Migrations.** Three, all additive:
+1. **Migrations.** Four, all additive:
    - `20261115000000_add_collections_billing`: new tables, plus three nullable/defaulted `Tenant` columns.
    - `20261116000000_add_tenancy_operations`: new Phase 2 tables; new nullable/defaulted columns on `BillingProfile`, `RentPayment`, `Notice` and `MaintenanceRequest`; and `MaintenanceRequest.tenantId` becomes nullable (for common-area work orders). No existing row is changed.
    - `20261118000000_add_expenses_utilities_pettycash`: four new Phase 3 tables only.
+   - `20261119000000_add_messenger_links`: one new table (`MessengerLink`) and a nullable `ThreadMessage.externalId`.
 
    Apply them with `npx prisma migrate deploy` using `DIRECT_URL`.
-   *Note:* the SQL was hand-written, because Prisma's schema engine couldn't be downloaded in the build sandbox. All three were checked column-by-column against `schema.prisma` (all 783 columns of 59 models match in type and nullability on a database built from the migrations alone) and exercised by all tests. Before deploying, run `npx prisma migrate diff --from-migrations prisma/migrations --to-schema prisma/schema.prisma` on a machine with the engine; it should print nothing.
+   *Note:* the SQL was hand-written, because Prisma's schema engine couldn't be downloaded in the build sandbox. All four were checked column-by-column against `schema.prisma` (all 794 columns of 60 models match in type and nullability on a database built from the migrations alone) and exercised by all tests. Before deploying, run `npx prisma migrate diff --from-migrations prisma/migrations --to-schema prisma/schema.prisma` on a machine with the engine; it should print nothing.
 2. **Private bucket.** Create a Supabase Storage bucket named `collections-private` with **Public = off** (or set `COLLECTIONS_BUCKET` to another private bucket). The existing `NEXT_PUBLIC_SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` are reused. Without Supabase settings, files are stored in Postgres, which is fine for development but not intended for production.
-3. **No new required environment variables.** The daily cron (`/api/cron/daily`) now also runs the collections sweep: auto-drafts if enabled, emails issued statements on their distribution date, and sends VECO reminders. It does nothing for properties without an enabled profile.
+3. **No new required environment variables.** Messenger alerts are optional and stay off until the `MESSENGER_*` variables are set (see [messenger-setup.md](messenger-setup.md)). The daily cron (`/api/cron/daily`) now also runs the collections sweep: auto-drafts if enabled, emails issued statements on their distribution date, and sends VECO reminders. It does nothing for properties without an enabled profile.
 4. **Turn it on for Dawson:** Collections → *Set up billing for this property* → Setup. See [guide.md](guide.md).
 
 ## Existing data and reconciliation
@@ -58,7 +60,7 @@ None of this is required for collections billing, which never reads the Float co
 
 ```bash
 npm test                                          # 22 pure rule tests, no database
-TEST_DATABASE_URL=postgresql://… npm run test:integration   # 63 database tests (migrations applied first)
+TEST_DATABASE_URL=postgresql://… npm run test:integration   # 73 database tests (migrations applied first)
 ```
 
 The integration tests create their own fictional accounts and cover:
@@ -82,5 +84,6 @@ The integration tests create their own fictional accounts and cover:
 - private messages, announcements scoped to one property, operations summary
 - expenses (validation, office-only receipts, void once), petty cash (no negative balance under concurrency, spending ↔ expense kept in step), utility bills (one per month, paid once, void reopens), building meter rules and caretaker scope
 - every report reconciled against the ledger tables, office-only access, CSV formula protection
+- Messenger: signed connect links (tampered/expired/moved-out/caretaker refused), webhook signature and verify token, 24-hour window vs utility template, parameter cleaning, at-most-once alerts, replies into the conversation once, STOP, Graph failures never throwing
 
 `scripts/seed-dawson-demo.ts` creates a fictional 18-room demo property for click-through testing; it refuses to run against a production database.

@@ -4,7 +4,7 @@ import crypto from "crypto";
  * Stateless signed links (renew-subscription, unsubscribe). The payload is
  * readable but tamper-proof: an HMAC over it with the app's auth secret.
  */
-type Purpose = "renew" | "unsubscribe";
+type Purpose = "renew" | "unsubscribe" | "messenger";
 
 function secret(): string {
   const s = process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET;

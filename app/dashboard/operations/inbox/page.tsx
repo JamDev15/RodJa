@@ -5,14 +5,17 @@ import { UploadForm } from "@/components/operations/upload-form";
 import { adminPageContext } from "@/lib/collections/page-context";
 import { prisma } from "@/lib/prisma";
 import { listThreads } from "@/lib/operations/messages";
+import { MessengerCard } from "@/components/operations/messenger-card";
+import { linkStatus } from "@/lib/messenger";
 
 export default async function InboxPage({ searchParams }: { searchParams: Promise<{ propertyId?: string; tenantId?: string }> }) {
   const sp = await searchParams;
   const { actor, properties, propertyId } = await adminPageContext(sp.propertyId);
   if (!propertyId) return <Empty>Add a property first.</Empty>;
-  const [threads, tenants] = await Promise.all([
+  const [threads, tenants, messenger] = await Promise.all([
     listThreads(actor, { propertyId }),
     prisma.tenant.findMany({ where: { isActive: true, unit: { propertyId } }, select: { id: true, name: true, unit: { select: { unitNumber: true } } }, orderBy: { unit: { unitNumber: "asc" } } }),
+    linkStatus({ kind: "ADMIN", accountId: actor.accountId, userId: actor.id }),
   ]);
   const shown = sp.tenantId ? threads.filter((t) => t.tenantId === sp.tenantId) : threads;
 
@@ -26,6 +29,7 @@ export default async function InboxPage({ searchParams }: { searchParams: Promis
         <PropertyPicker properties={properties} value={propertyId} />
       </div>
       <OpsNav propertyId={propertyId} active="inbox" />
+      <MessengerCard available={messenger.available} linked={messenger.linked} connectHref="/api/operations/messenger" apiUrl="/api/operations/messenger" audience="office" />
 
       {tenants.length > 0 && (
         <UploadForm

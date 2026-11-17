@@ -2,6 +2,7 @@ import { invalid } from "@/lib/collections/errors";
 import { handle, jsonBody, num, optStr, str } from "@/lib/collections/http";
 import { approvePayment, rejectPayment, reversePayment } from "@/lib/collections/payments";
 import { sendReceiptEmail } from "@/lib/collections/documents";
+import { paymentReviewed } from "@/lib/messenger/events";
 
 export async function POST(req: Request, ctx: RouteContext<"/api/collections/payments/[id]">) {
   const { id } = await ctx.params;
@@ -13,10 +14,14 @@ export async function POST(req: Request, ctx: RouteContext<"/api/collections/pay
         const result = await approvePayment(actor, id, { correctedAmountCentavos: corrected, note: optStr(body.note) ?? undefined });
         // Best effort, at most once: a failed email never undoes the approval.
         const receiptEmail = result.alreadyApproved ? null : await sendReceiptEmail(id).catch(() => ({ sent: false, reason: "Email failed" }));
+        await paymentReviewed(id).catch(() => undefined);
         return { ...result, receiptEmail };
       }
-      case "reject":
-        return rejectPayment(actor, id, str(body.reason));
+      case "reject": {
+        const result = await rejectPayment(actor, id, str(body.reason));
+        await paymentReviewed(id).catch(() => undefined);
+        return result;
+      }
       case "reverse":
         return reversePayment(actor, id, str(body.reason));
       default:
